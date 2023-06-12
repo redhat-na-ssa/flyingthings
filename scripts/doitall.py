@@ -6,7 +6,7 @@ import os
 import urllib3
 
 # MinIO server details
-minio_endpoint = "min-mytest.apps.ocpbare.davenet.local"
+minio_endpoint = "minio-djw.apps.cluster-d2dkm.d2dkm.sandbox2396.opentlc.com"
 minio_access_key = "minioadmin"
 minio_secret_key = "minioadmin"
 
