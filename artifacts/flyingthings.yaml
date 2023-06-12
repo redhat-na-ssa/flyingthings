@@ -1,0 +1,7 @@
+path: training
+train: train/images
+val: valid/images
+test: test/images
+
+nc: 2
+names: ['Fixed Wing', 'Rotor Aircraft']
