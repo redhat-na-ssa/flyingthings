@@ -6,13 +6,13 @@ import os
 import urllib3
 
 # MinIO server details
-minio_endpoint = "minio-djw.apps.cluster-lkpkw.lkpkw.sandbox2673.opentlc.com"
+minio_endpoint = "min-mytest.apps.ocpbare.davenet.local"
 minio_access_key = "minioadmin"
 minio_secret_key = "minioadmin"
 
 # Initialize MinIO client
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-minio_client = Minio(minio_endpoint, access_key=minio_access_key, secret_key=minio_secret_key, secure=True)
+minio_client = Minio(minio_endpoint, access_key=minio_access_key, secret_key=minio_secret_key, secure=False)
 
 # Bucket name
 bucket_name = "flyingthings"
@@ -31,9 +31,7 @@ else:
         print(f"Error creating bucket '{bucket_name}': {e}")
 
     # Enable versioning for the bucket
-    versioning_config = {
-        "Status": "Enabled"
-    }
+    versioning_config = {"Status": "Enabled"}
 
     try:
         minio_client.set_bucket_versioning(bucket_name, versioning_config)
