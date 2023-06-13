@@ -3,4 +3,3 @@ kind: Kustomization
 
 resources:
   - minio.yaml
-  - notebook.yaml
