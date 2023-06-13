@@ -1,0 +1,71 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: training-data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: 'gputhing'
+  annotations: {}
+spec:
+  selector:
+    matchLabels:
+      app: gputhing
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: gputhing
+    spec:
+      nodeSelector:
+        nvidia.com/gpu.deploy.driver: 'true'
+      containers:
+        - name: container
+          image: >-
+            image-registry.openshift-image-registry.svc:5000/redhat-ods-applications/opencv-notebook:latest
+          resources:
+            limits:
+              nvidia.com/gpu: 1
+          # securityContext:
+          #   capabilities:
+          #     add: ["SYS_ADMIN"]
+          env:
+          - name: AWS_ACCESS_KEY_ID
+            value: minioadmin
+          - name: AWS_SECRET_ACCESS_KEY
+            value: minioadmin
+          - name: AWS_S3_ENDPOINT
+            value: min-mytest.apps.ocpbare.davenet.local
+          - name: AWS_S3_BUCKET
+            value: flyingthings
+          ports:
+            - containerPort: 8888
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /mydata
+              name: training-data
+            - mountPath: /dev/shm
+              name: dshm
+          env: []
+      devices:
+        - name: my-gpu
+          devicePath: /dev/nvidia0
+      volumes:
+        - name: training-data
+          persistentVolumeClaim:
+            claimName: training-data
+        - name: dshm
+          emptyDir:
+             medium: Memory
+      imagePullSecrets: []
+  strategy:
+    type: Recreate
+  paused: false
