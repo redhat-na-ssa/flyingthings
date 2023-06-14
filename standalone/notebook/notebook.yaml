@@ -43,7 +43,7 @@ spec:
           - name: AWS_SECRET_ACCESS_KEY
             value: minioadmin
           - name: AWS_S3_ENDPOINT
-            value: minio-cvdemo-standalone.apps.ocpbare.davenet.local
+            value: minio-djw.apps.ocpsno2.davenet.local
           - name: AWS_S3_BUCKET
             value: flyingthings
           ports:
@@ -84,7 +84,6 @@ kind: Route
 apiVersion: route.openshift.io/v1
 metadata:
   name: flyingthings-rt
-  namespace: cvdemo-standalone
   labels: {}
 spec:
   to:

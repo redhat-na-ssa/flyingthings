@@ -1,12 +1,19 @@
 from minio import Minio
+import sys
 import os
 import urllib3
+
+# Check if the required number of arguments is provided
+if len(sys.argv) < 4:
+    print("Usage: python 01-enable-versioning.py minio_endpoint minio_access_key minio_secret_key")
+    sys.exit(1)
+
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # MinIO server details
-minio_endpoint = "minio-cvdemo-standalone.apps.ocpbare.davenet.local"
-minio_access_key = "minioadmin"
-minio_secret_key = "minioadmin"
+minio_endpoint = sys.argv[1]
+minio_access_key = sys.argv[2]
+minio_secret_key = sys.argv[3]
 
 # Bucket name
 bucket_name = "flyingthings"
