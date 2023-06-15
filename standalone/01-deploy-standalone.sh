@@ -8,7 +8,7 @@ oc create configmap flyingthings-configmap --from-literal=AWS_ACCESS_KEY_ID=mini
     --from-literal=AWS_S3_ENDPOINT=$MINIO_ROUTE \
     --from-literal=AWS_S3_BUCKET=flyingthings
 
-SLEEP 10
+SLEEP 13
 ../scripts/01-create-bucket.py $MINIO_ROUTE minioadmin minioadmin
 ../scripts/02-enable-versioning.py $MINIO_ROUTE minioadmin minioadmin
 ../scripts/03-upload-artifacts.py $MINIO_ROUTE minioadmin minioadmin

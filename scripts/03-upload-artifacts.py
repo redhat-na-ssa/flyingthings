@@ -20,7 +20,7 @@ minio_secret_key = sys.argv[3]
 bucket_name = "flyingthings"
 
 # Directory path
-directory_path = "artifacts"
+directory_path = "../artifacts"
 
 # Create a Minio client object
 minio_client = Minio(minio_endpoint,
