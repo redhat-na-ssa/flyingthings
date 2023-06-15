@@ -12,5 +12,6 @@ SLEEP 10
 ../scripts/01-create-bucket.py $MINIO_ROUTE minioadmin minioadmin
 ../scripts/02-enable-versioning.py $MINIO_ROUTE minioadmin minioadmin
 ../scripts/03-upload-artifacts.py $MINIO_ROUTE minioadmin minioadmin
+../scripts/04-tag-objects.py $MINIO_ROUTE minioadmin minioadmin
 
 oc apply -k notebook
