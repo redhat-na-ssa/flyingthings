@@ -3,7 +3,3 @@ kind: Kustomization
 
 resources:
   - notebook.yaml
-# configMapGenerator:
-#   - name: flyingthings-config
-#     literals:
-#       - MINIO_ROUTE=$(MINIO_ROUTE)

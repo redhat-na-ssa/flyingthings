@@ -37,15 +37,9 @@ spec:
           # securityContext:
           #   capabilities:
           #     add: ["SYS_ADMIN"]
-          env:
-          - name: AWS_ACCESS_KEY_ID
-            value: minioadmin
-          - name: AWS_SECRET_ACCESS_KEY
-            value: minioadmin
-          - name: AWS_S3_ENDPOINT
-            value: minio-djw.apps.ocpsno2.davenet.local
-          - name: AWS_S3_BUCKET
-            value: flyingthings
+          envFrom:
+            - configMapRef:
+                name: flyingthings-configmap
           ports:
             - containerPort: 8888
               protocol: TCP
