@@ -13,7 +13,7 @@ ARG MINIO_ENDPOINT=minio-flyingthings-standalone.apps.ocpbare.davenet.local/flyi
 #  && dnf -y install ffmpeg libGL git wget python3-pip \
 #  && dnf clean all
 
-RUN dnf install -y git wget python3-pip \
+RUN dnf install -y git wget libGL python3-pip \
  && dnf clean all
 
 # RUN pip install --no-cache-dir ultralytics
@@ -29,24 +29,24 @@ ENV MINIO_BUCKET=flyingthings
 ENV MINIO_ACCESSKEY=minioadmin
 ENV MINIO_SECRETKEY=minioadmin
 
-RUN curl https://dl.min.io/client/mc/release/linux-amd64/mc -o mc \
- && chmod +x mc \
- && ./mc config host add myminio $MINIO_ENDPOINT $MINIO_ACCESSKEY $MINIO_SECRETKEY --insecure \
- && ./mc cp myminio/$MINIO_BUCKET/$MODEL_CLASSES $MODEL_CLASSES --insecure \
- && ./mc cp myminio/$MINIO_BUCKET/$WEIGHTS $WEIGHTS --insecure \
- && rm ./mc \
- && mkdir -p ${SIMPLEVIS_DATA} \
- && chown -R 1001:1001 ${SIMPLEVIS_DATA}
+# RUN curl https://dl.min.io/client/mc/release/linux-amd64/mc -o mc \
+#  && chmod +x mc \
+#  && ./mc config host add myminio $MINIO_ENDPOINT $MINIO_ACCESSKEY $MINIO_SECRETKEY --insecure \
+#  && ./mc cp myminio/$MINIO_BUCKET/$MODEL_CLASSES $MODEL_CLASSES --insecure \
+#  && ./mc cp myminio/$MINIO_BUCKET/$WEIGHTS $WEIGHTS --insecure \
+#  && rm ./mc \
+#  && mkdir -p ${SIMPLEVIS_DATA} \
+#  && chown -R 1001:1001 ${SIMPLEVIS_DATA}
 
 COPY requirements.txt ./
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY app/ ./
+# COPY app/ ./
 
 USER 1001
 #USER 0
 EXPOSE 8000
-ENTRYPOINT ["/usr/local/bin/uvicorn"]
-# ENTRYPOINT ["/usr/bin/tail", "-f", "/dev/null"]
-CMD ["main:app", "--host", "0.0.0.0"]
+# ENTRYPOINT ["/usr/local/bin/uvicorn"]
+ENTRYPOINT ["/usr/bin/tail", "-f", "/dev/null"]
+# CMD ["main:app", "--host", "0.0.0.0"]

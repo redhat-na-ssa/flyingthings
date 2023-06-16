@@ -1,3 +1,15 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: workspace
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 10Gi
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -20,11 +32,16 @@ spec:
             - containerPort: 8000
               protocol: TCP
           volumeMounts:
-            - mountPath: /opt/app-root/src/simplevis-data
-              name: simplevis-data
+            # - mountPath: /opt/app-root/src/simplevis-data
+            #   name: simplevis-data
+            - mountPath: /opt/app-root/src
+              name: workspace
       volumes:
-        - name: simplevis-data
-          emptyDir: {}
+        - name: workspace
+          persistentVolumeClaim:
+            claimName: workspace
+        # - name: simplevis-data
+        #   emptyDir: {}
   strategy:
     type: RollingUpdate
     rollingUpdate:

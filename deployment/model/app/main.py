@@ -5,7 +5,7 @@ import subprocess
 import yaml
 from fastapi import FastAPI, HTTPException, UploadFile
 from fastapi.responses import FileResponse
-# from yolov5.detect import run as yolov5_detect
+from ultralytics import YOLO
 import os
 import shutil
 from pathlib import Path
@@ -104,7 +104,10 @@ def cleanall():
             detail=f"An error has occurred: {str(err)}"
         )
 
-
+@app.post("/detect")
+def detect(file: UploadFile):
+    model = YOLO(WEIGHTS_FILE)
+    results = model('https://ultralytics.com/images/bus.jpg')
 # @app.post("/detect")
 # def detect(file: UploadFile):
 #     if not isSafe(file.filename):
