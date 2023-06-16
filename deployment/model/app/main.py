@@ -66,7 +66,7 @@ async def main(fname):
     try:
         my_ext = Path(fname).suffix.upper()
         if my_ext not in VIDEO_EXTS:
-            return FileResponse(DETECT_DIR.joinpath("exp").joinpath(fname))
+            return FileResponse(DETECT_DIR.joinpath(fname))
         else:
             return FileResponse(VIDEO_DIR.joinpath(fname))
     except RuntimeError as exc:
