@@ -1,10 +1,12 @@
 FROM quay.io/centos/centos:stream9
 
+USER 0
 WORKDIR /opt/app-root/src
 ARG WEIGHTS=flyingthings.pt
 ARG BUILD_VER=0.0
 ARG MODEL_CLASSES=flyingthings.yaml
 ARG MINIO_ENDPOINT=minio-flyingthings-standalone.apps.ocpbare.davenet.local/flyingthings
+ARG SIMPLEVIS_DATA=/opt/app-root/src/simplevis-data
 
 # RUN dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm \
 #                    https://mirrors.rpmfusion.org/free/el/rpmfusion-free-release-9.noarch.rpm \
@@ -12,11 +14,6 @@ ARG MINIO_ENDPOINT=minio-flyingthings-standalone.apps.ocpbare.davenet.local/flyi
 #                    https://mirrors.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-9.noarch.rpm \
 #  && dnf -y install ffmpeg libGL git wget python3-pip \
 #  && dnf clean all
-
-RUN dnf install -y git wget libGL python3-pip \
- && dnf clean all
-
-RUN pip install --no-cache-dir ultralytics
 
 ENV WEIGHTS=${WEIGHTS}
 ENV BUILD_VER=${TRAINING_VER}
@@ -34,18 +31,14 @@ RUN curl https://dl.min.io/client/mc/release/linux-amd64/mc -o mc \
  && ./mc config host add myminio $MINIO_ENDPOINT $MINIO_ACCESSKEY $MINIO_SECRETKEY --insecure \
  && ./mc cp myminio/$MINIO_BUCKET/$MODEL_CLASSES $MODEL_CLASSES --insecure \
  && ./mc cp myminio/$MINIO_BUCKET/$WEIGHTS $WEIGHTS --insecure \
- && rm ./mc \
- && mkdir -p ${SIMPLEVIS_DATA} \
+ && rm ./mc
+
+RUN mkdir -p ${SIMPLEVIS_DATA} \
  && chown -R 1001:1001 ${SIMPLEVIS_DATA}
-
-COPY requirements.txt ./
-
-RUN pip install --no-cache-dir -r requirements.txt
 
 COPY app/ ./
 
 USER 1001
-#USER 0
 EXPOSE 8000
 ENTRYPOINT ["/usr/local/bin/uvicorn"]
 CMD ["main:app", "--host", "0.0.0.0"]
