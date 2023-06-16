@@ -6,6 +6,7 @@ import yaml
 from fastapi import FastAPI, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 from ultralytics import YOLO
+import cv2
 import os
 import shutil
 from pathlib import Path
@@ -25,7 +26,7 @@ BASE_DIR = Path(
 )
 
 MODEL_CLASSES = os.environ.get('MODEL_CLASSES')
-WEIGHTS_FILE = BASE_DIR.joinpath('weights.pt')
+WEIGHTS_FILE = os.environ.get('WEIGHTS')
 UPLOAD_DIR = SIMPLEVIS_DATA.joinpath("uploaded-files")
 DETECT_DIR = SIMPLEVIS_DATA.joinpath("detected-files")
 VIDEO_DIR = SIMPLEVIS_DATA.joinpath("video-files")
@@ -106,53 +107,73 @@ def cleanall():
 
 @app.post("/detect")
 def detect(file: UploadFile):
+    if not isSafe(file.filename):
+        raise HTTPException(
+            status_code=415,
+            detail=(
+                f"Cannot process that file type. "
+                f"Supported types: {SAFE_2_PROCESS}"
+            )
+        )
+    my_ext = Path(file.filename).suffix.upper()
+    try:
+        contents = file.file.read()
+        with open(UPLOAD_DIR.joinpath(file.filename), 'wb') as f:
+            f.write(contents)
+    except Exception as err:
+        raise HTTPException(
+            status_code=500,
+            detail=str(err)
+        )
+    finally:
+        file.file.close()
+
+    detect_args = {
+        'weights': WEIGHTS_FILE,
+        'source': UPLOAD_DIR.joinpath(file.filename),
+        'project': DETECT_DIR,
+        'exist_ok': True,
+    }
+
+    if my_ext not in VIDEO_EXTS:
+        detect_args['save_txt'] = True
+
+    # Actually run the inference
+    source = UPLOAD_DIR.joinpath(file.filename)
     model = YOLO(WEIGHTS_FILE)
-    results = model('https://ultralytics.com/images/bus.jpg')
-# @app.post("/detect")
-# def detect(file: UploadFile):
-#     if not isSafe(file.filename):
-#         raise HTTPException(
-#             status_code=415,
-#             detail=(
-#                 f"Cannot process that file type. "
-#                 f"Supported types: {SAFE_2_PROCESS}"
-#             )
-#         )
+    results = model(source)
+    res_plotted = results[0].plot()
+    detected_stuff = []
 
-#     my_ext = Path(file.filename).suffix.upper()
-#     try:
-#         contents = file.file.read()
-#         with open(UPLOAD_DIR.joinpath(file.filename), 'wb') as f:
-#             f.write(contents)
-#     except Exception as err:
-#         raise HTTPException(
-#             status_code=500,
-#             detail=str(err)
-#         )
-#     finally:
-#         file.file.close()
+    for result in results:
+        boxes = result.boxes.cpu().numpy()
+        for box in boxes:
+            oname = result.names[int(box.cls[0])]
+            detected_stuff.append(oname)
+    cv2.imwrite(str(DETECT_DIR.joinpath(file.filename)), res_plotted)
 
-#     detect_args = {
-#         'weights': WEIGHTS_FILE,
-#         'source': UPLOAD_DIR.joinpath(file.filename),
-#         'project': DETECT_DIR,
-#         'exist_ok': True,
-#     }
-#     if my_ext not in VIDEO_EXTS:
-#         detect_args['save_txt'] = True
+    counts = {}
+    for string in detected_stuff:
+        if string in counts:
+            counts[string] += 1
+        else:
+            counts[string] = 1
 
-#     # Actually run the inference
-#     yolov5_detect(**detect_args)
+    if my_ext not in VIDEO_EXTS:
+        # labels = get_labels(file.filename)
+        return {
+            "filename": file.filename,
+            "contentType": file.content_type,
+            "detectedObj": counts,
+            "save_path": UPLOAD_DIR.joinpath(file.filename),
+            "data": {}
+        }
 
-#     if my_ext not in VIDEO_EXTS:
-#         labels = get_labels(file.filename)
-#         return {
-#             "filename": file.filename,
-#             "contentType": file.content_type,
-#             "detectedObj": labels,
-#             "save_path": UPLOAD_DIR.joinpath(file.filename),
-#             "data": {}
-#         }
+
+
+
+
+
 #     else:
 #         try:
 #             # ffmpeg to transcode the video file
