@@ -1,19 +1,22 @@
 FROM quay.io/centos/centos:stream9
 
 WORKDIR /opt/app-root/src
-ARG WEIGHTS=yolov8n.pt
+ARG WEIGHTS=flyingthings.pt
 ARG BUILD_VER=0.0
-ARG MODEL_CLASSES=coco128.yaml
+ARG MODEL_CLASSES=flyingthings.yaml
 ARG MINIO_ENDPOINT=minio-flyingthings-standalone.apps.ocpbare.davenet.local/flyingthings
 
-RUN dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm \
-                   https://mirrors.rpmfusion.org/free/el/rpmfusion-free-release-9.noarch.rpm \
-                   http://mirror.stream.centos.org/9-stream/CRB/x86_64/os/Packages/ladspa-1.13-28.el9.x86_64.rpm \
-                   https://mirrors.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-9.noarch.rpm \
- && dnf -y install ffmpeg libGL git wget python3-pip \
+# RUN dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm \
+#                    https://mirrors.rpmfusion.org/free/el/rpmfusion-free-release-9.noarch.rpm \
+#                    http://mirror.stream.centos.org/9-stream/CRB/x86_64/os/Packages/ladspa-1.13-28.el9.x86_64.rpm \
+#                    https://mirrors.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-9.noarch.rpm \
+#  && dnf -y install ffmpeg libGL git wget python3-pip \
+#  && dnf clean all
+
+RUN dnf install -y git wget python3-pip \
  && dnf clean all
 
-RUN pip install --no-cache-dir ultralytics
+# RUN pip install --no-cache-dir ultralytics
 
 ENV WEIGHTS=${WEIGHTS}
 ENV BUILD_VER=${TRAINING_VER}
@@ -21,10 +24,19 @@ ENV MODEL_CLASSES=${MODEL_CLASSES}
 ENV MINIO_ENDPOINT=${MINIO_ENDPOINT}
 ENV SIMPLEVIS_DATA=/opt/app-root/src/simplevis-data
 ENV BASEDIR=/opt/app-root/src
+ENV MINIO_ENDPOINT=https://minio-flyingthings-standalone.apps.ocpbare.davenet.local
+ENV MINIO_BUCKET=flyingthings
+ENV MINIO_ACCESSKEY=minioadmin
+ENV MINIO_SECRETKEY=minioadmin
 
-RUN cd /opt/app-root/src \
- && curl -k "https://${MINIO_ENDPOINT}/${WEIGHTS}" -o ${WEIGHTS} \
- && curl -k "https://${MINIO_ENDPOINT}/${MODEL_CLASSES}" -o ${MODEL_CLASSES}
+RUN curl https://dl.min.io/client/mc/release/linux-amd64/mc -o mc \
+ && chmod +x mc \
+ && ./mc config host add myminio $MINIO_ENDPOINT $MINIO_ACCESSKEY $MINIO_SECRETKEY --insecure \
+ && ./mc cp myminio/$MINIO_BUCKET/$MODEL_CLASSES $MODEL_CLASSES --insecure \
+ && ./mc cp myminio/$MINIO_BUCKET/$WEIGHTS $WEIGHTS --insecure \
+ && rm ./mc \
+ && mkdir -p ${SIMPLEVIS_DATA} \
+ && chown -R 1001:1001 ${SIMPLEVIS_DATA}
 
 COPY requirements.txt ./
 
@@ -32,8 +44,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY app/ ./
 
-#USER 1001
-USER 0
+USER 1001
+#USER 0
 EXPOSE 8000
 ENTRYPOINT ["/usr/local/bin/uvicorn"]
+# ENTRYPOINT ["/usr/bin/tail", "-f", "/dev/null"]
 CMD ["main:app", "--host", "0.0.0.0"]
