@@ -34,9 +34,6 @@ spec:
           resources:
             limits:
               nvidia.com/gpu: 1
-          # securityContext:
-          #   capabilities:
-          #     add: ["SYS_ADMIN"]
           envFrom:
             - configMapRef:
                 name: flyingthings-configmap
