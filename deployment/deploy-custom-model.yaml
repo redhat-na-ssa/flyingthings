@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: 'flyingthings-model-deployment'
+  name: 'custom-model'
 spec:
   selector:
     matchLabels:
-      app: flyingthings-model
+      app: custom-model
   replicas: 1
   template:
     metadata:
       labels:
-        app: flyingthings-model
+        app: custom-model
     spec:
       containers:
         - name: container
           image: >-
-            image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/flyingthings-model:latest
+            image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/custom-model:latest
           ports:
             - containerPort: 8000
               protocol: TCP
@@ -34,10 +34,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: flyingthings-model-svc
+  name: custom-model-svc
 spec:
   selector:
-    app: flyingthings-model
+    app: custom-model
   ports:
     - protocol: TCP
       port: 8000
@@ -45,12 +45,12 @@ spec:
 kind: Route
 apiVersion: route.openshift.io/v1
 metadata:
-  name: flyingthings-model-rt
+  name: custom-model-rt
   labels: {}
 spec:
   to:
     kind: Service
-    name: flyingthings-model-svc
+    name: custom-model-svc
   tls: null
   path: /
   port:
