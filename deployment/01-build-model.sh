@@ -1,4 +1,5 @@
 #!/bin/bash
+oc project flyingthings-standalone
 oc new-build --name yolo --strategy docker --binary --context-dir .
 oc start-build yolo --from-dir yolo --follow
 

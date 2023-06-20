@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: 'coco-model'
+  namespace: flyingthings-standalone
 spec:
   selector:
     matchLabels:
@@ -35,6 +36,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: coco-model-svc
+  namespace: flyingthings-standalone
 spec:
   selector:
     app: coco-model
@@ -46,6 +48,7 @@ kind: Route
 apiVersion: route.openshift.io/v1
 metadata:
   name: coco-model-rt
+  namespace: flyingthings-standalone
   labels: {}
 spec:
   to:

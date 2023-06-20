@@ -27,10 +27,15 @@ spec:
       labels:
         app: flyingthings
     spec:
+      nodeSelector:
+        nvidia.com/gpu.deploy.driver: 'true'
       containers:
         - name: container
           image: >-
             image-registry.openshift-image-registry.svc:5000/redhat-ods-applications/opencv-notebook:latest
+          resources:
+            limits:
+              nvidia.com/gpu: 1
           envFrom:
             - configMapRef:
                 name: flyingthings-configmap
@@ -42,6 +47,9 @@ spec:
               name: training-data
             - mountPath: /dev/shm
               name: dshm
+      devices:
+        - name: my-gpu
+          devicePath: /dev/nvidia0
       volumes:
         - name: training-data
           persistentVolumeClaim:

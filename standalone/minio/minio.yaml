@@ -2,6 +2,7 @@ kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
   name: minio-data
+  namespace: flyingthings-standalone
 spec:
   accessModes:
     - ReadWriteOnce
@@ -22,6 +23,7 @@ metadata:
     app.kubernetes.io/name: minio
     app.kubernetes.io/part-of: minio
   name: minio
+  namespace: flyingthings-standalone
 spec:
   replicas: 1
   selector:
@@ -69,6 +71,7 @@ metadata:
     app.kubernetes.io/name: minio
     app.kubernetes.io/part-of: minio
   name: minio
+  namespace: flyingthings-standalone
 spec:
   host: ''
   port:
@@ -94,6 +97,7 @@ metadata:
     app.kubernetes.io/name: minio
     app.kubernetes.io/part-of: minio
   name: minio-console
+  namespace: flyingthings-standalone
 spec:
   host: ''
   port:
@@ -117,6 +121,7 @@ metadata:
     app.kubernetes.io/name: minio
     app.kubernetes.io/part-of: minio
   name: minio
+  namespace: flyingthings-standalone
 spec:
   ports:
   - name: 9000-tcp

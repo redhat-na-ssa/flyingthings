@@ -2,6 +2,7 @@ kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
   name: minio-data
+  namespace: flyingthings-standalone
 spec:
   accessModes:
     - ReadWriteOnce

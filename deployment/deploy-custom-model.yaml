@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: 'custom-model'
+  namespace: flyingthings-standalone
 spec:
   selector:
     matchLabels:
@@ -35,6 +36,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: custom-model-svc
+  namespace: flyingthings-standalone
 spec:
   selector:
     app: custom-model
@@ -46,6 +48,7 @@ kind: Route
 apiVersion: route.openshift.io/v1
 metadata:
   name: custom-model-rt
+  namespace: flyingthings-standalone
   labels: {}
 spec:
   to:
