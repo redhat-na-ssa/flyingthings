@@ -16,7 +16,7 @@ spec:
       containers:
         - name: container
           image: >-
-            image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/coco-model:latest
+            image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/pretrained-model:latest
           ports:
             - containerPort: 8000
               protocol: TCP
