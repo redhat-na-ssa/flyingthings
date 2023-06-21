@@ -7,7 +7,7 @@ WORKDIR /workspace/source/yolo
 
 # RUN pip install --no-cache-dir ultralytics
 
-COPY /workspace/source/yolo/requirements.txt ./
+COPY /source/yolo/requirements.txt ./
 
 RUN pip install --no-cache-dir -r ./requirements.txt
 
