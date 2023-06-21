@@ -1,4 +1,4 @@
-FROM quay.io/centos/centos:stream9
+FROM image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/yolo:latest
 
 USER 0
 WORKDIR /opt/app-root/src
