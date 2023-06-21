@@ -40,14 +40,14 @@ RUN pip install --no-cache-dir ultralytics
 
 COPY /source/yolo/requirements.txt ./
 
-# RUN pip install --no-cache-dir -r ./requirements.txt
+RUN pip install --no-cache-dir -r ./requirements.txt
 
-# RUN mkdir -p ${SIMPLEVIS_DATA} \
-#  && chown -R 1001:1001 ${SIMPLEVIS_DATA}
+RUN mkdir -p ${SIMPLEVIS_DATA} \
+ && chown -R 1001:1001 ${SIMPLEVIS_DATA}
 
-# COPY /source/model/app/ ./
+COPY /source/model/app/ ./
 
 USER 1001
 EXPOSE 8000
-# ENTRYPOINT ["/usr/local/bin/uvicorn"]
-# CMD ["main:app", "--host", "0.0.0.0"]
+ENTRYPOINT ["/usr/local/bin/uvicorn"]
+CMD ["main:app", "--host", "0.0.0.0"]
