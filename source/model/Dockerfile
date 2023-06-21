@@ -36,9 +36,9 @@ RUN curl https://dl.min.io/client/mc/release/linux-amd64/mc -o mc \
 RUN dnf install -y git wget libGL python3-pip \
  && dnf clean all
 
-# RUN pip install --no-cache-dir ultralytics
+RUN pip install --no-cache-dir ultralytics
 
-# COPY /source/yolo/requirements.txt ./
+COPY /source/yolo/requirements.txt ./
 
 # RUN pip install --no-cache-dir -r ./requirements.txt
 
