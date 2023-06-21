@@ -36,7 +36,7 @@ RUN curl https://dl.min.io/client/mc/release/linux-amd64/mc -o mc \
 RUN mkdir -p ${SIMPLEVIS_DATA} \
  && chown -R 1001:1001 ${SIMPLEVIS_DATA}
 
-COPY app/ ./
+COPY /source/model/app/ ./
 
 USER 1001
 EXPOSE 8000
