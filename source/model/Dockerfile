@@ -1,4 +1,4 @@
-FROM image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/yolo:latest
+FROM quay.io/centos/centos:stream9
 
 USER 0
 WORKDIR /opt/app-root/src
@@ -32,6 +32,15 @@ RUN curl https://dl.min.io/client/mc/release/linux-amd64/mc -o mc \
  && ./mc cp myminio/$MINIO_BUCKET/$MODEL_CLASSES $MODEL_CLASSES --insecure \
  && ./mc cp myminio/$MINIO_BUCKET/$WEIGHTS $WEIGHTS --insecure \
  && rm ./mc
+
+RUN dnf install -y git wget libGL python3-pip \
+ && dnf clean all
+
+RUN pip install --no-cache-dir ultralytics
+
+COPY /source/yolo/requirements.txt ./
+
+RUN pip install --no-cache-dir -r ./requirements.txt
 
 RUN mkdir -p ${SIMPLEVIS_DATA} \
  && chown -R 1001:1001 ${SIMPLEVIS_DATA}
