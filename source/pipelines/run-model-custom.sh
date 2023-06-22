@@ -16,7 +16,7 @@ tkn pipeline start app-pipeline \
 volumeClaimTemplateFile=custom-pvc.yaml \
 -p deployment-name=model-server-custom \
 -p git-url=https://github.com/davwhite/flyingthings.git \
--p git-revision=develop \
+-p git-revision=main \
 -p BUILD_EXTRA_ARGS='--build-arg WEIGHTS=model_custom.pt --build-arg MODEL_CLASSES=flyingthings.yaml --build-arg BUILD_VER=0.0 --build-arg MINIO_ENDPOINT=$MINIO_ENDPOINT/$MINIO_BUCKET --build-arg SIMPLEVIS_DATA=/opt/app-root/src/simplevis-data' \
 -p IMAGE=image-registry.openshift-image-registry.svc:5000/$NAMESPACE/custom-model \
 --use-param-defaults
