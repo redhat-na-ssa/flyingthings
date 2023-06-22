@@ -13,7 +13,7 @@ MINIO_BUCKET=$3
 
 tkn pipeline start app-pipeline \
 -w name=shared-workspace,\
-volumeClaimTemplateFile=https://raw.githubusercontent.com/openshift/pipelines-tutorial/pipelines-1.8/01_pipeline/03_persistent_volume_claim.yaml \
+volumeClaimTemplateFile=custom-pvc.yaml \
 -p deployment-name=model-server-custom \
 -p git-url=https://github.com/davwhite/flyingthings.git \
 -p git-revision=develop \
