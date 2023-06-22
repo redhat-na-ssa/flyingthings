@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: -pretrained-source-pvc
+  name: pretrained-source-pvc
 spec:
   accessModes:
     - ReadWriteOnce
