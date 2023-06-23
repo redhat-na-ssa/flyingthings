@@ -1,0 +1,36 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: training-pipeline
+  namespace: flyingthings-standalone
+spec:
+  tasks:
+    - name: run-training-task
+      taskRef:
+        kind: Task
+        name: run-training-task
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: run-training-task
+  namespace: flyingthings-standalone
+spec:
+  steps:
+    - args:
+        - '-c'
+        - >-
+          /opt/app-root/src/simplevis-data/dataprep.sh &&
+          /opt/app-root/src/simplevis-data/datasets/distribute-files.py && yolo
+          train model=yolov8n.pt batch=2 epochs=2 data=flyingthings.yaml
+          exist_ok=True && ls -l
+          /opt/app-root/src/simplevis-data/runs/detect/train &&
+          /opt/app-root/src/simplevis-data/push-results.sh
+      command:
+        - /bin/sh
+      image: >-
+        image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/flyingthings-training:latest
+      name: run-training-step
+      resources:
+        limits:
+          nvidia.com/gpu: '1'
