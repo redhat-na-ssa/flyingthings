@@ -32,7 +32,7 @@ spec:
       containers:
         - name: container
           image: >-
-            image-registry.openshift-image-registry.svc:5000/redhat-ods-applications/opencv-notebook:latest
+            image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/opencv:latest
           resources:
             limits:
               nvidia.com/gpu: 1
