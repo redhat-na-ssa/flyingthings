@@ -4,33 +4,47 @@ metadata:
   name: training-pipeline
   namespace: flyingthings-standalone
 spec:
+  params:
+    - name: batch-size
+      description: batch size of training
+      type: string
+    - name: num-epochs
+      description: number of epochs for training
+      type: string
   tasks:
     - name: run-training-task
       taskRef:
         kind: Task
         name: run-training-task
+      params:
+        - name: batch-size
+          value: $(params.batch-size)
+        - name: num-epochs
+          value: $(params.num-epochs)
+
 ---
 apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
   name: run-training-task
-  namespace: flyingthings-standalone
 spec:
+  params:
+    - name: batch-size
+      type: string
+    - name: num-epochs
+      type: string
   steps:
-    - args:
-        - '-c'
-        - >-
-          /opt/app-root/src/simplevis-data/dataprep.sh &&
-          /opt/app-root/src/simplevis-data/datasets/distribute-files.py && yolo
-          train model=yolov8n.pt batch=2 epochs=2 data=flyingthings.yaml
-          exist_ok=True && ls -l
-          /opt/app-root/src/simplevis-data/runs/detect/train &&
-          /opt/app-root/src/simplevis-data/push-results.sh
+    - name: run-command
+      image: image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/flyingthings-training:latest
       command:
-        - /bin/sh
-      image: >-
-        image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/flyingthings-training:latest
-      name: run-training-step
+        - /bin/bash
+        - -c
+        - |
+          /opt/app-root/src/simplevis-data/dataprep.sh &&
+          /opt/app-root/src/simplevis-data/datasets/distribute-files.py && 
+          yolo train model=yolov8n.pt batch=$(params.batch-size) epochs=$(params.num-epochs) data=flyingthings.yaml exist_ok=True && 
+          ls -l /opt/app-root/src/simplevis-data/runs/detect/train &&
+          /opt/app-root/src/simplevis-data/push-results.sh
       resources:
         limits:
           nvidia.com/gpu: '1'
