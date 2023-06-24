@@ -50,5 +50,5 @@ Once you have models in Minio you can run the model pipeline to serve the model.
     `run-model-custom.sh` - This is the main model serving image. It will pull the latest trained model and serve it up for consumption.
 4. Once the images are built they can be launched by:
     `cd flyingthings/source`
-    `oc apply -f deploy-coco-model.yaml` for the pre-trained and `oc apply -f deploy-custom-model.yaml` for the custom trained model. Each will have routes associated with it for access.
+    `oc apply -f deploy-pretrained-model.yaml` for the pre-trained and `oc apply -f deploy-custom-model.yaml` for the custom trained model. Each will have routes associated with it for access. Whenever you run the training pipeline the resulting model will be available to the model server. Simply re-deploy the appropriate server and the new model will be available.
 
