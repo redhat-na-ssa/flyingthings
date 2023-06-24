@@ -3,6 +3,9 @@ Computer vision demo
 
 # Getting Started
 
+## Namespace
+Create the namespace:
+`oc new-project flyingthings-standalone`
 ## Build Images
 There are a few images we need to build before proceeding with the next part of the workshop. 
 1. First, build the opencv image.
@@ -13,10 +16,10 @@ There are a few images we need to build before proceeding with the next part of 
     `cd flyingthings/source`
     `oc new-build --name yolo --strategy docker --binary --context-dir .`
     `oc start-build yolo --from-dir yolo --follow`
-3. Next, build the training image
+3. Next, build the model serving image.
     `cd flyingthings/source`
-    `oc new-build --name flyingthings-training --strategy docker --binary --context-dir .`
-    `oc start-build flyingthings-training --from-dir training --follow`
+    `oc new-build --name model-server --strategy docker --binary --context-dir .`
+    `oc start-build model-server --from-dir model --follow`
 
 ## Minio
 The Minio server will be used to store our models and datasets as well as help version our artifacts. This should be deployed first.
@@ -26,6 +29,11 @@ The Minio server will be used to store our models and datasets as well as help v
 4. If your cluster has GPUs configured run `03-deploy-notebookpod_gpu.sh` otherwise run `03-deploy-notebookpod_nogpu.sh`
 5. Once the notebook pod has been deployed fully run `04-deploy-notebooks.sh` to populate Jupyter with our notebooks. Remember, you can look into the logs on the pod to get the token required to log into the notebook. Begin with the first notebook. All instructions are contained within the notebooks. 
 6. ONLY run `99-cleanup.sh` when you want to tear down the entire workshop, otherwise please leave at least the Minio server as all other activities will use it.
+
+3. Next, build the training image
+    `cd flyingthings/source`
+    `oc new-build --name flyingthings-training --strategy docker --binary --context-dir .`
+    `oc start-build flyingthings-training --from-dir training --follow`
 
 ## Pipeline - Training
 You can use the training pipeline to kickoff a training run and produce a new model. The pipeline takes arguments to help fine tune the training session and produces output which can be evaluated for improvements to the previous models. 

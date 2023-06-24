@@ -15,10 +15,21 @@ spec:
       containers:
         - name: container
           image: >-
-            image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/custom-model:latest
+            image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/model-server:latest
           ports:
             - containerPort: 8000
               protocol: TCP
+          env:
+            - name: WEIGHTS
+              value: model_custom.pt
+            - name: BUILD_VER
+              value: "0.0"
+            - name: MODEL_CLASSES
+              value: flyingthings.yaml
+            - name: MINIO_ENDPOINT
+              value: http://minio:9000
+            - name: SIMPLEVIS_DATA
+              value: /opt/app-root/src/simplevis-data
           volumeMounts:
             - mountPath: /opt/app-root/src/simplevis-data
               name: simplevis-data
