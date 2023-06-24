@@ -1,15 +1,8 @@
 #!/bin/bash
 
-# Check the number of arguments
-if [ "$#" -ne 3 ]; then
-  echo "Error: Expected 3 arguments, but received $# arguments."
-  echo "Usage: $0 NAMESPACE MINIO_ENDPOINT MINIO_BUCKET"
-  exit 1
-fi
-
-NAMESPACE=$1
-MINIO_ENDPOINT=$2
-MINIO_BUCKET=$3
+MINIO_ENDPOINT=`oc get route|grep -v console|grep -v NAME|awk '{print $2 }'`
+NAMESPACE='flyingthings-standalone'
+MINIO_BUCKET='flyingthings'
 
 tkn pipeline start app-pipeline \
 -w name=shared-workspace,\
