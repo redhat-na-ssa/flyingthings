@@ -94,3 +94,12 @@ Once you have models in Minio you can run the model pipeline to serve the model.
     
     `oc apply -f deploy-pretrained-model.yaml` for the pre-trained and `oc apply -f deploy-custom-model.yaml` for the custom trained model. Each will have routes associated with it for access. Whenever you run the training pipeline the resulting model will be available to the model server. Simply re-deploy the appropriate server and the new model will be available.
 
+5. To run a the training job first create the image:
+```
+oc new-build --name training-job --strategy docker --binary --context-dir .
+oc start-build training-job --from-dir training-job --follow
+```
+6. Now we can run the training job. You can adjust the batch size and number of parameters. The resulting model will be saved in our bucket as model_candidate.pt along with the training artifacts for review before promoting the model.
+```
+oc apply -f deploy-training-job.yaml
+```
