@@ -26,12 +26,7 @@ cd flyingthings/source
 oc new-build --name model-server --strategy docker --binary --context-dir .
 oc start-build model-server --from-dir model --follow
 ```
-4. Next, build the training image
-```
-cd flyingthings/source
-oc new-build --name flyingthings-training --strategy docker --binary --context-dir .
-oc start-build flyingthings-training --from-dir training --follow
-```
+
 ## Minio
 The Minio server will be used to store our models and datasets as well as help version our artifacts. This should be deployed first.
 1. Deploy the minio server. 
@@ -65,15 +60,24 @@ cd flyingthings/standalone
 
 ## Pipeline - Training
 You can use the training pipeline to kickoff a training run and produce a new model. The pipeline takes arguments to help fine tune the training session and produces output which can be evaluated for improvements to the previous models. 
+
+1. Next, build the training image
+```
+cd flyingthings/source
+oc new-build --name flyingthings-training --strategy docker --binary --context-dir .
+oc start-build flyingthings-training --from-dir training --follow
+```
+
+2. Deploy the training pipeline.
 ```
 cd flyingthings/source/pipelines
 ```
-1. Deploy the training pipeline.
+
 >If your cluster has GPUs run `oc apply -f 01-training-pipeline_gpu.yaml` 
 
 >otherwise run `oc apply -f 01-training-pipeline_nogpu.yaml`  This will setup the pipeline for training.
 
-2. You can launch the training pipeline from the OpenShift console and observe its run from output window. This will publish a new model as well as a zipped file with the results of the training run.
+3. You can launch the training pipeline from the OpenShift console and observe its run from output window. This will publish a new model as well as a zipped file with the results of the training run.
 
 ## Pipeline - Model Serving
 Once you have models in Minio you can run the model pipeline to serve the model.
