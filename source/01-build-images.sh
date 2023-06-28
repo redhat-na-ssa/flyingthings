@@ -14,6 +14,5 @@ oc start-build yolo --from-dir yolo --follow
 oc new-build --name model-server --strategy docker --binary --context-dir .
 oc start-build model-server --from-dir model --follow
 
-# Run after minio install
 oc new-build --name training-job --strategy docker --binary --context-dir .
 oc start-build training-job --from-dir training-job --follow
