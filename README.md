@@ -8,11 +8,17 @@ Create the namespace:
 `oc new-project flyingthings-standalone`
 ## Build Images
 There are a few images we need to build before proceeding with the next part of the workshop. 
-1. First, build the opencv image.
+1. First, build the notebook image.
 ```
 cd flyingthings/source
-oc new-build --name opencv --strategy docker --binary --context-dir .
-oc start-build opencv --from-dir opencv --follow 
+oc new-build --name base-ubi9 --strategy docker --binary --context-dir .
+oc start-build base-ubi9 --from-dir ubi9 --follow
+
+oc new-build --name minimal-notebook --strategy docker --binary --image-stream base-ubi9:latest --context-dir .
+oc start-build minimal-notebook --from-dir minimal/py39 --follow
+
+oc new-build --name yolo-notebook --strategy docker --binary --image-stream minimal-notebook:latest --context-dir .
+oc start-build yolo-notebook --from-dir yolo-notebook --follow
 ```
 2. Next, build the yolo image.
 ```
@@ -25,6 +31,12 @@ oc start-build yolo --from-dir yolo --follow
 cd flyingthings/source
 oc new-build --name model-server --strategy docker --binary --context-dir .
 oc start-build model-server --from-dir model --follow
+```
+4. Next, build the training job image.
+```
+cd flyingthings/source
+oc new-build --name training-job --strategy docker --binary --context-dir .
+oc start-build training-job --from-dir training-job --follow
 ```
 
 ## Minio
@@ -61,23 +73,15 @@ cd flyingthings/standalone
 ## Pipeline - Training
 You can use the training pipeline to kickoff a training run and produce a new model. The pipeline takes arguments to help fine tune the training session and produces output which can be evaluated for improvements to the previous models. 
 
-1. Next, build the training image
+1. Deploy the training job.
 ```
 cd flyingthings/source
-oc new-build --name flyingthings-training --strategy docker --binary --context-dir .
-oc start-build flyingthings-training --from-dir training --follow
 ```
 
-2. Deploy the training pipeline.
-```
-cd flyingthings/source/pipelines
-```
+>If your cluster has GPUs run `oc apply -f deploy-training-job.yaml` 
 
->If your cluster has GPUs run `oc apply -f 01-training-pipeline_gpu.yaml` 
+>otherwise run `oc apply -f xxxx`  This will setup the pipeline for training.
 
->otherwise run `oc apply -f 01-training-pipeline_nogpu.yaml`  This will setup the pipeline for training.
-
-3. You can launch the training pipeline from the OpenShift console and observe its run from output window. This will publish a new model as well as a zipped file with the results of the training run.
 
 ## Pipeline - Model Serving
 Once you have models in Minio you can run the model pipeline to serve the model.
