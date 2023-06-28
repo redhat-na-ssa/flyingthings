@@ -84,7 +84,9 @@ spec:
   to:
     kind: Service
     name: flyingthings-svc
-  tls: null
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Allow
   path: /
   port:
     targetPort: 8888

@@ -62,7 +62,9 @@ spec:
   to:
     kind: Service
     name: custom-model-svc
-  tls: null
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Allow
   path: /
   port:
     targetPort: 8000
