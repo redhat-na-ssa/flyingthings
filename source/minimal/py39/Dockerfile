@@ -22,10 +22,10 @@ LABEL name="workbench-images:${CUDA}jupyter-minimal-${UBI_VERSION}-${PYTHON_VERS
 # Minimal notebook #
 ####################
 
-WORKDIR /opt/app-root/bin
+WORKDIR /workspace
 
-COPY utils utils/
-COPY Pipfile.lock start-notebook.sh ./
+COPY source/minimal/py39/utils utils/
+COPY source/minimal/py39/Pipfile.lock start-notebook.sh ./
 
 # Install packages and cleanup
 # (all commands are chained to minimize layer size)
