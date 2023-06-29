@@ -2,10 +2,10 @@ FROM quay.io/centos/centos:stream9
 
 WORKDIR /opt/app-root/src
 
-# RUN dnf install -y git wget libGL python3-pip \
-#  && dnf clean all
+RUN dnf install -y git wget libGL python3-pip \
+ && dnf clean all
 
-# RUN pip install --no-cache-dir ultralytics
+RUN pip install --no-cache-dir ultralytics
 
 WORKDIR /workspace
 
