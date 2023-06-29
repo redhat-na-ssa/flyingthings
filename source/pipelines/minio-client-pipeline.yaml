@@ -29,20 +29,6 @@ spec:
       workspaces:
         - name: output
           workspace: shared-workspace
-    - name: deploy
-      # taskSpec:
-      taskRef:
-        name: openshift-client
-        kind: ClusterTask
-      workspaces:
-        - name: output
-          workspace: shared-workspace
-      runAfter:
-        - fetch-repository
-      params:
-      - name: SCRIPT
-        value: |
-          oc apply -k /workspace/output/standalone/minio
     - name: run-minio-commands
       taskSpec:
         steps:
@@ -53,7 +39,7 @@ spec:
               echo "Hello from Bash!" \
               && /workspace/output/source/minio-client/bucket-ops.sh
       runAfter:
-        - deploy
+        - fetch-repository
       workspaces:
         - name: output
           workspace: shared-workspace
