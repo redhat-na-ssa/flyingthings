@@ -18,7 +18,7 @@ RUN mkdir -p ${WORKSPACE_DIR}
 
 WORKDIR ${WORKSPACE_DIR}
 
-COPY bucket-ops.sh ${WORKSPACE_DIR}/
+COPY /source/minio-client/bucket-ops.sh ./
 
 RUN chown -R 1001:1001 ${WORKSPACE_DIR}
 
