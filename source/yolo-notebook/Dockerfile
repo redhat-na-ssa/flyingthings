@@ -1,4 +1,5 @@
-FROM quay.io/centos/centos:stream9
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
 
 USER 0
 RUN dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm \
