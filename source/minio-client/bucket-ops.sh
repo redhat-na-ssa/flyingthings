@@ -8,7 +8,7 @@ WORKSPACE_DIR=/opt/app-root/src/workspace
 MINCFG=$WORKSPACE_DIR/miniocfg
 SOURCE_DIR=/workspace/output
 
-RUN mkdir -p ${WORKSPACE_DIR}
+mkdir -p ${WORKSPACE_DIR}
 cd $SIMPLEVIS_DATA
 ls -l $SIMPLEVIS_DATA
 curl $MINIO_CLIENT_URL/mc -o mc
