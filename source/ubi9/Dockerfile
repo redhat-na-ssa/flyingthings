@@ -28,10 +28,10 @@ USER 1001
 # Install micropipenv to deploy packages from Pipfile.lock
 RUN pip install -U "micropipenv[toml]"
 
-WORKDIR /workspace/source/ubi9
+WORKDIR /workspace
 
 # Copy files
-COPY /workspace/output/source/ubi9/pipstuff/Pipfile.lock ./
+COPY source/ubi9/pipstuff/Pipfile.lock ./
 
 # Install packages and cleanup
 # (all commands are chained to minimize layer size)
