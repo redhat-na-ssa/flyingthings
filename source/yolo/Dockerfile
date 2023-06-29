@@ -1,4 +1,4 @@
-FROM ubi9:latest
+FROM quay.io/centos/centos:stream9
 
 WORKDIR /opt/app-root/src
 
