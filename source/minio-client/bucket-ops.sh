@@ -1,4 +1,5 @@
 #!/bin/bash
+MINIO_ENDPOINT=minio:9000
 MINIO_BUCKET=flyingthings
 MINIO_ACCESSKEY=minioadmin
 MINIO_SECRETKEY=minioadmin
