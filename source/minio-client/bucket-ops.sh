@@ -16,7 +16,8 @@ chmod +x mc
 ./mc --config-dir ${MINCFG} config host add myminio $MINIO_ENDPOINT $MINIO_ACCESSKEY $MINIO_SECRETKEY --insecure
 ./mc --config-dir ${MINCFG} mb myminio/$MINIO_BUCKET --insecure
 ./mc --config-dir ${MINCFG} version enable myminio/$MINIO_BUCKET --insecure
-./mc --config-dir ${MINCFG} cp --recursive $SOURCE_DIR/artifacts myminio/$MINIO_BUCKET --insecure
+./mc --config-dir ${MINCFG} cp $SOURCE_DIR/artifacts/flyingthings.yaml myminio/$MINIO_BUCKET --insecure
+./mc --config-dir ${MINCFG} cp $SOURCE_DIR/artifacts/flyingthings-yolo.zip myminio/$MINIO_BUCKET --insecure
 
 # List all objects in the bucket
 objects=$(./mc ls --recursive $MINIO_BUCKET | awk '{ print $5 }')
