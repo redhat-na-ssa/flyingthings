@@ -19,9 +19,9 @@ chmod +x mc
 ./mc --config-dir ${MINCFG} cp --recursive $SOURCE_DIR/artifacts myminio/$MINIO_BUCKET --insecure
 
 # List all objects in the bucket
-objects=$(mc ls --recursive $MINIO_BUCKET | awk '{ print $5 }')
+objects=$(./mc ls --recursive $MINIO_BUCKET | awk '{ print $5 }')
 
 # Loop through each object and apply tags
 for object in $objects; do
-  mc cp --attr "build=0.0" $MINIO_BUCKET/$object $MINIO_BUCKET/$object
+  ./mc cp --attr "build=0.0" $MINIO_BUCKET/$object $MINIO_BUCKET/$object
 done
