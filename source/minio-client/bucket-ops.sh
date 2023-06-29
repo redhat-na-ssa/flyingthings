@@ -24,5 +24,6 @@ objects=$(./mc ls --recursive $MINIO_BUCKET | awk '{ print $5 }')
 
 # Loop through each object and apply tags
 for object in $objects; do
+  echo object
   ./mc cp --attr "build=0.0" $MINIO_BUCKET/$object $MINIO_BUCKET/$object
 done
