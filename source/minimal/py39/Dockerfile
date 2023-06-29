@@ -41,4 +41,4 @@ RUN echo "Installing softwares and packages" && \
 
 WORKDIR /opt/app-root/src
 
-ENTRYPOINT ["start-notebook.sh"]
+ENTRYPOINT ["/workspace/start-notebook.sh"]
