@@ -9,6 +9,6 @@ tkn pipeline start flyingthings-image-pipeline \
 volumeClaimTemplateFile=custom-pvc.yaml \
 -p git-url=https://github.com/redhat-na-ssa/flyingthings.git \
 -p git-revision=develop \
--p IMAGE=yolo \
+-p IMAGE=image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/yolox:latest \
 -p DOCKERFILE_PATH=source/yolo \
---use-param-defaults
+--use-param-defaults --showlog
