@@ -1,7 +1,7 @@
 apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
-  name: flyingthings-yolo-pipeline
+  name: flyingthings-minimal-pipeline
   namespace: flyingthings-standalone
 spec:
   params:
@@ -16,14 +16,15 @@ spec:
       description: revision to be used from repo of the code for deployment
       name: git-revision
       type: string
-    - default: image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/yolox
+    - default: image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/minimal-notebook
       description: image to be build from the code
       name: IMAGE
       type: string
-    # - description: build args for docker file
-    #   name: BUILD_EXTRA_ARGS
-    #   type: string
-    - default: source/yolo
+    - default: '--build-arg BASE_IMAGE=image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/base-ubi9:latest'
+      description: build args for docker file
+      name: BUILD_EXTRA_ARGS
+      type: string
+    - default: source/minimal/py39
       description: dockerfile path
       name: DOCKERFILE_PATH
       type: string
@@ -60,8 +61,8 @@ spec:
           workspace: shared-workspace
     - name: build-image
       params:
-        # - name: BUILD_EXTRA_ARGS
-        #   value: $(params.BUILD_EXTRA_ARGS)
+        - name: BUILD_EXTRA_ARGS
+          value: $(params.BUILD_EXTRA_ARGS)
         - name: IMAGE
           value: $(params.IMAGE)
         - name: DOCKERFILE_PATH

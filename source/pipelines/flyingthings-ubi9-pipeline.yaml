@@ -1,7 +1,7 @@
 apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
-  name: flyingthings-yolo-pipeline
+  name: flyingthings-ubi9-pipeline
   namespace: flyingthings-standalone
 spec:
   params:
@@ -23,7 +23,7 @@ spec:
     # - description: build args for docker file
     #   name: BUILD_EXTRA_ARGS
     #   type: string
-    - default: source/yolo
+    - default: source/ubi9
       description: dockerfile path
       name: DOCKERFILE_PATH
       type: string
