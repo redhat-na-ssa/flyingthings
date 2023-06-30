@@ -32,13 +32,13 @@ spec:
       containers:
         - name: container
           image: >-
-            image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/opencv:latest
+            image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/yolo-notebook:latest
           resources:
             limits:
               nvidia.com/gpu: 1
-          envFrom:
-            - configMapRef:
-                name: flyingthings-configmap
+          # envFrom:
+          #   - configMapRef:
+          #       name: flyingthings-configmap
           ports:
             - containerPort: 8888
               protocol: TCP
@@ -84,7 +84,9 @@ spec:
   to:
     kind: Service
     name: flyingthings-svc
-  tls: null
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Allow
   path: /
   port:
     targetPort: 8888

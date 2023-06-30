@@ -15,7 +15,7 @@ spec:
       containers:
         - name: container
           image: >-
-            image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/model-server:latest
+            image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/custom-model:latest
           ports:
             - containerPort: 8000
               protocol: TCP
@@ -62,7 +62,9 @@ spec:
   to:
     kind: Service
     name: custom-model-svc
-  tls: null
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Allow
   path: /
   port:
     targetPort: 8000

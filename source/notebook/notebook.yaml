@@ -30,10 +30,10 @@ spec:
       containers:
         - name: container
           image: >-
-            image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/opencv:latest
-          envFrom:
-            - configMapRef:
-                name: flyingthings-configmap
+            image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/yolo-notebook:latest
+          # envFrom:
+          #   - configMapRef:
+          #       name: flyingthings-configmap
           ports:
             - containerPort: 8888
               protocol: TCP
@@ -76,7 +76,10 @@ spec:
   to:
     kind: Service
     name: flyingthings-svc
-  tls: null
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Allow
+  wildcardPolicy: None
   path: /
   port:
     targetPort: 8888

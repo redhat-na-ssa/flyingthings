@@ -13,10 +13,9 @@ WORKDIR /opt/app-root/src
 ENV WEIGHTS=flyingthings.pt
 ENV BUILD_VER=0.0
 ENV MODEL_CLASSES=flyingthings.yaml
-ENV MINIO_ENDPOINT=minio-flyingthings-standalone.apps.ocpbare.davenet.local/flyingthings
 ENV SIMPLEVIS_DATA=/opt/app-root/src/simplevis-data
 ENV BASEDIR=/opt/app-root/src
-ENV MINIO_ENDPOINT=https://minio-flyingthings-standalone.apps.ocpbare.davenet.local
+ENV MINIO_ENDPOINT=http://minio:9000
 ENV MINIO_BUCKET=flyingthings
 ENV MINIO_ACCESSKEY=minioadmin
 ENV MINIO_SECRETKEY=minioadmin
@@ -36,12 +35,13 @@ RUN pip install --no-cache-dir ultralytics
 RUN mkdir -p $SIMPLEVIS_DATA \
  && chown -R 1001:1001 $SIMPLEVIS_DATA
 
-COPY requirements.txt ./
-COPY get-model.sh /opt/app-root/src/
+WORKDIR /opt/app-root/src/
+
+COPY source/model/requirements.txt ./
+COPY source/model/get-model.sh ./
 RUN pip install --no-cache-dir -r ./requirements.txt
 
-
-COPY app/ ./
+COPY source/model/app/ ./
 
 WORKDIR /opt/app-root/src
 

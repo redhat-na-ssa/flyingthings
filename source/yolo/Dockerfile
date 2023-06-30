@@ -7,7 +7,9 @@ RUN dnf install -y git wget libGL python3-pip \
 
 RUN pip install --no-cache-dir ultralytics
 
-COPY requirements.txt ./
+WORKDIR /workspace
+
+COPY source/yolo/requirements.txt ./
 
 RUN pip install --no-cache-dir -r ./requirements.txt
 
