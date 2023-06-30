@@ -36,9 +36,9 @@ spec:
           resources:
             limits:
               nvidia.com/gpu: 1
-          envFrom:
-            - configMapRef:
-                name: flyingthings-configmap
+          # envFrom:
+          #   - configMapRef:
+          #       name: flyingthings-configmap
           ports:
             - containerPort: 8888
               protocol: TCP

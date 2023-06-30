@@ -4,6 +4,8 @@
 # NAMESPACE='flyingthings-standalone'
 # MINIO_BUCKET='flyingthings'
 
+cd ../pipelines
+
 tkn pipeline start minio-server-pipeline \
 -w name=shared-workspace,\
 volumeClaimTemplateFile=custom-pvc.yaml \

@@ -1,4 +1,5 @@
 #!/bin/bash
 
-oc new-project flying-things
-oc apply -f pipelines
+oc new-project flyingthings-standalone
+cd ../pipelines
+oc apply -f .

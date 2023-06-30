@@ -1,25 +1,18 @@
 #!/bin/bash
 
-MINIO_ENDPOINT=`oc get route|grep -v console|grep -v NAME|awk '{print $2 }'`
-NAMESPACE='flyingthings-standalone'
-MINIO_BUCKET='flyingthings'
+# MINIO_ENDPOINT=`oc get route|grep -v console|grep -v NAME|awk '{print $2 }'`
+# NAMESPACE='flyingthings-standalone'
+# MINIO_BUCKET='flyingthings'
 
-tkn pipeline start flyingthings-image-pipeline \
--w name=shared-workspace,\
-volumeClaimTemplateFile=custom-pvc.yaml \
--p git-url=https://github.com/redhat-na-ssa/flyingthings.git \
--p git-revision=develop \
--p IMAGE=image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/yolo:latest \
--p DOCKERFILE_PATH=source/yolo \
---use-param-defaults --showlog
+cd ../pipelines
 
 tkn pipeline start flyingthings-ubi9-pipeline \
 -w name=shared-workspace,\
 volumeClaimTemplateFile=custom-pvc.yaml \
 -p git-url=https://github.com/redhat-na-ssa/flyingthings.git \
 -p git-revision=develop \
--p IMAGE=image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/ubi9:latest \
--p DOCKERFILE_PATH=source/ubi9 \
+-p IMAGE=image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/yolo:latest \
+-p DOCKERFILE_PATH=source/yolo \
 --use-param-defaults --showlog
 
 tkn pipeline start flyingthings-ubi9-pipeline \
