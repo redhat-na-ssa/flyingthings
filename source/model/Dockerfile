@@ -15,7 +15,7 @@ ENV BUILD_VER=0.0
 ENV MODEL_CLASSES=flyingthings.yaml
 ENV SIMPLEVIS_DATA=/opt/app-root/src/simplevis-data
 ENV BASEDIR=/opt/app-root/src
-ENV MINIO_ENDPOINT=https://minio:9000
+ENV MINIO_ENDPOINT=http://minio:9000
 ENV MINIO_BUCKET=flyingthings
 ENV MINIO_ACCESSKEY=minioadmin
 ENV MINIO_SECRETKEY=minioadmin
@@ -30,7 +30,7 @@ ENV MINIO_SECRETKEY=minioadmin
 RUN dnf install -y git wget libGL python3-pip \
  && dnf clean all
 
-# RUN pip install --no-cache-dir ultralytics
+RUN pip install --no-cache-dir ultralytics
 
 RUN mkdir -p $SIMPLEVIS_DATA \
  && chown -R 1001:1001 $SIMPLEVIS_DATA
@@ -39,7 +39,7 @@ WORKDIR /workspce
 
 COPY source/model/requirements.txt ./
 COPY source/model/get-model.sh /opt/app-root/src/
-# RUN pip install --no-cache-dir -r ./requirements.txt
+RUN pip install --no-cache-dir -r ./requirements.txt
 
 COPY source/model/app/ ./
 
