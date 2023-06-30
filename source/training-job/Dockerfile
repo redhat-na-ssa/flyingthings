@@ -35,13 +35,15 @@ RUN curl $MINIO_CLIENT_URL/mc -o mc \
  && ./mc --config-dir miniocfg cp myminio/$MINIO_BUCKET/$BASE_MODEL $BASE_MODEL --insecure \
  && ./mc --config-dir miniocfg cp myminio/$MINIO_BUCKET/$DATASET_ZIP $DATASET_ZIP --insecure
 
-COPY dataprep.sh ${SIMPLEVIS_DATA}/
+WORKDIR /workspace
 
-COPY distribute-files.py ${SIMPLEVIS_DATA}/
+COPY source/training-job/dataprep.sh ${SIMPLEVIS_DATA}/
 
-COPY push-results.sh ${SIMPLEVIS_DATA}/
+COPY source/training-job/distribute-files.py ${SIMPLEVIS_DATA}/
 
-COPY run-training.sh ${SIMPLEVIS_DATA}/
+COPY source/training-job/push-results.sh ${SIMPLEVIS_DATA}/
+
+COPY source/training-job/run-training.sh ${SIMPLEVIS_DATA}/
 
 RUN chown -R 1001:1001 ${SIMPLEVIS_DATA}
 
