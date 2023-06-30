@@ -6,7 +6,7 @@ MINIO_SECRETKEY=minioadmin
 MINIO_CLIENT_URL=https://dl.min.io/client/mc/release/linux-amd64
 WORKSPACE_DIR=/opt/app-root/src/workspace
 MINCFG=$WORKSPACE_DIR/miniocfg
-SOURCE_DIR=/workspace/output
+SOURCE_DIR=/workspace/workspace
 
 mkdir -p ${WORKSPACE_DIR}
 cd $SIMPLEVIS_DATA
