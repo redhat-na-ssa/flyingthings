@@ -35,10 +35,10 @@ RUN pip install --no-cache-dir ultralytics
 RUN mkdir -p $SIMPLEVIS_DATA \
  && chown -R 1001:1001 $SIMPLEVIS_DATA
 
-WORKDIR /workspce
+WORKDIR /opt/app-root/src/
 
 COPY source/model/requirements.txt ./
-COPY source/model/get-model.sh /opt/app-root/src/
+COPY source/model/get-model.sh ./
 RUN pip install --no-cache-dir -r ./requirements.txt
 
 COPY source/model/app/ ./
