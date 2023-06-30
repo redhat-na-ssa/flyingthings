@@ -1,4 +1,7 @@
-FROM image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/yolo:latest
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
+
+# FROM image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/yolo:latest
 # FROM quay.io/centos/centos:stream9
 
 USER 0
