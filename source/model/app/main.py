@@ -26,7 +26,8 @@ BASE_DIR = Path(
 )
 
 MODEL_CLASSES = os.environ.get('MODEL_CLASSES')
-WEIGHTS_FILE = os.environ.get('WEIGHTS')
+weights_filename = os.environ.get('WEIGHTS')
+WEIGHTS_FILE = SIMPLEVIS_DATA.joinpath(weights_filename)
 UPLOAD_DIR = SIMPLEVIS_DATA.joinpath("uploaded-files")
 DETECT_DIR = SIMPLEVIS_DATA.joinpath("detected-files")
 VIDEO_DIR = SIMPLEVIS_DATA.joinpath("video-files")
@@ -38,15 +39,15 @@ SAFE_2_PROCESS = [".JPG", ".JPEG", ".PNG", ".M4V", ".MOV", ".MP4"]
 VIDEO_EXTS = [".M4V", ".MOV", ".MP4"]
 
 
-# Load the classes
-with open(BASE_DIR.joinpath(MODEL_CLASSES), 'r') as f:
-    try:
-        parsed_yaml = yaml.safe_load(f)
-        OBJECT_CLASSES = parsed_yaml['names']
-    except yaml.YAMLError as exc:
-        raise RuntimeError(f"Unable to load classes from yaml: {str(exc)}")
-    except Exception as exc:
-        raise RuntimeError(f"Unable to identify class names: {str(exc)}")
+# # Load the classes
+# with open(BASE_DIR.joinpath(MODEL_CLASSES), 'r') as f:
+#     try:
+#         parsed_yaml = yaml.safe_load(f)
+#         OBJECT_CLASSES = parsed_yaml['names']
+#     except yaml.YAMLError as exc:
+#         raise RuntimeError(f"Unable to load classes from yaml: {str(exc)}")
+#     except Exception as exc:
+#         raise RuntimeError(f"Unable to identify class names: {str(exc)}")
 
 app = FastAPI()
 

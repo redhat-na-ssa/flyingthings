@@ -1,27 +1,27 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: 'custom-model'
+  name: 'coco-model'
 spec:
   selector:
     matchLabels:
-      app: custom-model
+      app: coco-model
   replicas: 1
   template:
     metadata:
       labels:
-        app: custom-model
+        app: coco-model
     spec:
       containers:
         - name: container
           image: >-
-            image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/custom-model:latest
+            image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/model-server:latest
           ports:
             - containerPort: 8000
               protocol: TCP
           env:
             - name: WEIGHTS
-              value: model_custom.pt
+              value: model_pretrained.pt
             - name: BUILD_VER
               value: "0.0"
             - name: MODEL_CLASSES
@@ -45,10 +45,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: custom-model-svc
+  name: coco-model-svc
 spec:
   selector:
-    app: custom-model
+    app: coco-model
   ports:
     - protocol: TCP
       port: 8000
@@ -56,15 +56,13 @@ spec:
 kind: Route
 apiVersion: route.openshift.io/v1
 metadata:
-  name: custom-model-rt
+  name: coco-model-rt
   labels: {}
 spec:
   to:
     kind: Service
-    name: custom-model-svc
-  tls:
-    termination: edge
-    insecureEdgeTerminationPolicy: Allow
+    name: coco-model-svc
+  tls: null
   path: /
   port:
     targetPort: 8000
