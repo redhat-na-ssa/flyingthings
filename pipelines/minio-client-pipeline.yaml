@@ -97,7 +97,7 @@ spec:
       params:
       - name: SCRIPT
         value: |
-          oc apply -k /workspace/source/standalone/minio
+          oc apply -k /workspace/source/minio
     - name: upload-artifacts
       taskSpec:
         steps:
