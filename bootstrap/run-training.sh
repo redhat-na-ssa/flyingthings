@@ -12,4 +12,4 @@ NUM_EPOCHS=$2
 
 tkn pipeline start training-pipeline \
 -p batch-size=$BATCHSIZE \
--p num-epochs=$NUM_EPOCHS
+-p num-epochs=$NUM_EPOCHS --showlog
