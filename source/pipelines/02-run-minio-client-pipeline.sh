@@ -4,10 +4,9 @@
 # NAMESPACE='flyingthings-standalone'
 # MINIO_BUCKET='flyingthings'
 
-tkn pipeline start minio-server-setup \
+tkn pipeline start minio-server-pipeline \
 -w name=shared-workspace,\
 volumeClaimTemplateFile=custom-pvc.yaml \
 -p git-url=https://github.com/redhat-na-ssa/flyingthings.git \
--p git-revision=main \
---use-param-defaults \
+-p git-revision=develop \
 --use-param-defaults --showlog
