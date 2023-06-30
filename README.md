@@ -4,7 +4,7 @@ Computer vision demo
 # Getting Started
 
 ## Quick Start
-The `bootstrap` direcotry contains files scripts to create all the assets for the project. 
+The `bootstrap` directory contains scripts to create all the assets for the project. 
 ```
 cd bootstrap
 flyingthings-standalone
