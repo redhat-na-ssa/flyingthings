@@ -1,5 +1,5 @@
 #!/bin/bash
 
 oc new-project flyingthings-standalone
-cd ../pipelines
+cd ../pipelines/manifests
 oc apply -f .
