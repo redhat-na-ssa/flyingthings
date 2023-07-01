@@ -43,80 +43,81 @@ spec:
             script: |
               #!/usr/bin/env bash
               echo "Let's see what we got here..." \
-              && ls -al /workspace/workspace
+              && echo "...contents of /workspace/workspace.source" \
+              && ls -al /workspace/workspace/source
       runAfter:
         - fetch-repository
       workspaces:
         - name: workspace
           workspace: workspace
 
-    # - name: deploy
-    #   taskSpec:
-    #     metadata:
-    #       annotations:
-    #         operator.tekton.dev/last-applied-hash: 64d9014f8c7f4cd290afc619a32a185211cae3b23d56af70197b0e936ec8d35b
-    #         tekton.dev/displayName: openshift client
-    #         tekton.dev/pipelines.minVersion: 0.17.0
-    #         tekton.dev/tags: cli
-    #       labels:
-    #         app.kubernetes.io/version: '0.2'
-    #         operator.tekton.dev/operand-name: openshift-pipelines-addons
-    #         operator.tekton.dev/provider-type: redhat
-    #     description: >-
-    #       This task runs commands against the cluster provided by user and if not
-    #       provided then where the Task is being executed.
+    - name: deploy
+      taskSpec:
+        metadata:
+          annotations:
+            operator.tekton.dev/last-applied-hash: 64d9014f8c7f4cd290afc619a32a185211cae3b23d56af70197b0e936ec8d35b
+            tekton.dev/displayName: openshift client
+            tekton.dev/pipelines.minVersion: 0.17.0
+            tekton.dev/tags: cli
+          labels:
+            app.kubernetes.io/version: '0.2'
+            operator.tekton.dev/operand-name: openshift-pipelines-addons
+            operator.tekton.dev/provider-type: redhat
+        description: >-
+          This task runs commands against the cluster provided by user and if not
+          provided then where the Task is being executed.
 
-    #       OpenShift is a Kubernetes distribution from Red Hat which provides oc, the
-    #       OpenShift CLI that complements kubectl for simplifying deployment and
-    #       configuration applications on OpenShift.
-    #     params:
-    #       - default: oc help
-    #         description: The OpenShift CLI arguments to run
-    #         name: SCRIPT
-    #         type: string
-    #       - default: latest
-    #         description: The OpenShift Version to use
-    #         name: VERSION
-    #         type: string
-    #     steps:
-    #       - env:
-    #           - name: HOME
-    #             value: /tekton/home
-    #         image: >-
-    #           image-registry.openshift-image-registry.svc:5000/openshift/cli:$(params.VERSION)
-    #         name: oc
-    #         resources: {}
-    #         script: |
-    #           #!/usr/bin/env bash
+          OpenShift is a Kubernetes distribution from Red Hat which provides oc, the
+          OpenShift CLI that complements kubectl for simplifying deployment and
+          configuration applications on OpenShift.
+        params:
+          - default: oc help
+            description: The OpenShift CLI arguments to run
+            name: SCRIPT
+            type: string
+          - default: latest
+            description: The OpenShift Version to use
+            name: VERSION
+            type: string
+        steps:
+          - env:
+              - name: HOME
+                value: /tekton/home
+            image: >-
+              image-registry.openshift-image-registry.svc:5000/openshift/cli:$(params.VERSION)
+            name: oc
+            resources: {}
+            script: |
+              #!/usr/bin/env bash
 
-    #           [[ "$(workspaces.manifest-dir.bound)" == "true" ]] && \
-    #           cd $(workspaces.manifest-dir.path)
+              [[ "$(workspaces.manifest-dir.bound)" == "true" ]] && \
+              cd $(workspaces.manifest-dir.path)
 
-    #           [[ "$(workspaces.kubeconfig-dir.bound)" == "true" ]] && \
-    #           [[ -f $(workspaces.kubeconfig-dir.path)/kubeconfig ]] && \
-    #           export KUBECONFIG=$(workspaces.kubeconfig-dir.path)/kubeconfig
+              [[ "$(workspaces.kubeconfig-dir.bound)" == "true" ]] && \
+              [[ -f $(workspaces.kubeconfig-dir.path)/kubeconfig ]] && \
+              export KUBECONFIG=$(workspaces.kubeconfig-dir.path)/kubeconfig
 
-    #           $(params.SCRIPT)
-    #         securityContext:
-    #           runAsNonRoot: true
-    #           runAsUser: 65532
-    #     workspaces:
-    #       - description: >-
-    #           The workspace which contains kubernetes manifests which we want to apply
-    #           on the cluster.
-    #         name: manifest-dir
-    #         optional: true
-    #       - description: >-
-    #           The workspace which contains the the kubeconfig file if in case we want to
-    #           run the oc command on another cluster.
-    #         name: kubeconfig-dir
-    #         optional: true
-    #   workspaces:
-    #     - name: source
-    #       workspace: workspace
-    #   runAfter:
-    #     - see-stuff
-    #   params:
-    #   - name: SCRIPT
-    #     value: |
-    #       oc apply -f /workspace/source/source/deploy-model-server.yaml
+              $(params.SCRIPT)
+            securityContext:
+              runAsNonRoot: true
+              runAsUser: 65532
+        workspaces:
+          - description: >-
+              The workspace which contains kubernetes manifests which we want to apply
+              on the cluster.
+            name: manifest-dir
+            optional: true
+          - description: >-
+              The workspace which contains the the kubeconfig file if in case we want to
+              run the oc command on another cluster.
+            name: kubeconfig-dir
+            optional: true
+      workspaces:
+        - name: source
+          workspace: workspace
+      runAfter:
+        - see-stuff
+      params:
+      - name: SCRIPT
+        value: |
+          oc apply -f /workspace/source/source/deploy-model-server.yaml
