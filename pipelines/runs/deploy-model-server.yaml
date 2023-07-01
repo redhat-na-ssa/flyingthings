@@ -1,58 +1,3 @@
-﻿apiVersion: tekton.dev/v1beta1
-kind: Pipeline
-metadata:
-  name: model-serv-pipeline
-  namespace: flyingthings-standalone
-spec:
-  params:
-    - description: name of the deployment to be patched
-      name: deployment-name
-      type: string
-    - description: url of the git repo for the code of deployment
-      name: git-url
-      type: string
-    - description: revision to be used from repo of the code for deployment
-      name: git-revision
-      type: string
-    - description: image to be build from the code
-      name: IMAGE
-      type: string
-    - description: build args for docker file
-      name: BUILD_EXTRA_ARGS
-      type: string
-  tasks:
-    - name: fetch-repository
-      params:
-        - name: url
-          value: $(params.git-url)
-        - name: subdirectory
-          value: ''
-        - name: deleteExisting
-          value: 'true'
-        - name: revision
-          value: $(params.git-revision)
-      taskRef:
-        kind: ClusterTask
-        name: git-clone
-      workspaces:
-        - name: output
-          workspace: shared-workspace
-    - name: build-image
-      params:
-        - name: BUILD_EXTRA_ARGS
-          value: $(params.BUILD_EXTRA_ARGS)
-        - name: IMAGE
-          value: $(params.IMAGE)
-        - name: DOCKERFILE
-          value: $(workspaces.path)/source/model/Dockerfile
-      runAfter:
-        - fetch-repository
-      taskRef:
-        kind: ClusterTask
-        name: buildah
-      workspaces:
-        - name: source
-          workspace: shared-workspace
     - name: deploy
       taskSpec:
         metadata:
@@ -116,12 +61,10 @@ spec:
             optional: true
       workspaces:
         - name: source
-          workspace: shared-workspace
+          workspace: workspace
       runAfter:
-        - build-image
+        - build
       params:
       - name: SCRIPT
         value: |
           oc create -f /workspace/source/source/deploy-custom-model.yaml
-  workspaces:
-    - name: shared-workspace
