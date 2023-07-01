@@ -1,38 +1,61 @@
 apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
-  name: minio-server-pipeline
+  name: deploy-model-server
   namespace: flyingthings-standalone
 spec:
   params:
-    - description: url of the git repo for the code of deployment
-      name: git-url
+    - name: IMAGE
       type: string
-    - description: revision to be used from repo of the code for deployment
-      name: git-revision
+    - name: GIT_REPO
       type: string
+    - name: GIT_REVISION
+      type: string
+    - name: DOCKERFILE_PATH
+      type: string
+    - name: BUILD_EXTRA_ARGS
+      type: string
+  workspaces:
+    - name: workspace
   tasks:
     - name: fetch-repository
-      params:
-        - name: url
-          value: $(params.git-url)
-        - name: subdirectory
-          value: ''
-        - name: deleteExisting
-          value: 'true'
-        - name: revision
-          value: $(params.git-revision)
       taskRef:
-        kind: ClusterTask
         name: git-clone
+        kind: ClusterTask
       workspaces:
         - name: output
-          workspace: shared-workspace
+          workspace: workspace
+      params:
+        - name: url
+          value: $(params.GIT_REPO)
+        - name: revision
+          value: $(params.GIT_REVISION)
+        - name: subdirectory
+          value: ""
+        - name: deleteExisting
+          value: "true"
+
+    - name: see-stuff
+      taskSpec:
+        steps:
+          - name: run-batch-file
+            image: ubi9:latest
+            script: |
+              #!/usr/bin/env bash
+              echo "Let's see what we got here..." \
+              && echo "...contents of /workspace/workspace.source" \
+              && ls -al /workspace/workspace/source
+      runAfter:
+        - fetch-repository
+      workspaces:
+        - name: workspace
+          workspace: workspace
+
     - name: deploy
       taskSpec:
         metadata:
           annotations:
-            # operator.tekton.dev/last-applied-hash: 64d9014f8c7f4cd290afc619a32a185211cae3b23d56af70197b0e936ec8d35b
+            operator.tekton.dev/last-applied-hash: 64d9014f8c7f4cd290afc619a32a185211cae3b23d56af70197b0e936ec8d35b
             tekton.dev/displayName: openshift client
             tekton.dev/pipelines.minVersion: 0.17.0
             tekton.dev/tags: cli
@@ -91,44 +114,10 @@ spec:
             optional: true
       workspaces:
         - name: source
-          workspace: shared-workspace
+          workspace: workspace
       runAfter:
-        - fetch-repository
+        - see-stuff
       params:
       - name: SCRIPT
         value: |
-          oc apply -k /workspace/source/standalone/minio
-    - name: upload-artifacts
-      taskSpec:
-        steps:
-          - name: run-batch-file
-            image: ubi9:latest
-            env:
-              - name: MINIO_ENDPOINT
-                value: http://minio:9000
-              - name: MINIO_BUCKET
-                value: flyingthings
-              - name: MINIO_ACCESSKEY
-                value: minioadmin
-              - name: MINIO_SECRETKEY
-                value: minioadmin
-              - name: MINIO_CLIENT_URL
-                value: https://dl.min.io/client/mc/release/linux-amd64
-              - name: WORKSPACE_DIR
-                value: /opt/app-root/src/workspace/workspace
-              - name: MINCFG
-                value: $WORKSPACE_DIR/miniocfg
-              - name: SOURCE_DIR
-                value: /workspace/output
-            script: |
-              #!/usr/bin/env bash
-              echo "Let's see what we got here..." \
-              && ls -al /workspace/workspace/source \
-              && /workspace/workspace/source/minio-client/bucket-ops.sh
-      runAfter:
-        - deploy
-      workspaces:
-        - name: workspace
-          workspace: shared-workspace
-  workspaces:
-    - name: shared-workspace
+          oc apply -f /workspace/source/source/deploy-model-server.yaml

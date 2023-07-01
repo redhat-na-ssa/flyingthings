@@ -1,4 +1,7 @@
-FROM image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/yolo:latest
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
+
+# FROM image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/yolo:latest
 # FROM quay.io/centos/centos:stream9
 
 USER 0
@@ -24,21 +27,16 @@ RUN mkdir -p ${SIMPLEVIS_DATA} \
  && dnf clean all
 
 WORKDIR ${SIMPLEVIS_DATA}
-RUN curl $MINIO_CLIENT_URL/mc -o mc \
- && chmod +x mc \
- && ./mc --config-dir miniocfg config host add myminio $MINIO_ENDPOINT $MINIO_ACCESSKEY $MINIO_SECRETKEY --insecure \
- && ./mc --config-dir miniocfg cp myminio/$MINIO_BUCKET/$MODEL_CLASSES $MODEL_CLASSES --insecure \
- && ./mc --config-dir miniocfg cp myminio/$MINIO_BUCKET/$WEIGHTS $WEIGHTS --insecure \
- && ./mc --config-dir miniocfg cp myminio/$MINIO_BUCKET/$BASE_MODEL $BASE_MODEL --insecure \
- && ./mc --config-dir miniocfg cp myminio/$MINIO_BUCKET/$DATASET_ZIP $DATASET_ZIP --insecure
 
-COPY dataprep.sh ${SIMPLEVIS_DATA}/
+WORKDIR /workspace
 
-COPY distribute-files.py ${SIMPLEVIS_DATA}/
+COPY source/training-job/dataprep.sh ${SIMPLEVIS_DATA}/
 
-COPY push-results.sh ${SIMPLEVIS_DATA}/
+COPY source/training-job/distribute-files.py ${SIMPLEVIS_DATA}/
 
-COPY run-training.sh ${SIMPLEVIS_DATA}/
+COPY source/training-job/push-results.sh ${SIMPLEVIS_DATA}/
+
+COPY source/training-job/run-training.sh ${SIMPLEVIS_DATA}/
 
 RUN chown -R 1001:1001 ${SIMPLEVIS_DATA}
 
