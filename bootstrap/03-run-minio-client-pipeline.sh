@@ -4,7 +4,7 @@
 # NAMESPACE='flyingthings-standalone'
 # MINIO_BUCKET='flyingthings'
 
-cd ../pipelines
+cd ../pipelines/runs
 
 tkn pipeline start minio-server-pipeline \
 -w name=shared-workspace,\

@@ -1,0 +1,57 @@
+﻿apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: model-serv-pipeline
+  namespace: flyingthings-standalone
+spec:
+  params:
+    - name: IMAGE
+      type: string
+    - name: GIT_REPO
+      type: string
+    - name: GIT_REVISION
+      type: string
+    - name: DOCKERFILE_PATH
+      type: string
+    - name: BUILD_EXTRA_ARGS
+      type: string
+  workspaces:
+    - name: workspace
+  tasks:
+    - name: fetch-repository
+      taskRef:
+        name: git-clone
+        kind: ClusterTask
+      workspaces:
+        - name: output
+          workspace: workspace
+      params:
+        - name: url
+          value: $(params.GIT_REPO)
+        - name: revision
+          value: $(params.GIT_REVISION)
+        - name: subdirectory
+          value: ""
+        - name: deleteExisting
+          value: "true"
+
+    - name: build
+      taskRef:
+        name: buildah
+        kind: ClusterTask
+      runAfter:
+        - fetch-repository
+      workspaces:
+        - name: source
+          workspace: workspace
+      params:
+        - name: IMAGE
+          value: $(params.IMAGE)
+        - name: BUILD_EXTRA_ARGS
+          value: $(params.BUILD_EXTRA_ARGS)
+        - name: TLSVERIFY
+          value: "false"
+        - name: DOCKERFILE_PATH
+          value: $(params.DOCKERFILE_PATH)
+        - name: DOCKERFILE
+          value: $(workspaces.source.path)/$(params.DOCKERFILE_PATH)/Dockerfile
