@@ -30,7 +30,7 @@ ENV MINIO_SECRETKEY=minioadmin
 RUN dnf install -y git wget libGL python3-pip \
  && dnf clean all
 
-RUN pip install --no-cache-dir ultralytics
+RUN pip install --no-cache-dir ultralytics==8.0.124
 
 RUN mkdir -p $SIMPLEVIS_DATA \
  && chown -R 1001:1001 $SIMPLEVIS_DATA

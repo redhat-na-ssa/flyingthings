@@ -97,6 +97,6 @@ spec:
       params:
       - name: SCRIPT
         value: |
-          oc apply -k $(workspaces.source.path)/source/deploy-training-job.yaml
+          oc apply -f $(workspaces.source.path)/source/training-job
   workspaces:
     - name: shared-workspace
