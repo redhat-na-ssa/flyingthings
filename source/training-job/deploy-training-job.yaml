@@ -18,7 +18,7 @@ spec:
           - name: BATCH_SIZE
             value: "-1"
           - name: NUM_EPOCHS
-            value: "100"
+            value: "10"
           command:
             - /opt/app-root/src/simplevis-data/run-training.sh
           volumeMounts:
