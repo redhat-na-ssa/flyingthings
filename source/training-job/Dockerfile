@@ -28,7 +28,7 @@ RUN mkdir -p ${SIMPLEVIS_DATA} \
 
 WORKDIR ${SIMPLEVIS_DATA}
 
-WORKDIR /workspace
+# WORKDIR /workspace
 
 COPY source/training-job/dataprep.sh ${SIMPLEVIS_DATA}/
 

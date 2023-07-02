@@ -8,7 +8,7 @@ chmod +x mc
 ./mc --config-dir miniocfg cp myminio/$MINIO_BUCKET/$BASE_MODEL $BASE_MODEL --insecure
 ./mc --config-dir miniocfg cp myminio/$MINIO_BUCKET/$DATASET_ZIP $DATASET_ZIP --insecure
 
-mkdir -p $SIMPLEVIS_DATA/datasets
-cd $SIMPLEVIS_DATA/datasets
+mkdir -p $SIMPLEVIS_DATA/workspace/datasets
+cd $SIMPLEVIS_DATA/workspace/datasets
 unzip $SIMPLEVIS_DATA/$DATASET_ZIP
-ls -l $SIMPLEVIS_DATA/datasets
+ls -l $SIMPLEVIS_DATA/workspace/datasets
