@@ -10,5 +10,5 @@ chmod +x mc
 
 mkdir -p $SIMPLEVIS_DATA/workspace/datasets
 cd $SIMPLEVIS_DATA/workspace/datasets
-unzip $SIMPLEVIS_DATA/$DATASET_ZIP
+unzip $SIMPLEVIS_DATA/workspace/$DATASET_ZIP
 ls -l $SIMPLEVIS_DATA/workspace/datasets

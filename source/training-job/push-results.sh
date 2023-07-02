@@ -3,7 +3,7 @@ cd $SIMPLEVIS_DATA/workspace
 echo "*************** Training Run Results*************************"
 cat $SIMPLEVIS_DATA/workspace/runs/train/results.csv
 echo "************************************************************"
-tar czf $SIMPLEVIS_DATA/workspace/runs/training-results.tgz $SIMPLEVIS_DATA/runs/train/
+tar czf $SIMPLEVIS_DATA/workspace/runs/training-results.tgz $SIMPLEVIS_DATA/workspace/runs/train/
 ls -l $SIMPLEVIS_DATA
 
 ./mc --config-dir miniocfg config host add myminio $MINIO_ENDPOINT $MINIO_ACCESSKEY $MINIO_SECRETKEY --insecure
