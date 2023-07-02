@@ -9,7 +9,4 @@ RUN dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.n
  && dnf -y install libGL \
  && dnf clean all
 
-# RUN pip install --no-cache-dir ultralytics
-COPY source/custom/requirements.txt ./
-
-RUN pip install --no-cache-dir -r ./requirements.txt
+RUN pip install --no-cache-dir ultralytics
