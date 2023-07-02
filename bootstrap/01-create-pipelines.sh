@@ -5,5 +5,5 @@ oc new-project flyingthings-standalone
 cd ../pipelines/manifests
 oc apply -f .
 
-cd ../pipelines/runs
+cd ../runs
 oc apply -f .
