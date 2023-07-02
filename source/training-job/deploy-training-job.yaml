@@ -18,9 +18,9 @@ spec:
           - name: MINIO_CLIENT_URL
             value: "http://util02.davenet.local"
           - name: BATCH_SIZE
-            value: "8"
+            value: "2"
           - name: NUM_EPOCHS
-            value: "10"
+            value: "3"
           command:
             - /opt/app-root/src/simplevis-data/run-training.sh
           volumeMounts:
