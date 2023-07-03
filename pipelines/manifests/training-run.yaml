@@ -1,0 +1,155 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: run-training
+  namespace: flyingthings-standalone
+spec:
+  params: 
+    - name: BATCH_SIZE
+      default: "2"
+      type: string
+    - name: NUM_EPOCHS
+      default: "3"
+      type: string
+    - name: WEIGHTS
+      default: "flyingthings.pt"
+      type: string
+    - name: BASE_MODEL
+      default: "model_pretrained.pt"
+      type: string
+    - name: MODEL_CLASSES
+      default: "flyingthings.yaml"
+      type: string
+    - name: MINIO_ENDPOINT
+      default: "http://minio:9000"
+      type: string
+    - name: DATASET_ZIP
+      default: "flyingthings-yolo.zip"
+      type: string
+    - name: SIMPLEVIS_DATA
+      default: "/opt/app-root/src/simplevis-data"
+      type: string
+    - name: BASEDIR
+      default: "/opt/app-root/src"
+      type: string
+    - name: MINIO_BUCKET
+      default: "flyingthings"
+      type: string
+    - name: MINIO_ACCESSKEY
+      default: "minioadmin"
+      type: string
+    - name: MINIO_SECRETKEY
+      default: "minioadmin"
+      type: string
+    - name: MINIO_CLIENT_URL
+      default: "https://dl.min.io/client/mc/release/linux-amd64"
+      type: string
+  tasks: 
+    - name: run-my-task
+      taskRef:
+        name: training-task
+      params:
+        - name: BATCH_SIZE
+          value: $(params.BATCH_SIZE)
+        - name: NUM_EPOCHS
+          value: $(params.NUM_EPOCHS)
+        - name: WEIGHTS
+          value: $(params.WEIGHTS)
+        - name: BASE_MODEL
+          value: $(params.BASE_MODEL)
+        - name: MODEL_CLASSES
+          value: $(params.MODEL_CLASSES)
+        - name: MINIO_ENDPOINT
+          value: $(params.MINIO_ENDPOINT)
+        - name: DATASET_ZIP
+          value: $(params.DATASET_ZIP)
+        - name: SIMPLEVIS_DATA
+          value: $(params.SIMPLEVIS_DATA)
+        - name: BASEDIR
+          value: $(params.BASEDIR)
+        - name: MINIO_BUCKET
+          value: $(params.MINIO_BUCKET)
+        - name: MINIO_ACCESSKEY
+          value: $(params.MINIO_ACCESSKEY)
+        - name: MINIO_SECRETKEY
+          value: $(params.MINIO_SECRETKEY)
+        - name: MINIO_CLIENT_URL
+          value: $(params.MINIO_CLIENT_URL)
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: training-task
+  namespace: flyingthings-standalone
+spec:
+  params:
+    - name: BATCH_SIZE
+      type: string
+    - name: NUM_EPOCHS
+      type: string
+    - name: WEIGHTS
+      type: string
+    - name: BASE_MODEL
+      type: string
+    - name: MODEL_CLASSES
+      type: string
+    - name: MINIO_ENDPOINT
+      type: string
+    - name: DATASET_ZIP
+      type: string
+    - name: SIMPLEVIS_DATA
+      type: string
+    - name: BASEDIR
+      type: string
+    - name: MINIO_BUCKET
+      type: string
+    - name: MINIO_ACCESSKEY
+      type: string
+    - name: MINIO_SECRETKEY
+      type: string
+    - name: MINIO_CLIENT_URL
+      type: string
+  steps:
+    - image: image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/training-job:latest
+      command: ["/opt/app-root/src/simplevis-data/run-training.sh"]
+      env:
+        - name: BATCH_SIZE
+          value: $(params.BATCH_SIZE)
+        - name: NUM_EPOCHS
+          value: $(params.NUM_EPOCHS)
+        - name: WEIGHTS
+          value: $(params.WEIGHTS)
+        - name: BASE_MODEL
+          value: $(params.BASE_MODEL)
+        - name: MODEL_CLASSES
+          value: $(params.MODEL_CLASSES)
+        - name: MINIO_ENDPOINT
+          value: $(params.MINIO_ENDPOINT)
+        - name: DATASET_ZIP
+          value: $(params.DATASET_ZIP)
+        - name: SIMPLEVIS_DATA
+          value: $(params.SIMPLEVIS_DATA)
+        - name: BASEDIR
+          value: $(params.BASEDIR)
+        - name: MINIO_BUCKET
+          value: $(params.MINIO_BUCKET)
+        - name: MINIO_ACCESSKEY
+          value: $(params.MINIO_ACCESSKEY)
+        - name: MINIO_SECRETKEY
+          value: $(params.MINIO_SECRETKEY)
+        - name: MINIO_CLIENT_URL
+          value: $(params.MINIO_CLIENT_URL)
+      resources:
+        limits:
+          nvidia.com/gpu: 1
+      volumeMounts:
+        - name: workspace
+          mountPath: /opt/app-root/src/simplevis-data/workspace
+        - mountPath: /dev/shm
+          name: dshm
+  volumes:
+    - name: workspace
+      emptyDir: {}
+    - name: dshm
+      emptyDir:
+          medium: Memory

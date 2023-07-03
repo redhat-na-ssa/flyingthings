@@ -1,16 +1,6 @@
 #!/bin/bash
 
-echo "temporarily running a job deployment until shared memory issue is resolved"
-cd ../source/training-job
-
-# Set the input variables
-NAMESPACE="flyingthings-standalone"
-DEPLOYMENT_FILE="deploy-training-job.yaml"
-
-# Apply the deployment and override environment variables
-oc apply -f "$DEPLOYMENT_FILE" --overwrite -n "$NAMESPACE"
-
-# cd ../pipelines/runs
+cd ../pipelines/manifests
 
 # tkn pipeline start run-training-pipeline \
 # -w name=workspace,\
@@ -31,10 +21,8 @@ oc apply -f "$DEPLOYMENT_FILE" --overwrite -n "$NAMESPACE"
 # -p MINIO_CLIENT_URL=https://dl.min.io/client/mc/release/linux-amd64 \
 # --use-param-defaults --showlog
 
-# tkn pipeline start run-training-job \
-# -w name=shared-workspace,\
-# volumeClaimTemplateFile=custom-pvc.yaml \
-# -p git-url=https://github.com/redhat-na-ssa/flyingthings.git \
-# -p git-revision=develop \
-# --use-param-defaults --showlog
+tkn pipeline start run-training \
+-p BATCH_SIZE="32" \
+-p NUM_EPOCHS="50" \
+--use-param-defaults --showlog
 
