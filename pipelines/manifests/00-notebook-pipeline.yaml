@@ -70,7 +70,7 @@ spec:
       description: build arguments for minimal notebook
       type: string
     - name: MODEL_BUILD_ARGS
-      default: --build-arg WEIGHTS=flyingthings.pt
+      default: --build-arg WEIGHTS=flyingthings.pt --build-arg BASE_IMAGE=image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/yolo:latest
       description: build arguments for model server
       type: string
     - name: CUSTOM_BUILD_ARGS
@@ -154,7 +154,7 @@ spec:
         - name: BUILD_EXTRA_ARGS
           value: "$(params.MODEL_BUILD_ARGS)"
       runAfter:
-        - see-stuff
+        - build-training-job
       taskRef:
         kind: ClusterTask
         name: buildah

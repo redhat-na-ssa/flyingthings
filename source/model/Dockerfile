@@ -1,4 +1,6 @@
-FROM quay.io/centos/centos:stream9
+# FROM quay.io/centos/centos:stream9
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
 
 USER 0
 WORKDIR /opt/app-root/src
@@ -30,7 +32,7 @@ ENV MINIO_SECRETKEY=minioadmin
 RUN dnf install -y git wget libGL python3-pip \
  && dnf clean all
 
-RUN pip install --no-cache-dir ultralytics==8.0.124
+# RUN pip install --no-cache-dir ultralytics==8.0.124
 
 RUN mkdir -p $SIMPLEVIS_DATA \
  && chown -R 1001:1001 $SIMPLEVIS_DATA
