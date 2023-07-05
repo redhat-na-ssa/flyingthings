@@ -9,6 +9,8 @@ file_exists=$(mc ls "myminio/$MINIO_BUCKET/$WEIGHTS" 2>/dev/null)
 
 if [[ -z "${file_exists}" ]]; then
   echo "File not found in the bucket."
+  yolo train data=coco128.yaml model=yolov8n.pt epochs=1 lr0=0.01
+  mv yolov8n.pt model_custom.pt
 else
   # Pull the file from the bucket
   ./mc --config-dir=/opt/app-root/src/simplevis-data/mconfig cp myminio/$MINIO_BUCKET/$WEIGHTS $WEIGHTS --insecure
