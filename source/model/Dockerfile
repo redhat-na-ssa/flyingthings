@@ -12,7 +12,7 @@ WORKDIR /opt/app-root/src
 #  && dnf -y install ffmpeg libGL git wget python3-pip \
 #  && dnf clean all
 
-ENV WEIGHTS=yolov8n.pt
+ENV WEIGHTS=flyingthings.pt
 ENV BUILD_VER=0.0
 ENV MODEL_CLASSES=flyingthings.yaml
 ENV SIMPLEVIS_DATA=/opt/app-root/src/simplevis-data
