@@ -3,6 +3,7 @@
 # cd ../pipelines/manifests
 
 oc apply -f ../pipelines/manifests/01-build-flyingthings-images.yaml
+oc apply -f ../pipelines/manifests/10-training-run.yaml
 
 # # Build yolo image
 # tkn pipeline start flyingthings-ubi9-pipeline \
