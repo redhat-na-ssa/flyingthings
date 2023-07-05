@@ -77,7 +77,45 @@ spec:
       default: --build-arg BASE_IMAGE=image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/minimal-notebook:latest
       description: build arguments for custom notebook
       type: string
-
+    - name: BATCH_SIZE
+      default: "2"
+      type: string
+    - name: NUM_EPOCHS
+      default: "3"
+      type: string
+    - name: WEIGHTS
+      default: "flyingthings.pt"
+      type: string
+    - name: BASE_MODEL
+      default: "model_pretrained.pt"
+      type: string
+    - name: MODEL_CLASSES
+      default: "flyingthings.yaml"
+      type: string
+    - name: MINIO_ENDPOINT
+      default: "http://minio:9000"
+      type: string
+    - name: DATASET_ZIP
+      default: "flyingthings-yolo.zip"
+      type: string
+    - name: SIMPLEVIS_DATA
+      default: "/opt/app-root/src/simplevis-data"
+      type: string
+    - name: BASEDIR
+      default: "/opt/app-root/src"
+      type: string
+    - name: MINIO_BUCKET
+      default: "flyingthings"
+      type: string
+    - name: MINIO_ACCESSKEY
+      default: "minioadmin"
+      type: string
+    - name: MINIO_SECRETKEY
+      default: "minioadmin"
+      type: string
+    - name: MINIO_CLIENT_URL
+      default: "https://dl.min.io/client/mc/release/linux-amd64"
+      type: string
   tasks:
     - name: fetch-repository
       params:
@@ -154,7 +192,7 @@ spec:
         - name: BUILD_EXTRA_ARGS
           value: "$(params.MODEL_BUILD_ARGS)"
       runAfter:
-        - build-training-job
+        - get-pretrained
       taskRef:
         kind: ClusterTask
         name: buildah
@@ -455,5 +493,97 @@ spec:
       - name: SCRIPT
         value: |
           oc apply -k $(workspaces.source.path)/source/notebook-gpus
+
+    - name: get-pretrained
+      taskRef:
+        name: pretrained-task
+      params:
+        - name: BATCH_SIZE
+          value: $(params.BATCH_SIZE)
+        - name: NUM_EPOCHS
+          value: $(params.NUM_EPOCHS)
+        - name: WEIGHTS
+          value: $(params.WEIGHTS)
+        - name: MINIO_ENDPOINT
+          value: $(params.MINIO_ENDPOINT)
+        - name: MINIO_BUCKET
+          value: $(params.MINIO_BUCKET)
+        - name: MINIO_ACCESSKEY
+          value: $(params.MINIO_ACCESSKEY)
+        - name: MINIO_SECRETKEY
+          value: $(params.MINIO_SECRETKEY)
+        - name: MINIO_CLIENT_URL
+          value: $(params.MINIO_CLIENT_URL)
+      runAfter:
+        - build-training-job
+      workspaces:
+        - name: output
+          workspace: shared-workspace
   workspaces:
     - name: shared-workspace
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: pretrained-task
+  namespace: flyingthings-standalone
+spec:
+  params:
+    - name: BATCH_SIZE
+      type: string
+    - name: NUM_EPOCHS
+      type: string
+    - name: WEIGHTS
+      type: string
+    - name: MINIO_ENDPOINT
+      type: string
+    - name: MINIO_BUCKET
+      type: string
+    - name: MINIO_ACCESSKEY
+      type: string
+    - name: MINIO_SECRETKEY
+      type: string
+    - name: MINIO_CLIENT_URL
+      type: string
+  steps:
+    - image: image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/yolo:latest
+      # script: |
+      #   ls -al $(workspaces.output.path) && touch /workspace/this
+      script: |
+        cd /workspace && yolo predict model=yolov8n.pt && $(workspaces.output.path)/source/training-job/zz-push-pretrained.sh
+      env:
+        - name: BATCH_SIZE
+          value: $(params.BATCH_SIZE)
+        - name: NUM_EPOCHS
+          value: $(params.NUM_EPOCHS)
+        - name: WEIGHTS
+          value: $(params.WEIGHTS)
+        - name: MINIO_ENDPOINT
+          value: $(params.MINIO_ENDPOINT)
+        - name: MINIO_BUCKET
+          value: $(params.MINIO_BUCKET)
+        - name: MINIO_ACCESSKEY
+          value: $(params.MINIO_ACCESSKEY)
+        - name: MINIO_SECRETKEY
+          value: $(params.MINIO_SECRETKEY)
+        - name: MINIO_CLIENT_URL
+          value: $(params.MINIO_CLIENT_URL)
+      resources:
+        limits:
+          nvidia.com/gpu: 1
+      volumeMounts:
+        - name: workspace
+          mountPath: /opt/app-root/src/simplevis-data/workspace
+        - mountPath: /dev/shm
+          name: dshm
+        - mountPath: /source
+          name: output
+  volumes:
+    - name: workspace
+      emptyDir: {}
+    - name: dshm
+      emptyDir:
+          medium: Memory
+    - name: output
+  workspaces:
+    - name: output
