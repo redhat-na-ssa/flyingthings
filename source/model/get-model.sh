@@ -9,7 +9,7 @@ file_exists=$(mc ls "myminio/$MINIO_BUCKET/$WEIGHTS" 2>/dev/null)
 
 if [[ -z "${file_exists}" ]]; then
   echo "File not found in the bucket."
-  yolo train data=coco128.yaml model=yolov8n.pt epochs=1 lr0=0.01
+  yolo train data=coco128.yaml model=yolov8n.pt epochs=1 lr0=0.01 # TODO: just need to get the yolov8n.pt
   mv yolov8n.pt model_custom.pt
 else
   # Pull the file from the bucket
