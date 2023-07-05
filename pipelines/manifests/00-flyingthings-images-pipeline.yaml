@@ -1,0 +1,389 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: flyingthings-images-pipeline
+  namespace: flyingthings-standalone
+spec:
+  params:
+    - name: git-url
+      default: https://github.com/redhat-na-ssa/flyingthings.git
+      description: url of the git repo for the code of deployment
+      type: string
+    - name: git-revision
+      default: develop
+      description: revision to be used from repo of the code for deployment
+      type: string
+    - name: YOLO_IMAGE
+      default: image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/yolo:latest
+      description: base image for yolo
+      type: string
+    - name: TRAINING_IMAGE
+      default: image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/training-job:latest
+      description: base image for training job
+      type: string
+    - name: UBI_IMAGE
+      default: image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/base-ubi9:latest
+      description: base image for notebook
+      type: string
+    - name: MINIMAL_IMAGE
+      default: image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/minimal-notebook:latest
+      description: notebook template
+      type: string
+    - name: CUSTOM_NOTEBOOK_IMAGE
+      default: image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/yolo-notebook:latest
+      description: custom notebook image
+      type: string
+    - name: MODEL_IMAGE
+      default: image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/custom-model:latest
+      description: model server image
+      type: string
+    - name: YOLO_DOCKERFILE
+      default: source/yolo
+      description: dockerfile path 
+      type: string
+    - name: TRAINING_DOCKERFILE
+      default: source/training-job
+      description: dockerfile path 
+      type: string
+    - name: MODEL_DOCKERFILE
+      default: source/model
+      description: dockerfile path 
+      type: string
+    - name: UBI_DOCKERFILE
+      default: source/ubi9
+      description: dockerfile path 
+      type: string
+    - name: MINIMAL_DOCKERFILE
+      default: source/minimal/py39
+      description: dockerfile path 
+      type: string
+    - name: CUSTOM_DOCKERFILE
+      default: source/custom
+      description: dockerfile path
+      type: string
+    - name: TRAINING_BUILD_ARGS
+      default: --build-arg BASE_IMAGE=image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/yolo:latest
+      description: build arguments for training job
+      type: string
+    - name: MINIMAL_BUILD_ARGS
+      default: --build-arg BASE_IMAGE=image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/base-ubi9:latest
+      description: build arguments for minimal notebook
+      type: string
+    - name: MODEL_BUILD_ARGS
+      default: --build-arg WEIGHTS=flyingthings.pt --build-arg BASE_IMAGE=image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/yolo:latest
+      description: build arguments for model server
+      type: string
+    - name: CUSTOM_BUILD_ARGS
+      default: --build-arg BASE_IMAGE=image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/minimal-notebook:latest
+      description: build arguments for custom notebook
+      type: string
+
+  tasks:
+    - name: fetch-repository
+      params:
+        - name: url
+          value: $(params.git-url)
+        - name: subdirectory
+          value: ''
+        - name: deleteExisting
+          value: 'true'
+        - name: revision
+          value: $(params.git-revision)
+      taskRef:
+        kind: ClusterTask
+        name: git-clone
+      workspaces:
+        - name: output
+          workspace: shared-workspace
+    - name: see-stuff
+      taskSpec:
+        steps:
+          - name: run-batch-file
+            image: ubi9:latest
+            script: |
+              #!/usr/bin/env bash
+              echo "Let's see what we got here..." \
+              && ls -al $(workspaces.workspace.path)
+      runAfter:
+        - upload-artifacts
+      workspaces:
+        - name: workspace
+          workspace: shared-workspace
+    - name: build-yolo
+      params:
+        - name: IMAGE
+          value: $(params.YOLO_IMAGE)
+        - name: DOCKERFILE_PATH
+          value: $(params.YOLO_DOCKERFILE)          
+        - name: DOCKERFILE
+          value: $(workspaces.path)/$(params.YOLO_DOCKERFILE)/Dockerfile
+      runAfter:
+        - see-stuff
+      taskRef:
+        kind: ClusterTask
+        name: buildah
+      workspaces:
+        - name: source
+          workspace: shared-workspace
+    - name: build-training-job
+      params:
+        - name: IMAGE
+          value: $(params.TRAINING_IMAGE)
+        - name: DOCKERFILE_PATH
+          value: $(params.TRAINING_DOCKERFILE)          
+        - name: DOCKERFILE
+          value: $(workspaces.path)/$(params.TRAINING_DOCKERFILE)/Dockerfile
+        - name: BUILD_EXTRA_ARGS
+          value: "$(params.TRAINING_BUILD_ARGS)"
+      runAfter:
+        - build-yolo
+      taskRef:
+        kind: ClusterTask
+        name: buildah
+      workspaces:
+        - name: source
+          workspace: shared-workspace
+    - name: build-model-server
+      params:
+        - name: IMAGE
+          value: $(params.MODEL_IMAGE)
+        - name: DOCKERFILE_PATH
+          value: $(params.MODEL_DOCKERFILE)          
+        - name: DOCKERFILE
+          value: $(workspaces.path)/$(params.MODEL_DOCKERFILE)/Dockerfile
+        - name: BUILD_EXTRA_ARGS
+          value: "$(params.MODEL_BUILD_ARGS)"
+      runAfter:
+        - build-training-job
+      taskRef:
+        kind: ClusterTask
+        name: buildah
+      workspaces:
+        - name: source
+          workspace: shared-workspace
+    - name: build-ubi9
+      params:
+        - name: IMAGE
+          value: $(params.UBI_IMAGE)
+        - name: DOCKERFILE_PATH
+          value: $(params.UBI_DOCKERFILE)          
+        - name: DOCKERFILE
+          value: $(workspaces.path)/$(params.UBI_DOCKERFILE)/Dockerfile
+      runAfter:
+        - see-stuff
+      taskRef:
+        kind: ClusterTask
+        name: buildah
+      workspaces:
+        - name: source
+          workspace: shared-workspace
+    - name: build-minimal
+      params:
+        - name: IMAGE
+          value: $(params.MINIMAL_IMAGE)
+        - name: DOCKERFILE_PATH
+          value: $(params.MINIMAL_DOCKERFILE)          
+        - name: DOCKERFILE
+          value: $(workspaces.path)/$(params.MINIMAL_DOCKERFILE)/Dockerfile
+        - name: BUILD_EXTRA_ARGS
+          value: "$(params.MINIMAL_BUILD_ARGS)"
+      runAfter:
+        - build-ubi9
+      taskRef:
+        kind: ClusterTask
+        name: buildah
+      workspaces:
+        - name: source
+          workspace: shared-workspace
+    - name: build-custom
+      params:
+        - name: IMAGE
+          value: $(params.CUSTOM_NOTEBOOK_IMAGE)
+        - name: DOCKERFILE_PATH
+          value: $(params.CUSTOM_DOCKERFILE)          
+        - name: DOCKERFILE
+          value: $(workspaces.path)/$(params.CUSTOM_DOCKERFILE)/Dockerfile
+        - name: BUILD_EXTRA_ARGS
+          value: "$(params.CUSTOM_BUILD_ARGS)"
+      runAfter:
+        - build-minimal
+      taskRef:
+        kind: ClusterTask
+        name: buildah
+      workspaces:
+        - name: source
+          workspace: shared-workspace
+    - name: deploy-minio
+      taskSpec:
+        metadata:
+          annotations:
+            # operator.tekton.dev/last-applied-hash: 64d9014f8c7f4cd290afc619a32a185211cae3b23d56af70197b0e936ec8d35b
+            tekton.dev/displayName: openshift client
+            tekton.dev/pipelines.minVersion: 0.17.0
+            tekton.dev/tags: cli
+          labels:
+            app.kubernetes.io/version: '0.2'
+            operator.tekton.dev/operand-name: openshift-pipelines-addons
+            operator.tekton.dev/provider-type: redhat
+        description: >-
+          This task runs commands against the cluster provided by user and if not
+          provided then where the Task is being executed.
+
+          OpenShift is a Kubernetes distribution from Red Hat which provides oc, the
+          OpenShift CLI that complements kubectl for simplifying deployment and
+          configuration applications on OpenShift.
+        params:
+          - default: oc help
+            description: The OpenShift CLI arguments to run
+            name: SCRIPT
+            type: string
+          - default: latest
+            description: The OpenShift Version to use
+            name: VERSION
+            type: string
+        steps:
+          - env:
+              - name: HOME
+                value: /tekton/home
+            image: >-
+              image-registry.openshift-image-registry.svc:5000/openshift/cli:$(params.VERSION)
+            name: oc
+            resources: {}
+            script: |
+              #!/usr/bin/env bash
+
+              [[ "$(workspaces.manifest-dir.bound)" == "true" ]] && \
+              cd $(workspaces.manifest-dir.path)
+
+              [[ "$(workspaces.kubeconfig-dir.bound)" == "true" ]] && \
+              [[ -f $(workspaces.kubeconfig-dir.path)/kubeconfig ]] && \
+              export KUBECONFIG=$(workspaces.kubeconfig-dir.path)/kubeconfig
+
+              $(params.SCRIPT)
+            securityContext:
+              runAsNonRoot: true
+              runAsUser: 65532
+        workspaces:
+          - description: >-
+              The workspace which contains kubernetes manifests which we want to apply
+              on the cluster.
+            name: manifest-dir
+            optional: true
+          - description: >-
+              The workspace which contains the the kubeconfig file if in case we want to
+              run the oc command on another cluster.
+            name: kubeconfig-dir
+            optional: true
+      workspaces:
+        - name: source
+          workspace: shared-workspace
+      runAfter:
+        - fetch-repository
+      params:
+      - name: SCRIPT
+        value: |
+          oc apply -k $(workspaces.source.path)/source/minio
+    - name: upload-artifacts
+      taskSpec:
+        steps:
+          - name: run-batch-file
+            image: ubi9:latest
+            env:
+              - name: MINIO_ENDPOINT
+                value: http://minio:9000
+              - name: MINIO_BUCKET
+                value: flyingthings
+              - name: MINIO_ACCESSKEY
+                value: minioadmin
+              - name: MINIO_SECRETKEY
+                value: minioadmin
+              - name: MINIO_CLIENT_URL
+                value: https://dl.min.io/client/mc/release/linux-amd64
+              - name: WORKSPACE_DIR
+                value: /opt/app-root/src/workspace/workspace
+              - name: MINCFG
+                value: $WORKSPACE_DIR/miniocfg
+              - name: SOURCE_DIR
+                value: /workspace/output
+            script: |
+              #!/usr/bin/env bash
+              echo "Let's see what we got here..." \
+              && ls -al /workspace/workspace/source \
+              && $(workspaces.workspace.path)/source/minio-client/bucket-ops.sh
+      runAfter:
+        - deploy-minio
+      workspaces:
+        - name: workspace
+          workspace: shared-workspace
+    - name: deploy-custom-notebook
+      taskSpec:
+        metadata:
+          annotations:
+            # operator.tekton.dev/last-applied-hash: 64d9014f8c7f4cd290afc619a32a185211cae3b23d56af70197b0e936ec8d35b
+            tekton.dev/displayName: openshift client
+            tekton.dev/pipelines.minVersion: 0.17.0
+            tekton.dev/tags: cli
+          labels:
+            app.kubernetes.io/version: '0.2'
+            operator.tekton.dev/operand-name: openshift-pipelines-addons
+            operator.tekton.dev/provider-type: redhat
+        description: >-
+          This task runs commands against the cluster provided by user and if not
+          provided then where the Task is being executed.
+
+          OpenShift is a Kubernetes distribution from Red Hat which provides oc, the
+          OpenShift CLI that complements kubectl for simplifying deployment and
+          configuration applications on OpenShift.
+        params:
+          - default: oc help
+            description: The OpenShift CLI arguments to run
+            name: SCRIPT
+            type: string
+          - default: latest
+            description: The OpenShift Version to use
+            name: VERSION
+            type: string
+        steps:
+          - env:
+              - name: HOME
+                value: /tekton/home
+            image: >-
+              image-registry.openshift-image-registry.svc:5000/openshift/cli:$(params.VERSION)
+            name: oc
+            resources: {}
+            script: |
+              #!/usr/bin/env bash
+
+              [[ "$(workspaces.manifest-dir.bound)" == "true" ]] && \
+              cd $(workspaces.manifest-dir.path)
+
+              [[ "$(workspaces.kubeconfig-dir.bound)" == "true" ]] && \
+              [[ -f $(workspaces.kubeconfig-dir.path)/kubeconfig ]] && \
+              export KUBECONFIG=$(workspaces.kubeconfig-dir.path)/kubeconfig
+
+              $(params.SCRIPT)
+            securityContext:
+              runAsNonRoot: true
+              runAsUser: 65532
+        workspaces:
+          - description: >-
+              The workspace which contains kubernetes manifests which we want to apply
+              on the cluster.
+            name: manifest-dir
+            optional: true
+          - description: >-
+              The workspace which contains the the kubeconfig file if in case we want to
+              run the oc command on another cluster.
+            name: kubeconfig-dir
+            optional: true
+      workspaces:
+        - name: source
+          workspace: shared-workspace
+      runAfter:
+        - build-custom
+      params:
+      - name: SCRIPT
+        value: |
+          oc apply -k $(workspaces.source.path)/source/notebook-gpus
+  workspaces:
+    - name: shared-workspace
