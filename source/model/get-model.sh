@@ -11,6 +11,8 @@ if [[ -z "${file_exists}" ]]; then
   echo "File not found in the bucket."
   yolo train data=coco128.yaml model=yolov8n.pt epochs=1 lr0=0.01 # TODO: just need to get the yolov8n.pt
   mv yolov8n.pt model_custom.pt
+  # copy the pretrained model to the bucket
+  ./mc --config-dir=/opt/app-root/src/simplevis-data/mconfig cp model_custom.pt myminio/$MINIO_BUCKET/model_pretrained.pt --insecure
 else
   # Pull the file from the bucket
   ./mc --config-dir=/opt/app-root/src/simplevis-data/mconfig cp myminio/$MINIO_BUCKET/$WEIGHTS $WEIGHTS --insecure
