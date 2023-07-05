@@ -1,0 +1,149 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: get-pretrained-model
+  namespace: flyingthings-standalone
+spec:
+  params: 
+    - name: git-url
+      default: https://github.com/redhat-na-ssa/flyingthings.git
+      description: url of the git repo for the code of deployment
+      type: string
+    - name: git-revision
+      default: develop
+      description: revision to be used from repo of the code for deployment
+      type: string
+    - name: BATCH_SIZE
+      default: "-1"
+      type: string
+    - name: NUM_EPOCHS
+      default: "1"
+      type: string
+    - name: WEIGHTS
+      default: "yolov8n.pt"
+      type: string
+    - name: MINIO_ENDPOINT
+      default: "http://minio:9000"
+      type: string
+    - name: MINIO_BUCKET
+      default: "flyingthings"
+      type: string
+    - name: MINIO_ACCESSKEY
+      default: "minioadmin"
+      type: string
+    - name: MINIO_SECRETKEY
+      default: "minioadmin"
+      type: string
+    - name: MINIO_CLIENT_URL
+      default: "https://dl.min.io/client/mc/release/linux-amd64"
+      type: string
+  tasks: 
+    - name: fetch-repository
+      params:
+        - name: url
+          value: $(params.git-url)
+        - name: subdirectory
+          value: ''
+        - name: deleteExisting
+          value: 'true'
+        - name: revision
+          value: $(params.git-revision)
+      taskRef:
+        kind: ClusterTask
+        name: git-clone
+      workspaces:
+        - name: output
+          workspace: shared-workspace
+    - name: get-pretrained
+      taskRef:
+        name: pretrained-task
+      params:
+        - name: BATCH_SIZE
+          value: $(params.BATCH_SIZE)
+        - name: NUM_EPOCHS
+          value: $(params.NUM_EPOCHS)
+        - name: WEIGHTS
+          value: $(params.WEIGHTS)
+        - name: MINIO_ENDPOINT
+          value: $(params.MINIO_ENDPOINT)
+        - name: MINIO_BUCKET
+          value: $(params.MINIO_BUCKET)
+        - name: MINIO_ACCESSKEY
+          value: $(params.MINIO_ACCESSKEY)
+        - name: MINIO_SECRETKEY
+          value: $(params.MINIO_SECRETKEY)
+        - name: MINIO_CLIENT_URL
+          value: $(params.MINIO_CLIENT_URL)
+      runAfter:
+        - fetch-repository
+      workspaces:
+        - name: output
+          workspace: shared-workspace
+  workspaces:
+    - name: shared-workspace
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: pretrained-task
+  namespace: flyingthings-standalone
+spec:
+  params:
+    - name: BATCH_SIZE
+      type: string
+    - name: NUM_EPOCHS
+      type: string
+    - name: WEIGHTS
+      type: string
+    - name: MINIO_ENDPOINT
+      type: string
+    - name: MINIO_BUCKET
+      type: string
+    - name: MINIO_ACCESSKEY
+      type: string
+    - name: MINIO_SECRETKEY
+      type: string
+    - name: MINIO_CLIENT_URL
+      type: string
+  steps:
+    - image: image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/yolo:latest
+      # script: |
+      #   cd /workspace && $(workspaces.output.path)/source/training-job/zz-push-pretrained.sh && yolo predict model=yolov8n.pt
+      script: |
+        cd /workspace && yolo predict model=yolov8n.pt && $(workspaces.output.path)/source/training-job/zz-push-pretrained.sh
+      env:
+        - name: BATCH_SIZE
+          value: $(params.BATCH_SIZE)
+        - name: NUM_EPOCHS
+          value: $(params.NUM_EPOCHS)
+        - name: WEIGHTS
+          value: $(params.WEIGHTS)
+        - name: MINIO_ENDPOINT
+          value: $(params.MINIO_ENDPOINT)
+        - name: MINIO_BUCKET
+          value: $(params.MINIO_BUCKET)
+        - name: MINIO_ACCESSKEY
+          value: $(params.MINIO_ACCESSKEY)
+        - name: MINIO_SECRETKEY
+          value: $(params.MINIO_SECRETKEY)
+        - name: MINIO_CLIENT_URL
+          value: $(params.MINIO_CLIENT_URL)
+      resources:
+        limits:
+          nvidia.com/gpu: 1
+      volumeMounts:
+        - name: workspace
+          mountPath: /opt/app-root/src/simplevis-data/workspace
+        - mountPath: /dev/shm
+          name: dshm
+        - mountPath: /source
+          name: output
+  volumes:
+    - name: workspace
+      emptyDir: {}
+    - name: dshm
+      emptyDir:
+          medium: Memory
+    - name: output
+  workspaces:
+    - name: output
