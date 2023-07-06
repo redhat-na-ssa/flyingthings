@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd ../pipelines/runs
+cd ../pipelines/manifests
 
 # tkn pipeline start run-training-pipeline \
 # -w name=workspace,\
@@ -21,9 +21,8 @@ cd ../pipelines/runs
 # -p MINIO_CLIENT_URL=https://dl.min.io/client/mc/release/linux-amd64 \
 # --use-param-defaults --showlog
 
-tkn pipeline start run-training-job \
--w name=shared-workspace,\
-volumeClaimTemplateFile=custom-pvc.yaml \
--p git-url=https://github.com/redhat-na-ssa/flyingthings.git \
--p git-revision=develop \
+tkn pipeline start run-training \
+-p BATCH_SIZE="32" \
+-p NUM_EPOCHS="50" \
 --use-param-defaults --showlog
+

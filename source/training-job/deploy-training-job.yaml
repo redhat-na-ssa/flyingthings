@@ -15,26 +15,24 @@ spec:
         - name: training
           image: image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/training-job
           env:
+          - name: MINIO_CLIENT_URL
+            value: "http://util02.davenet.local"
           - name: BATCH_SIZE
-            value: "-1"
+            value: "2"
           - name: NUM_EPOCHS
-            value: "10"
+            value: "3"
           command:
             - /opt/app-root/src/simplevis-data/run-training.sh
           volumeMounts:
-            - mountPath: /opt/app-root/src/simplevis-data/datasets
-              name: training-data
-            - mountPath: /opt/app-root/src/simplevis-data/runs
-              name: run-data
+            - mountPath: /opt/app-root/src/simplevis-data/workspace
+              name: workspace
             - mountPath: /dev/shm
               name: dshm
           resources:
             limits:
               nvidia.com/gpu: 1
       volumes:
-        - name: training-data
-          emptyDir: {}
-        - name: run-data
+        - name: workspace
           emptyDir: {}
         - name: dshm
           emptyDir:
