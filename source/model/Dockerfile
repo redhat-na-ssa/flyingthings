@@ -22,17 +22,8 @@ ENV MINIO_BUCKET=flyingthings
 ENV MINIO_ACCESSKEY=minioadmin
 ENV MINIO_SECRETKEY=minioadmin
 
-# RUN curl https://dl.min.io/client/mc/release/linux-amd64/mc -o mc \
-#  && chmod +x mc \
-#  && ./mc config host add myminio $MINIO_ENDPOINT $MINIO_ACCESSKEY $MINIO_SECRETKEY --insecure \
-#  && ./mc cp myminio/$MINIO_BUCKET/$MODEL_CLASSES $MODEL_CLASSES --insecure \
-#  && ./mc cp myminio/$MINIO_BUCKET/$WEIGHTS $WEIGHTS --insecure \
-#  && rm ./mc
-
 RUN dnf install -y git wget libGL python3-pip \
  && dnf clean all
-
-# RUN pip install --no-cache-dir ultralytics==8.0.124
 
 RUN mkdir -p $SIMPLEVIS_DATA \
  && chown -R 1001:1001 $SIMPLEVIS_DATA
@@ -49,7 +40,5 @@ WORKDIR /opt/app-root/src
 
 USER 1001
 EXPOSE 8000
-# ENTRYPOINT ["/usr/local/bin/uvicorn"]
-# CMD ["main:app", "--host", "0.0.0.0"]
+
 CMD ["/opt/app-root/src/get-model.sh"]
-# ENTRYPOINT [ "tail", "-f", "/dev/null" ]
