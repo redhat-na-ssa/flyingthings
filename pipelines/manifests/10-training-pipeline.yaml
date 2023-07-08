@@ -1,53 +1,64 @@
 apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
-  name: run-training
+  name: training-pipeline
   namespace: flyingthings-standalone
 spec:
   params: 
+    - name: git-url
+      default: https://github.com/redhat-na-ssa/flyingthings.git
+      description: url of the git repo for the code of deployment
+      type: string
+    - name: git-revision
+      default: develop
+      description: revision to be used from repo of the code for deployment
+      type: string
     - name: BATCH_SIZE
-      default: "2"
       type: string
     - name: NUM_EPOCHS
-      default: "3"
       type: string
     - name: WEIGHTS
-      default: "flyingthings.pt"
       type: string
     - name: BASE_MODEL
-      default: "model_pretrained.pt"
       type: string
     - name: MODEL_CLASSES
-      default: "flyingthings.yaml"
       type: string
     - name: MINIO_ENDPOINT
-      default: "http://minio:9000"
       type: string
     - name: DATASET_ZIP
-      default: "flyingthings-yolo.zip"
       type: string
     - name: SIMPLEVIS_DATA
-      default: "/opt/app-root/src/simplevis-data"
       type: string
     - name: BASEDIR
-      default: "/opt/app-root/src"
       type: string
     - name: MINIO_BUCKET
-      default: "flyingthings"
       type: string
     - name: MINIO_ACCESSKEY
-      default: "minioadmin"
       type: string
     - name: MINIO_SECRETKEY
-      default: "minioadmin"
       type: string
     - name: MINIO_CLIENT_URL
-      default: "https://dl.min.io/client/mc/release/linux-amd64"
       type: string
   tasks: 
-    - name: run-my-task
+    - name: fetch-repository
+      params:
+        - name: url
+          value: $(params.git-url)
+        - name: subdirectory
+          value: ''
+        - name: deleteExisting
+          value: 'true'
+        - name: revision
+          value: $(params.git-revision)
       taskRef:
-        name: training-task
+        kind: ClusterTask
+        name: git-clone
+      workspaces:
+        - name: output
+          workspace: shared-workspace
+    - name: train-a-model
+      taskRef:
+        name: training-model-task
       params:
         - name: BATCH_SIZE
           value: $(params.BATCH_SIZE)
@@ -75,11 +86,18 @@ spec:
           value: $(params.MINIO_SECRETKEY)
         - name: MINIO_CLIENT_URL
           value: $(params.MINIO_CLIENT_URL)
+      runAfter:
+        - fetch-repository
+      workspaces:
+        - name: source
+          workspace: shared-workspace
+  workspaces:
+    - name: shared-workspace
 ---
 apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
-  name: training-task
+  name: training-model-task
   namespace: flyingthings-standalone
 spec:
   params:
@@ -111,7 +129,9 @@ spec:
       type: string
   steps:
     - image: image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/training-job:latest
-      command: ["/opt/app-root/src/simplevis-data/run-training.sh"]
+      # command: ["/opt/app-root/src/simplevis-data/run-training.sh"]
+      script: |
+        $(workspaces.source.path)/source/training-job/run-training.sh
       env:
         - name: BATCH_SIZE
           value: $(params.BATCH_SIZE)
@@ -153,3 +173,6 @@ spec:
     - name: dshm
       emptyDir:
           medium: Memory
+  workspaces:
+    - name: source
+      mountPath: /source
