@@ -30,13 +30,13 @@ WORKDIR ${SIMPLEVIS_DATA}
 
 # WORKDIR /workspace
 
-COPY source/training-job/dataprep.sh ${SIMPLEVIS_DATA}/
+# COPY source/training-job/dataprep.sh ${SIMPLEVIS_DATA}/
 
-COPY source/training-job/distribute-files.py ${SIMPLEVIS_DATA}/
+# COPY source/training-job/distribute-files.py ${SIMPLEVIS_DATA}/
 
-COPY source/training-job/push-results.sh ${SIMPLEVIS_DATA}/
+# COPY source/training-job/push-results.sh ${SIMPLEVIS_DATA}/
 
-COPY source/training-job/run-training.sh ${SIMPLEVIS_DATA}/
+# COPY source/training-job/run-training.sh ${SIMPLEVIS_DATA}/
 
 RUN chown -R 1001:1001 ${SIMPLEVIS_DATA}
 
