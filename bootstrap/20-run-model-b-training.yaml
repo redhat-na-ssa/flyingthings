@@ -1,6 +1,6 @@
 #!/bin/bash
 
-oc apply -f ../pipelines/manifests/11-run-training-pipeline.yaml
+oc apply -f ../pipelines/manifests/12-run-model-b-pipeline.yaml
 
 # cd ../pipelines/manifests
 
