@@ -1,7 +1,7 @@
 apiVersion: tekton.dev/v1beta1
 kind: PipelineRun
 metadata:
-  name: run-training-pipeline
+  name: run-my-training-pipeline
 spec:
   pipelineRef:
     name: training-pipeline
@@ -13,28 +13,28 @@ spec:
     - name: BATCH_SIZE
       value: "-1"
     - name: NUM_EPOCHS
-      value: "3"
+      value: "100"
     - name: WEIGHTS
-      value: flyingthings.pt
+      value: hotwheelz.pt
     - name: BASE_MODEL
       value: yolov8n.pt
     - name: MODEL_CLASSES
-      value: flyingthings.yaml
+      value: hotwheelz.yaml
     - name: MINIO_ENDPOINT
       value: http://minio:9000
-      # value: http://qnap-nas.davenet.local:49154
     - name: DATASET_ZIP
-      value: flyingthings-yolo.zip
+      value: hotwheelz-01.zip
     - name: SIMPLEVIS_DATA
       value: /opt/app-root/src/simplevis-data
     - name: MINIO_BUCKET
-      value: flyingthings
+      value: hotwheelz
     - name: MINIO_ACCESSKEY
       value: minioadmin
     - name: MINIO_SECRETKEY
       value: minioadmin
     - name: MINIO_CLIENT_URL
-      value: https://dl.min.io/client/mc/release/linux-amd64
+      value: http://util02.davenet.local
+      # value: https://dl.min.io/client/mc/release/linux-amd64
   workspaces:
     - name: shared-workspace
       volumeClaimTemplate:

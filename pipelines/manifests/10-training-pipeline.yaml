@@ -29,8 +29,6 @@ spec:
       type: string
     - name: SIMPLEVIS_DATA
       type: string
-    - name: BASEDIR
-      type: string
     - name: MINIO_BUCKET
       type: string
     - name: MINIO_ACCESSKEY
@@ -76,8 +74,6 @@ spec:
           value: $(params.DATASET_ZIP)
         - name: SIMPLEVIS_DATA
           value: $(params.SIMPLEVIS_DATA)
-        - name: BASEDIR
-          value: $(params.BASEDIR)
         - name: MINIO_BUCKET
           value: $(params.MINIO_BUCKET)
         - name: MINIO_ACCESSKEY
@@ -117,8 +113,6 @@ spec:
       type: string
     - name: SIMPLEVIS_DATA
       type: string
-    - name: BASEDIR
-      type: string
     - name: MINIO_BUCKET
       type: string
     - name: MINIO_ACCESSKEY
@@ -150,7 +144,7 @@ spec:
         - name: SIMPLEVIS_DATA
           value: $(params.SIMPLEVIS_DATA)
         - name: BASEDIR
-          value: $(params.BASEDIR)
+          value: $(workspaces.source.path)/source/training-job
         - name: MINIO_BUCKET
           value: $(params.MINIO_BUCKET)
         - name: MINIO_ACCESSKEY
