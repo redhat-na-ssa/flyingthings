@@ -21,7 +21,7 @@ spec:
               protocol: TCP
           env:
             - name: WEIGHTS
-              value: model_a.pt
+              value: model_custom.pt
             - name: BUILD_VER
               value: "0.0"
             - name: MODEL_CLASSES
