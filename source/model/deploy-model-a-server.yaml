@@ -1,33 +1,35 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: 'coco-model'
+  name: 'model-a'
 spec:
   selector:
     matchLabels:
-      app: coco-model
+      app: model-a
   replicas: 1
   template:
     metadata:
       labels:
-        app: coco-model
+        app: model-a
     spec:
       containers:
         - name: container
           image: >-
-            image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/model-server:latest
+            image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/custom-model:latest
           ports:
             - containerPort: 8000
               protocol: TCP
           env:
             - name: WEIGHTS
-              value: model_pretrained.pt
+              value: model_custom.pt
             - name: BUILD_VER
               value: "0.0"
             - name: MODEL_CLASSES
               value: flyingthings.yaml
             - name: MINIO_ENDPOINT
               value: http://minio:9000
+            - name: MINIO_BUCKET
+              value: flyingthings
             - name: SIMPLEVIS_DATA
               value: /opt/app-root/src/simplevis-data
           volumeMounts:
@@ -45,10 +47,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: coco-model-svc
+  name: model-a-svc
 spec:
   selector:
-    app: coco-model
+    app: model-a
   ports:
     - protocol: TCP
       port: 8000
@@ -56,13 +58,15 @@ spec:
 kind: Route
 apiVersion: route.openshift.io/v1
 metadata:
-  name: coco-model-rt
+  name: model-a-rt
   labels: {}
 spec:
   to:
     kind: Service
-    name: coco-model-svc
-  tls: null
+    name: model-a-svc
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Allow
   path: /
   port:
     targetPort: 8000

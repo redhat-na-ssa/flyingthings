@@ -9,4 +9,4 @@ RUN dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.n
  && dnf -y install libGL \
  && dnf clean all
 
-RUN pip install --no-cache-dir ultralytics
+RUN pip install --no-cache-dir Pillow==9.5.0 ipython==8.10.0 ipython-genutils==0.2.0 ultralytics==8.0.124

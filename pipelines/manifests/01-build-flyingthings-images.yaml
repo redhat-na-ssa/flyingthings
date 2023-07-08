@@ -1,0 +1,23 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: build-flyingthings-images
+spec:
+  pipelineRef:
+    name: flyingthings-images-pipeline
+  params:
+    - name: git-url
+      value: https://github.com/redhat-na-ssa/flyingthings.git
+    - name: git-revision
+      value: develop
+  workspaces:
+    - name: shared-workspace
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+            - ReadWriteMany # access mode may affect how you can use this volume in parallel tasks
+          resources:
+            requests:
+              storage: 500Mi
+          storageClassName: ocs-storagecluster-cephfs
+          volumeMode: Filesystem
