@@ -416,7 +416,7 @@ spec:
             script: |
               #!/usr/bin/env bash
               echo "Let's see what we got here..." \
-              && ls -al /workspace/workspace/source \
+              && ls -al $(workspaces.workspace.path)/source \
               && $(workspaces.workspace.path)/source/minio-client/bucket-ops.sh
       runAfter:
         - deploy-minio
@@ -574,10 +574,10 @@ spec:
       volumeMounts:
         - name: workspace
           mountPath: /opt/app-root/src/simplevis-data/workspace
-        - mountPath: /dev/shm
-          name: dshm
-        - mountPath: /source
-          name: output
+        - name: dshm
+          mountPath: /dev/shm
+        - name: output
+          mountPath: /source 
   volumes:
     - name: workspace
       emptyDir: {}

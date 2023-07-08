@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: 'custom-model'
+  name: 'model-a'
 spec:
   selector:
     matchLabels:
-      app: custom-model
+      app: model-a
   replicas: 1
   template:
     metadata:
       labels:
-        app: custom-model
+        app: model-a
     spec:
       containers:
         - name: container
@@ -28,6 +28,8 @@ spec:
               value: flyingthings.yaml
             - name: MINIO_ENDPOINT
               value: http://minio:9000
+            - name: MINIO_BUCKET
+              value: flyingthings
             - name: SIMPLEVIS_DATA
               value: /opt/app-root/src/simplevis-data
           volumeMounts:
@@ -45,10 +47,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: custom-model-svc
+  name: model-a-svc
 spec:
   selector:
-    app: custom-model
+    app: model-a
   ports:
     - protocol: TCP
       port: 8000
@@ -56,12 +58,12 @@ spec:
 kind: Route
 apiVersion: route.openshift.io/v1
 metadata:
-  name: custom-model-rt
+  name: model-a-rt
   labels: {}
 spec:
   to:
     kind: Service
-    name: custom-model-svc
+    name: model-a-svc
   tls:
     termination: edge
     insecureEdgeTerminationPolicy: Allow
