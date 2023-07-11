@@ -488,7 +488,7 @@ spec:
         - name: source
           workspace: shared-workspace
       runAfter:
-        - get-pretrained
+        - build-custom
       params:
       - name: SCRIPT
         value: |
