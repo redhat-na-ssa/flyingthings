@@ -10,3 +10,8 @@ RUN dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.n
  && dnf clean all
 
 RUN pip install --no-cache-dir ultralytics==8.0.124
+
+ENV AWS_S3_ENDPOINT=${MINIO_ENDPOINT}
+ENV AWS_S3_BUCKET=${MINIO_BUCKET}
+ENV AWS_SECRET_ACCESS_KEY=${MINIO_ACCESS_KEY}
+ENV AWS_ACCESS_KEY=${MINIO_SECRETKEY}
