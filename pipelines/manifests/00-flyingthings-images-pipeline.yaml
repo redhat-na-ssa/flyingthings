@@ -268,7 +268,7 @@ spec:
       params:
       - name: SCRIPT
         value: |
-          oc apply -f $(workspaces.source.path)/source/model/deploy-model-server.yaml
+          oc apply -f $(workspaces.source.path)/source/model/deploy-model-a-server.yaml
     - name: build-ubi9
       params:
         - name: IMAGE
@@ -488,7 +488,7 @@ spec:
         - name: source
           workspace: shared-workspace
       runAfter:
-        - get-pretrained
+        - build-custom
       params:
       - name: SCRIPT
         value: |
