@@ -36,15 +36,6 @@ spec:
           resources:
             limits:
               nvidia.com/gpu: 1
-          env:
-            - name: AWS_S3_ENDPOINT
-              value: yourendpoint
-            - name: AWS_S3_BUCKET
-              value: yourbucket
-            - name: AWS_SECRET_ACCESS_KEY
-              value: yoursecretkey
-            - name: AWS_S3_ENDPOINT
-              value: youraccesskey
           ports:
             - containerPort: 8888
               protocol: TCP
