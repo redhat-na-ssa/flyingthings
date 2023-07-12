@@ -19,6 +19,9 @@ spec:
     - name: NUM_EPOCHS
       default: "10"
       type: string
+    - name: IMG_RESIZE
+      default: "N"
+      type: string
     - name: WEIGHTS
       default: flyingthings.pt
       type: string
@@ -93,6 +96,25 @@ spec:
           workspace: sourcecode
         - name: workspace
           workspace: shared-workspace
+    - name: image-resize
+      when:
+        - input: "$(params.IMG_RESIZE)"
+          operator: in
+          values: ["Y"]
+      taskRef:
+        name: image-resize
+      params:
+        - name: SIMPLEVIS_DATA
+          value: $(params.SIMPLEVIS_DATA)
+        - name: IMG_RESIZE
+          value: "$(params.IMG_RESIZE)"
+      runAfter:
+        - get-dataset
+      workspaces:
+        - name: source
+          workspace: sourcecode
+        - name: workspace
+          workspace: shared-workspace
     - name: distribute-dataset
       taskRef:
         name: distribute-data
@@ -102,7 +124,7 @@ spec:
         - name: SIMPLEVIS_DATA
           value: $(params.SIMPLEVIS_DATA)
       runAfter:
-        - get-dataset
+        - image-resize
       workspaces:
         - name: source
           workspace: sourcecode
