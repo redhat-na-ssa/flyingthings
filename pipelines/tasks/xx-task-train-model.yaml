@@ -18,7 +18,8 @@ spec:
     - name: SIMPLEVIS_DATA
       type: string
   steps:
-    - image: image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/yolo:latest
+    - name: train-model
+      image: image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/yolo:latest
       script: |
         $(workspaces.source.path)/source/training/03-run-training.sh
       env:
