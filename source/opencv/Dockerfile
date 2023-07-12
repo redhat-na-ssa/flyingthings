@@ -1,4 +1,4 @@
-FROM quay.io/modh/cuda-notebooks:cuda-jupyter-tensorflow-ubi9-python-3.9-2023a-weekly
+FROM registry.access.redhat.com/ubi9/python-39
 
 USER 0
 
@@ -19,15 +19,5 @@ USER 1001
 
 # install the pip things
 RUN pip install --no-cache-dir \
-    elyra==3.* \
     opencv-python==4.7.* \
-    opencv-contrib-python==4.7.* \
-    matplotlib==3.6.* \
-    protobuf==3.19.* \
-    imutils==0.5.* \
-    tensorflow_datasets==4.9.* \
-    keras_tuner==1.0.* \
-    visualkeras==0.0.* \
-    graphviz==0.20.* \
-    pydot==1.4.* \
-    python-dotenv==1.*
+    opencv-contrib-python==4.7.*
