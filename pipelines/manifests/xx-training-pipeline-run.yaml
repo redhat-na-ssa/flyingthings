@@ -13,7 +13,7 @@ spec:
     - name: BATCH_SIZE
       value: "-1"
     - name: NUM_EPOCHS
-      value: "30"
+      value: "3"
 
   workspaces:
     - name: sourcecode

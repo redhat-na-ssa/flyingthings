@@ -1,23 +1,15 @@
 apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
-  name: distribute-data
+  name: push-results
   namespace: flyingthings-standalone
 spec:
   params:
-    - name: BATCH_SIZE
-      type: string
-    - name: NUM_EPOCHS
-      type: string
     - name: WEIGHTS
-      type: string
-    - name: BASE_MODEL
       type: string
     - name: MODEL_CLASSES
       type: string
     - name: MINIO_ENDPOINT
-      type: string
-    - name: DATASET_ZIP
       type: string
     - name: SIMPLEVIS_DATA
       type: string
@@ -30,26 +22,17 @@ spec:
     - name: MINIO_CLIENT_URL
       type: string
   steps:
-    - name: distribute-data
+    - name: push-results
       image: registry.access.redhat.com/ubi9/python-39
       script: |
-        cd $(params.SIMPLEVIS_DATA)/workspace \
-        && $(workspaces.source.path)/source/training/02-distribute-files.py
+        $(workspaces.source.path)/source/training/04-push-results.sh
       env:
-        - name: BATCH_SIZE
-          value: $(params.BATCH_SIZE)
-        - name: NUM_EPOCHS
-          value: $(params.NUM_EPOCHS)
         - name: WEIGHTS
           value: $(params.WEIGHTS)
-        - name: BASE_MODEL
-          value: $(params.BASE_MODEL)
         - name: MODEL_CLASSES
           value: $(params.MODEL_CLASSES)
         - name: MINIO_ENDPOINT
           value: $(params.MINIO_ENDPOINT)
-        - name: DATASET_ZIP
-          value: $(params.DATASET_ZIP)
         - name: SIMPLEVIS_DATA
           value: $(params.SIMPLEVIS_DATA)
         - name: BASEDIR

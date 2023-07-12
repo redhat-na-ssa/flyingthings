@@ -70,20 +70,12 @@ spec:
       taskRef:
         name: get-dataset
       params:
-        - name: BATCH_SIZE
-          value: $(params.BATCH_SIZE)
-        - name: NUM_EPOCHS
-          value: $(params.NUM_EPOCHS)
-        - name: WEIGHTS
-          value: $(params.WEIGHTS)
-        - name: BASE_MODEL
-          value: $(params.BASE_MODEL)
+        - name: DATASET_ZIP
+          value: $(params.DATASET_ZIP)
         - name: MODEL_CLASSES
           value: $(params.MODEL_CLASSES)
         - name: MINIO_ENDPOINT
           value: $(params.MINIO_ENDPOINT)
-        - name: DATASET_ZIP
-          value: $(params.DATASET_ZIP)
         - name: SIMPLEVIS_DATA
           value: $(params.SIMPLEVIS_DATA)
         - name: MINIO_BUCKET
@@ -105,30 +97,10 @@ spec:
       taskRef:
         name: distribute-data
       params:
-        - name: BATCH_SIZE
-          value: $(params.BATCH_SIZE)
-        - name: NUM_EPOCHS
-          value: $(params.NUM_EPOCHS)
-        - name: WEIGHTS
-          value: $(params.WEIGHTS)
-        - name: BASE_MODEL
-          value: $(params.BASE_MODEL)
         - name: MODEL_CLASSES
           value: $(params.MODEL_CLASSES)
-        - name: MINIO_ENDPOINT
-          value: $(params.MINIO_ENDPOINT)
-        - name: DATASET_ZIP
-          value: $(params.DATASET_ZIP)
         - name: SIMPLEVIS_DATA
           value: $(params.SIMPLEVIS_DATA)
-        - name: MINIO_BUCKET
-          value: $(params.MINIO_BUCKET)
-        - name: MINIO_ACCESSKEY
-          value: $(params.MINIO_ACCESSKEY)
-        - name: MINIO_SECRETKEY
-          value: $(params.MINIO_SECRETKEY)
-        - name: MINIO_CLIENT_URL
-          value: $(params.MINIO_CLIENT_URL)
       runAfter:
         - get-dataset
       workspaces:
@@ -150,20 +122,8 @@ spec:
           value: $(params.BASE_MODEL)
         - name: MODEL_CLASSES
           value: $(params.MODEL_CLASSES)
-        - name: MINIO_ENDPOINT
-          value: $(params.MINIO_ENDPOINT)
-        - name: DATASET_ZIP
-          value: $(params.DATASET_ZIP)
         - name: SIMPLEVIS_DATA
           value: $(params.SIMPLEVIS_DATA)
-        - name: MINIO_BUCKET
-          value: $(params.MINIO_BUCKET)
-        - name: MINIO_ACCESSKEY
-          value: $(params.MINIO_ACCESSKEY)
-        - name: MINIO_SECRETKEY
-          value: $(params.MINIO_SECRETKEY)
-        - name: MINIO_CLIENT_URL
-          value: $(params.MINIO_CLIENT_URL)
       runAfter:
         - distribute-dataset
       workspaces:
@@ -175,20 +135,12 @@ spec:
       taskRef:
         name: push-results
       params:
-        - name: BATCH_SIZE
-          value: $(params.BATCH_SIZE)
-        - name: NUM_EPOCHS
-          value: $(params.NUM_EPOCHS)
         - name: WEIGHTS
           value: $(params.WEIGHTS)
-        - name: BASE_MODEL
-          value: $(params.BASE_MODEL)
         - name: MODEL_CLASSES
           value: $(params.MODEL_CLASSES)
         - name: MINIO_ENDPOINT
           value: $(params.MINIO_ENDPOINT)
-        - name: DATASET_ZIP
-          value: $(params.DATASET_ZIP)
         - name: SIMPLEVIS_DATA
           value: $(params.SIMPLEVIS_DATA)
         - name: MINIO_BUCKET

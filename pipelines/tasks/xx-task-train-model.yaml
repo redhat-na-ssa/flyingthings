@@ -15,19 +15,7 @@ spec:
       type: string
     - name: MODEL_CLASSES
       type: string
-    - name: MINIO_ENDPOINT
-      type: string
-    - name: DATASET_ZIP
-      type: string
     - name: SIMPLEVIS_DATA
-      type: string
-    - name: MINIO_BUCKET
-      type: string
-    - name: MINIO_ACCESSKEY
-      type: string
-    - name: MINIO_SECRETKEY
-      type: string
-    - name: MINIO_CLIENT_URL
       type: string
   steps:
     - image: image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/yolo:latest
@@ -44,22 +32,10 @@ spec:
           value: $(params.BASE_MODEL)
         - name: MODEL_CLASSES
           value: $(params.MODEL_CLASSES)
-        - name: MINIO_ENDPOINT
-          value: $(params.MINIO_ENDPOINT)
-        - name: DATASET_ZIP
-          value: $(params.DATASET_ZIP)
         - name: SIMPLEVIS_DATA
           value: $(params.SIMPLEVIS_DATA)
         - name: BASEDIR
           value: $(workspaces.source.path)/source/training-job
-        - name: MINIO_BUCKET
-          value: $(params.MINIO_BUCKET)
-        - name: MINIO_ACCESSKEY
-          value: $(params.MINIO_ACCESSKEY)
-        - name: MINIO_SECRETKEY
-          value: $(params.MINIO_SECRETKEY)
-        - name: MINIO_CLIENT_URL
-          value: $(params.MINIO_CLIENT_URL)
       resources:
         limits:
           nvidia.com/gpu: 1

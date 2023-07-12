@@ -1,7 +1,7 @@
 apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
-  name: push-results
+  name: image-resize
   namespace: flyingthings-standalone
 spec:
   params:
@@ -30,10 +30,11 @@ spec:
     - name: MINIO_CLIENT_URL
       type: string
   steps:
-    - name: push-results
+    - name: distribute-data
       image: registry.access.redhat.com/ubi9/python-39
       script: |
-        $(workspaces.source.path)/source/training/04-push-results.sh
+        cd $(params.SIMPLEVIS_DATA)/workspace \
+        && $(workspaces.source.path)/source/training/100-image-resize.py
       env:
         - name: BATCH_SIZE
           value: $(params.BATCH_SIZE)
