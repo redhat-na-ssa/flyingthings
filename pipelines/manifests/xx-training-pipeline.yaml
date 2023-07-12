@@ -10,14 +10,14 @@ spec:
       description: url of the git repo for the code of deployment
       type: string
     - name: git-revision
-      default: pipeline-tasks
+      default: develop
       description: revision to be used from repo of the code for deployment
       type: string
     - name: BATCH_SIZE
-      default: "1"
+      default: "-1"
       type: string
     - name: NUM_EPOCHS
-      default: "1"
+      default: "10"
       type: string
     - name: WEIGHTS
       default: flyingthings.pt
@@ -29,7 +29,7 @@ spec:
       default: flyingthings.yaml
       type: string
     - name: MINIO_ENDPOINT
-      default: minio:9000
+      default: http://minio:9000
       type: string
     - name: DATASET_ZIP
       default: flyingthings-yolo.zip
@@ -47,7 +47,7 @@ spec:
       default: minioadmin
       type: string
     - name: MINIO_CLIENT_URL
-      default: util02.davenet.local/mc
+      default: util02.davenet.local
       type: string
   tasks: 
     - name: fetch-repository
@@ -65,7 +65,7 @@ spec:
         name: git-clone
       workspaces:
         - name: output
-          workspace: shared-workspace
+          workspace: sourcecode
     - name: get-dataset
       taskRef:
         name: get-dataset
@@ -98,7 +98,114 @@ spec:
         - fetch-repository
       workspaces:
         - name: source
+          workspace: sourcecode
+        - name: workspace
           workspace: shared-workspace
-
+    - name: distribute-dataset
+      taskRef:
+        name: distribute-data
+      params:
+        - name: BATCH_SIZE
+          value: $(params.BATCH_SIZE)
+        - name: NUM_EPOCHS
+          value: $(params.NUM_EPOCHS)
+        - name: WEIGHTS
+          value: $(params.WEIGHTS)
+        - name: BASE_MODEL
+          value: $(params.BASE_MODEL)
+        - name: MODEL_CLASSES
+          value: $(params.MODEL_CLASSES)
+        - name: MINIO_ENDPOINT
+          value: $(params.MINIO_ENDPOINT)
+        - name: DATASET_ZIP
+          value: $(params.DATASET_ZIP)
+        - name: SIMPLEVIS_DATA
+          value: $(params.SIMPLEVIS_DATA)
+        - name: MINIO_BUCKET
+          value: $(params.MINIO_BUCKET)
+        - name: MINIO_ACCESSKEY
+          value: $(params.MINIO_ACCESSKEY)
+        - name: MINIO_SECRETKEY
+          value: $(params.MINIO_SECRETKEY)
+        - name: MINIO_CLIENT_URL
+          value: $(params.MINIO_CLIENT_URL)
+      runAfter:
+        - get-dataset
+      workspaces:
+        - name: source
+          workspace: sourcecode
+        - name: workspace
+          workspace: shared-workspace
+    - name: train-model
+      taskRef:
+        name: train-model
+      params:
+        - name: BATCH_SIZE
+          value: $(params.BATCH_SIZE)
+        - name: NUM_EPOCHS
+          value: $(params.NUM_EPOCHS)
+        - name: WEIGHTS
+          value: $(params.WEIGHTS)
+        - name: BASE_MODEL
+          value: $(params.BASE_MODEL)
+        - name: MODEL_CLASSES
+          value: $(params.MODEL_CLASSES)
+        - name: MINIO_ENDPOINT
+          value: $(params.MINIO_ENDPOINT)
+        - name: DATASET_ZIP
+          value: $(params.DATASET_ZIP)
+        - name: SIMPLEVIS_DATA
+          value: $(params.SIMPLEVIS_DATA)
+        - name: MINIO_BUCKET
+          value: $(params.MINIO_BUCKET)
+        - name: MINIO_ACCESSKEY
+          value: $(params.MINIO_ACCESSKEY)
+        - name: MINIO_SECRETKEY
+          value: $(params.MINIO_SECRETKEY)
+        - name: MINIO_CLIENT_URL
+          value: $(params.MINIO_CLIENT_URL)
+      runAfter:
+        - distribute-dataset
+      workspaces:
+        - name: source
+          workspace: sourcecode
+        - name: workspace
+          workspace: shared-workspace
+    - name: push-results
+      taskRef:
+        name: push-results
+      params:
+        - name: BATCH_SIZE
+          value: $(params.BATCH_SIZE)
+        - name: NUM_EPOCHS
+          value: $(params.NUM_EPOCHS)
+        - name: WEIGHTS
+          value: $(params.WEIGHTS)
+        - name: BASE_MODEL
+          value: $(params.BASE_MODEL)
+        - name: MODEL_CLASSES
+          value: $(params.MODEL_CLASSES)
+        - name: MINIO_ENDPOINT
+          value: $(params.MINIO_ENDPOINT)
+        - name: DATASET_ZIP
+          value: $(params.DATASET_ZIP)
+        - name: SIMPLEVIS_DATA
+          value: $(params.SIMPLEVIS_DATA)
+        - name: MINIO_BUCKET
+          value: $(params.MINIO_BUCKET)
+        - name: MINIO_ACCESSKEY
+          value: $(params.MINIO_ACCESSKEY)
+        - name: MINIO_SECRETKEY
+          value: $(params.MINIO_SECRETKEY)
+        - name: MINIO_CLIENT_URL
+          value: $(params.MINIO_CLIENT_URL)
+      runAfter:
+        - train-model
+      workspaces:
+        - name: source
+          workspace: sourcecode
+        - name: workspace
+          workspace: shared-workspace
   workspaces:
     - name: shared-workspace
+    - name: sourcecode

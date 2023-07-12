@@ -52,7 +52,7 @@ spec:
         - name: SIMPLEVIS_DATA
           value: $(params.SIMPLEVIS_DATA)
         - name: BASEDIR
-          value: $(workspaces.source.path)/source/training-job
+          value: $(workspaces.source.path)/source/training
         - name: MINIO_BUCKET
           value: $(params.MINIO_BUCKET)
         - name: MINIO_ACCESSKEY
@@ -61,17 +61,19 @@ spec:
           value: $(params.MINIO_SECRETKEY)
         - name: MINIO_CLIENT_URL
           value: $(params.MINIO_CLIENT_URL)
-      volumeMounts:
-        - name: workspace
-          mountPath: /opt/app-root/src/simplevis-data/workspace
-        - mountPath: /dev/shm
-          name: dshm
-  volumes:
-    - name: workspace
-      emptyDir: {}
-    - name: dshm
-      emptyDir:
-          medium: Memory
+  #     volumeMounts:
+  #       - name: workspace
+  #         mountPath: /opt/app-root/src/simplevis-data/workspace
+  #       - mountPath: /dev/shm
+  #         name: dshm
+  # volumes:
+  #   - name: workspace
+  #     emptyDir: {}
+  #   - name: dshm
+  #     emptyDir:
+  #         medium: Memory
   workspaces:
+    - name: workspace
+      mountPath: /opt/app-root/src/simplevis-data/workspace
     - name: source
       mountPath: /source
