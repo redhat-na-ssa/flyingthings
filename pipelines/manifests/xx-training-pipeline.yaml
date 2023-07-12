@@ -1,0 +1,104 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: training-x-pipeline
+  namespace: flyingthings-standalone
+spec:
+  params: 
+    - name: git-url
+      default: https://github.com/redhat-na-ssa/flyingthings.git
+      description: url of the git repo for the code of deployment
+      type: string
+    - name: git-revision
+      default: pipeline-tasks
+      description: revision to be used from repo of the code for deployment
+      type: string
+    - name: BATCH_SIZE
+      default: "1"
+      type: string
+    - name: NUM_EPOCHS
+      default: "1"
+      type: string
+    - name: WEIGHTS
+      default: flyingthings.pt
+      type: string
+    - name: BASE_MODEL
+      default: yolov8n.pt
+      type: string
+    - name: MODEL_CLASSES
+      default: flyingthings.yaml
+      type: string
+    - name: MINIO_ENDPOINT
+      default: minio:9000
+      type: string
+    - name: DATASET_ZIP
+      default: flyingthings-yolo.zip
+      type: string
+    - name: SIMPLEVIS_DATA
+      default: /opt/app-root/src/simplevis-data
+      type: string
+    - name: MINIO_BUCKET
+      default: flyingthings
+      type: string
+    - name: MINIO_ACCESSKEY
+      default: minioadmin
+      type: string
+    - name: MINIO_SECRETKEY
+      default: minioadmin
+      type: string
+    - name: MINIO_CLIENT_URL
+      default: util02.davenet.local/mc
+      type: string
+  tasks: 
+    - name: fetch-repository
+      params:
+        - name: url
+          value: $(params.git-url)
+        - name: subdirectory
+          value: ''
+        - name: deleteExisting
+          value: 'true'
+        - name: revision
+          value: $(params.git-revision)
+      taskRef:
+        kind: ClusterTask
+        name: git-clone
+      workspaces:
+        - name: output
+          workspace: shared-workspace
+    - name: get-dataset
+      taskRef:
+        name: get-dataset
+      params:
+        - name: BATCH_SIZE
+          value: $(params.BATCH_SIZE)
+        - name: NUM_EPOCHS
+          value: $(params.NUM_EPOCHS)
+        - name: WEIGHTS
+          value: $(params.WEIGHTS)
+        - name: BASE_MODEL
+          value: $(params.BASE_MODEL)
+        - name: MODEL_CLASSES
+          value: $(params.MODEL_CLASSES)
+        - name: MINIO_ENDPOINT
+          value: $(params.MINIO_ENDPOINT)
+        - name: DATASET_ZIP
+          value: $(params.DATASET_ZIP)
+        - name: SIMPLEVIS_DATA
+          value: $(params.SIMPLEVIS_DATA)
+        - name: MINIO_BUCKET
+          value: $(params.MINIO_BUCKET)
+        - name: MINIO_ACCESSKEY
+          value: $(params.MINIO_ACCESSKEY)
+        - name: MINIO_SECRETKEY
+          value: $(params.MINIO_SECRETKEY)
+        - name: MINIO_CLIENT_URL
+          value: $(params.MINIO_CLIENT_URL)
+      runAfter:
+        - fetch-repository
+      workspaces:
+        - name: source
+          workspace: shared-workspace
+
+  workspaces:
+    - name: shared-workspace

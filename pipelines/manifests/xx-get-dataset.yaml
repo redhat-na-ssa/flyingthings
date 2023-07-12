@@ -1,0 +1,77 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: get-dataset
+  namespace: flyingthings-standalone
+spec:
+  params:
+    - name: BATCH_SIZE
+      type: string
+    - name: NUM_EPOCHS
+      type: string
+    - name: WEIGHTS
+      type: string
+    - name: BASE_MODEL
+      type: string
+    - name: MODEL_CLASSES
+      type: string
+    - name: MINIO_ENDPOINT
+      type: string
+    - name: DATASET_ZIP
+      type: string
+    - name: SIMPLEVIS_DATA
+      type: string
+    - name: MINIO_BUCKET
+      type: string
+    - name: MINIO_ACCESSKEY
+      type: string
+    - name: MINIO_SECRETKEY
+      type: string
+    - name: MINIO_CLIENT_URL
+      type: string
+  steps:
+    - name: pull-dataset
+      image: registry.access.redhat.com/ubi9/python-39
+      script: |
+        $(workspaces.source.path)/source/training/01-dataprep.sh
+      env:
+        - name: BATCH_SIZE
+          value: $(params.BATCH_SIZE)
+        - name: NUM_EPOCHS
+          value: $(params.NUM_EPOCHS)
+        - name: WEIGHTS
+          value: $(params.WEIGHTS)
+        - name: BASE_MODEL
+          value: $(params.BASE_MODEL)
+        - name: MODEL_CLASSES
+          value: $(params.MODEL_CLASSES)
+        - name: MINIO_ENDPOINT
+          value: $(params.MINIO_ENDPOINT)
+        - name: DATASET_ZIP
+          value: $(params.DATASET_ZIP)
+        - name: SIMPLEVIS_DATA
+          value: $(params.SIMPLEVIS_DATA)
+        - name: BASEDIR
+          value: $(workspaces.source.path)/source/training-job
+        - name: MINIO_BUCKET
+          value: $(params.MINIO_BUCKET)
+        - name: MINIO_ACCESSKEY
+          value: $(params.MINIO_ACCESSKEY)
+        - name: MINIO_SECRETKEY
+          value: $(params.MINIO_SECRETKEY)
+        - name: MINIO_CLIENT_URL
+          value: $(params.MINIO_CLIENT_URL)
+      volumeMounts:
+        - name: workspace
+          mountPath: /opt/app-root/src/simplevis-data/workspace
+        - mountPath: /dev/shm
+          name: dshm
+  volumes:
+    - name: workspace
+      emptyDir: {}
+    - name: dshm
+      emptyDir:
+          medium: Memory
+  workspaces:
+    - name: source
+      mountPath: /source
