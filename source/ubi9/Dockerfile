@@ -25,6 +25,9 @@ RUN dnf -y  --setopt=tsflags=nodocs update && \
 
 USER 1001
 
+# need jinja2
+RUN pip install -U jijna2
+
 # Install micropipenv to deploy packages from Pipfile.lock
 RUN pip install -U "micropipenv[toml]"
 
