@@ -1,0 +1,25 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: image-resize
+  namespace: flyingthings-standalone
+spec:
+  params:
+    - name: SIMPLEVIS_DATA
+      type: string
+  steps:
+    - name: image-resize
+      image: registry.access.redhat.com/ubi9/python-39
+      script: |
+        cd $(params.SIMPLEVIS_DATA)/workspace \
+        && $(workspaces.source.path)/source/training/100-image-resize.py
+      env:
+        - name: SIMPLEVIS_DATA
+          value: $(params.SIMPLEVIS_DATA)
+        - name: BASEDIR
+          value: $(workspaces.source.path)/source/training
+  workspaces:
+    - name: workspace
+      mountPath: /opt/app-root/src/simplevis-data/workspace
+    - name: source
+      mountPath: /source
