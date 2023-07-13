@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 from jinja2 import Environment, FileSystemLoader
 
 # Read the names from the "classes.txt" file, skipping blank lines
