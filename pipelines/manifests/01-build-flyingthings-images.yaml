@@ -10,6 +10,8 @@ spec:
       value: https://github.com/redhat-na-ssa/flyingthings.git
     - name: git-revision
       value: djw
+    - name: MINIO_CLIENT_URL
+      value: "http://util02.davenet.local"
   workspaces:
     - name: shared-workspace
       volumeClaimTemplate:

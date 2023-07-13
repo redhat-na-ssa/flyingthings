@@ -9,6 +9,8 @@ spec:
       type: string
     - name: BASE_MODEL
       type: string
+    - name: SIMPLEVIS_DATA
+      type: string
     - name: MINIO_ENDPOINT
       type: string
     - name: MINIO_BUCKET
@@ -23,8 +25,10 @@ spec:
     - name: pull-dataset
       image: image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/yolo:latest
       script: |
-        $(workspaces.source.path)/source/training/00-get-yolo.sh \
-        && $(workspaces.source.path)/source/training/04-push-results.sh
+        cd $(params.SIMPLEVIS_DATA)/workspace \
+        && $(workspaces.source.path)/source/training/00-get-yolo-model.sh \
+        && $(workspaces.source.path)/source/minio-client/01-setup-client.sh \
+        && $(workspaces.source.path)/source/training/00-push-yolo-model.sh
       env:
         - name: MINIO_ENDPOINT
           value: $(params.MINIO_ENDPOINT)
@@ -32,6 +36,8 @@ spec:
           value: $(params.SIMPLEVIS_DATA)
         - name: BASEDIR
           value: $(workspaces.source.path)/source/training
+        - name: BASE_MODEL
+          value: yolov8n.pt
         - name: MINIO_BUCKET
           value: $(params.MINIO_BUCKET)
         - name: MINIO_ACCESSKEY
