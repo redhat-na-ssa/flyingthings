@@ -16,7 +16,12 @@ spec:
       value: "3"
     - name: IMG_RESIZE
       value: "Y"
-
+    - name: WEIGHTS
+      value: flyingthings.pt
+    - name: DATASET_ZIP
+      value: flyingthings-yolo.zip
+    - name: MINIO_BUCKET
+      value: flyingthings
   workspaces:
     - name: sourcecode
       volumeClaimTemplate:
