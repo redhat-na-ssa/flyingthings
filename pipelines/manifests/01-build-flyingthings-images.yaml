@@ -9,7 +9,7 @@ spec:
     - name: git-url
       value: https://github.com/redhat-na-ssa/flyingthings.git
     - name: git-revision
-      value: djw
+      value: develop
     - name: MINIO_CLIENT_URL
       value: "http://util02.davenet.local"
   workspaces:
