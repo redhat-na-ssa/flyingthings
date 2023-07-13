@@ -7,8 +7,6 @@ spec:
   params:
     - name: DATASET_ZIP
       type: string
-    - name: MODEL_CLASSES
-      type: string
     - name: MINIO_ENDPOINT
       type: string
     - name: SIMPLEVIS_DATA
@@ -29,8 +27,6 @@ spec:
       env:
         - name: DATASET_ZIP
           value: $(params.DATASET_ZIP)
-        - name: MODEL_CLASSES
-          value: $(params.MODEL_CLASSES)
         - name: MINIO_ENDPOINT
           value: $(params.MINIO_ENDPOINT)
         - name: SIMPLEVIS_DATA

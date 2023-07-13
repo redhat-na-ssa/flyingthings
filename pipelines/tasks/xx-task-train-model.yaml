@@ -13,8 +13,6 @@ spec:
       type: string
     - name: BASE_MODEL
       type: string
-    - name: MODEL_CLASSES
-      type: string
     - name: SIMPLEVIS_DATA
       type: string
   steps:
@@ -31,8 +29,6 @@ spec:
           value: $(params.WEIGHTS)
         - name: BASE_MODEL
           value: $(params.BASE_MODEL)
-        - name: MODEL_CLASSES
-          value: $(params.MODEL_CLASSES)
         - name: SIMPLEVIS_DATA
           value: $(params.SIMPLEVIS_DATA)
         - name: BASEDIR

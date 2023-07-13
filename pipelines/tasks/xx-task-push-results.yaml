@@ -7,8 +7,6 @@ spec:
   params:
     - name: WEIGHTS
       type: string
-    - name: MODEL_CLASSES
-      type: string
     - name: MINIO_ENDPOINT
       type: string
     - name: SIMPLEVIS_DATA
@@ -29,8 +27,6 @@ spec:
       env:
         - name: WEIGHTS
           value: $(params.WEIGHTS)
-        - name: MODEL_CLASSES
-          value: $(params.MODEL_CLASSES)
         - name: MINIO_ENDPOINT
           value: $(params.MINIO_ENDPOINT)
         - name: SIMPLEVIS_DATA
