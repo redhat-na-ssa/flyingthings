@@ -13,7 +13,7 @@ spec:
     - name: BATCH_SIZE
       value: "-1"
     - name: NUM_EPOCHS
-      value: "100"
+      value: "5"
     - name: IMG_RESIZE
       value: "Y"
     - name: WEIGHTS
@@ -22,6 +22,8 @@ spec:
       value: flyingthings-yolo.zip
     - name: MINIO_BUCKET
       value: flyingthings
+    - name: DEPLOY_FILE
+      value: deploy-model-a-server.yaml
   workspaces:
     - name: sourcecode
       volumeClaimTemplate:
