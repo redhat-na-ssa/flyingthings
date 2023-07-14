@@ -17,10 +17,6 @@ spec:
       default: image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/yolo:latest
       description: base image for yolo
       type: string
-    - name: TRAINING_IMAGE
-      default: image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/training-job:latest
-      description: base image for training job
-      type: string
     - name: UBI_IMAGE
       default: image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/base-ubi9:latest
       description: base image for notebook
@@ -41,10 +37,6 @@ spec:
       default: source/yolo
       description: dockerfile path 
       type: string
-    - name: TRAINING_DOCKERFILE
-      default: source/training-job
-      description: dockerfile path 
-      type: string
     - name: MODEL_DOCKERFILE
       default: source/model
       description: dockerfile path 
@@ -60,10 +52,6 @@ spec:
     - name: CUSTOM_DOCKERFILE
       default: source/custom
       description: dockerfile path
-      type: string
-    - name: TRAINING_BUILD_ARGS
-      default: --build-arg BASE_IMAGE=image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/yolo:latest
-      description: build arguments for training job
       type: string
     - name: MINIMAL_BUILD_ARGS
       default: --build-arg BASE_IMAGE=image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/base-ubi9:latest
@@ -154,24 +142,6 @@ spec:
           value: $(workspaces.path)/$(params.YOLO_DOCKERFILE)/Dockerfile
       runAfter:
         - see-stuff
-      taskRef:
-        kind: ClusterTask
-        name: buildah
-      workspaces:
-        - name: source
-          workspace: source
-    - name: build-training-job
-      params:
-        - name: IMAGE
-          value: $(params.TRAINING_IMAGE)
-        - name: DOCKERFILE_PATH
-          value: $(params.TRAINING_DOCKERFILE)          
-        - name: DOCKERFILE
-          value: $(workspaces.path)/$(params.TRAINING_DOCKERFILE)/Dockerfile
-        - name: BUILD_EXTRA_ARGS
-          value: "$(params.TRAINING_BUILD_ARGS)"
-      runAfter:
-        - build-yolo
       taskRef:
         kind: ClusterTask
         name: buildah
