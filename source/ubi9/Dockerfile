@@ -21,12 +21,13 @@ USER 0
 # Update base image for latest security updates
 # (ubi images are not released that often)
 RUN dnf -y  --setopt=tsflags=nodocs update && \
+    dnf -y install libGL && \
     dnf -y clean all --enablerepo='*'
 
 USER 1001
 
 # need jinja2
-RUN pip install -U Jinja2==3.1.2
+RUN pip install -U Jinja2==3.1.2 opencv-python==4.6.0.66
 
 # Install micropipenv to deploy packages from Pipfile.lock
 RUN pip install -U "micropipenv[toml]"
