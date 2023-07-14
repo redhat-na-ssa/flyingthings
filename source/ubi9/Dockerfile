@@ -26,7 +26,7 @@ RUN dnf -y  --setopt=tsflags=nodocs update && \
 USER 1001
 
 # need jinja2
-RUN pip install -U Jinja2==3.1.2 opencv-python==4.6.0.66
+RUN pip install -U Jinja2==3.1.2 opencv-python==4.6.0.66 libGL
 
 # Install micropipenv to deploy packages from Pipfile.lock
 RUN pip install -U "micropipenv[toml]"
