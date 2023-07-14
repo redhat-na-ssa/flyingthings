@@ -9,7 +9,7 @@ spec:
     - name: git-url
       value: https://github.com/redhat-na-ssa/flyingthings.git
     - name: git-revision
-      value: develop
+      value: main
     - name: BATCH_SIZE
       value: "-1"
     - name: NUM_EPOCHS
