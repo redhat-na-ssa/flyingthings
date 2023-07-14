@@ -1,7 +1,7 @@
 apiVersion: tekton.dev/v1beta1
 kind: PipelineRun
 metadata:
-  name: training-x-pipeline-b-run
+  name: training-x-pipeline-run
 spec:
   pipelineRef:
     name: training-x-pipeline
@@ -9,20 +9,21 @@ spec:
     - name: git-url
       value: https://github.com/redhat-na-ssa/flyingthings.git
     - name: git-revision
-      value: develop
+      value: main
     - name: BATCH_SIZE
       value: "-1"
     - name: NUM_EPOCHS
-      value: "100"
+      value: "5"
     - name: IMG_RESIZE
       value: "Y"
     - name: WEIGHTS
-      value: hotwheelz.pt
+      value: flyingthings.pt
     - name: DATASET_ZIP
-      value: hotwheelz-02.zip
+      value: flyingthings-yolo.zip
     - name: MINIO_BUCKET
-      value: hotwheelz
-
+      value: flyingthings
+    - name: DEPLOY_FILE
+      value: deploy-model-a-server.yaml
   workspaces:
     - name: sourcecode
       volumeClaimTemplate:
@@ -41,6 +42,6 @@ spec:
             - ReadWriteMany # access mode may affect how you can use this volume in parallel tasks
           resources:
             requests:
-              storage: 2Gi
+              storage: 500Mi
           storageClassName: ocs-storagecluster-cephfs
           volumeMode: Filesystem

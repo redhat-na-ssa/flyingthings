@@ -11,7 +11,7 @@ flyingthings-standalone
 ./01-create-pipelines.sh 
 ./02-build-images.sh
 ./05-deploy-notebooks.sh
-./11-run-training.sh
+./10-run-model-a-training.sh
 ```
 ## Notebooks
 
