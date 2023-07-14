@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/opt/app-root/bin/python
 import os
 import sys
 import cv2
