@@ -9,11 +9,11 @@ spec:
     - name: git-url
       value: https://github.com/redhat-na-ssa/flyingthings.git
     - name: git-revision
-      value: develop
+      value: main
     - name: BATCH_SIZE
       value: "-1"
     - name: NUM_EPOCHS
-      value: "100"
+      value: "3"
     - name: IMG_RESIZE
       value: "Y"
     - name: WEIGHTS
@@ -22,7 +22,8 @@ spec:
       value: hotwheelz-02.zip
     - name: MINIO_BUCKET
       value: hotwheelz
-
+    - name: DEPLOY_FILE
+      value: deploy-model-b-server.yaml
   workspaces:
     - name: sourcecode
       volumeClaimTemplate:

@@ -49,6 +49,8 @@ spec:
     - name: MINIO_CLIENT_URL
       default: util02.davenet.local
       type: string
+    - name: DEPLOY_FILE
+      type: string
   tasks: 
     - name: fetch-repository
       params:
@@ -182,7 +184,7 @@ spec:
           workspace: sourcecode
         - name: workspace
           workspace: shared-workspace
-    - name: deploy-model-a
+    - name: deploy-model-x
       taskSpec:
         metadata:
           annotations:
@@ -238,7 +240,7 @@ spec:
       params:
       - name: SCRIPT
         value: |
-          oc apply -f $(workspaces.source.path)/source/model/deploy-model-a-server.yaml
+          oc apply -f $(workspaces.source.path)/source/model/$(params.DEPLOY_FILE)
   workspaces:
     - name: shared-workspace
     - name: sourcecode
