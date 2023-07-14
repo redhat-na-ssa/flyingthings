@@ -89,9 +89,6 @@ spec:
     - name: BASE_MODEL
       default: "model_pretrained.pt"
       type: string
-    - name: MODEL_CLASSES
-      default: "flyingthings.yaml"
-      type: string
     - name: MINIO_ENDPOINT
       default: "http://minio:9000"
       type: string
@@ -132,7 +129,7 @@ spec:
         name: git-clone
       workspaces:
         - name: output
-          workspace: shared-workspace
+          workspace: source
     - name: see-stuff
       taskSpec:
         steps:
@@ -162,7 +159,7 @@ spec:
         name: buildah
       workspaces:
         - name: source
-          workspace: shared-workspace
+          workspace: source
     - name: build-training-job
       params:
         - name: IMAGE
@@ -180,95 +177,7 @@ spec:
         name: buildah
       workspaces:
         - name: source
-          workspace: shared-workspace
-    - name: build-model-server
-      params:
-        - name: IMAGE
-          value: $(params.MODEL_IMAGE)
-        - name: DOCKERFILE_PATH
-          value: $(params.MODEL_DOCKERFILE)          
-        - name: DOCKERFILE
-          value: $(workspaces.path)/$(params.MODEL_DOCKERFILE)/Dockerfile
-        - name: BUILD_EXTRA_ARGS
-          value: "$(params.MODEL_BUILD_ARGS)"
-      runAfter:
-        - get-pretrained
-      taskRef:
-        kind: ClusterTask
-        name: buildah
-      workspaces:
-        - name: source
-          workspace: shared-workspace
-    - name: deploy-model-server
-      taskSpec:
-        metadata:
-          annotations:
-            # operator.tekton.dev/last-applied-hash: 64d9014f8c7f4cd290afc619a32a185211cae3b23d56af70197b0e936ec8d35b
-            tekton.dev/displayName: openshift client
-            tekton.dev/pipelines.minVersion: 0.17.0
-            tekton.dev/tags: cli
-          labels:
-            app.kubernetes.io/version: '0.2'
-            operator.tekton.dev/operand-name: openshift-pipelines-addons
-            operator.tekton.dev/provider-type: redhat
-        description: >-
-          This task runs commands against the cluster provided by user and if not
-          provided then where the Task is being executed.
-
-          OpenShift is a Kubernetes distribution from Red Hat which provides oc, the
-          OpenShift CLI that complements kubectl for simplifying deployment and
-          configuration applications on OpenShift.
-        params:
-          - default: oc help
-            description: The OpenShift CLI arguments to run
-            name: SCRIPT
-            type: string
-          - default: latest
-            description: The OpenShift Version to use
-            name: VERSION
-            type: string
-        steps:
-          - env:
-              - name: HOME
-                value: /tekton/home
-            image: >-
-              image-registry.openshift-image-registry.svc:5000/openshift/cli:$(params.VERSION)
-            name: oc
-            resources: {}
-            script: |
-              #!/usr/bin/env bash
-
-              [[ "$(workspaces.manifest-dir.bound)" == "true" ]] && \
-              cd $(workspaces.manifest-dir.path)
-
-              [[ "$(workspaces.kubeconfig-dir.bound)" == "true" ]] && \
-              [[ -f $(workspaces.kubeconfig-dir.path)/kubeconfig ]] && \
-              export KUBECONFIG=$(workspaces.kubeconfig-dir.path)/kubeconfig
-
-              $(params.SCRIPT)
-            securityContext:
-              runAsNonRoot: true
-              runAsUser: 65532
-        workspaces:
-          - description: >-
-              The workspace which contains kubernetes manifests which we want to apply
-              on the cluster.
-            name: manifest-dir
-            optional: true
-          - description: >-
-              The workspace which contains the the kubeconfig file if in case we want to
-              run the oc command on another cluster.
-            name: kubeconfig-dir
-            optional: true
-      workspaces:
-        - name: source
-          workspace: shared-workspace
-      runAfter:
-        - build-model-server
-      params:
-      - name: SCRIPT
-        value: |
-          oc apply -f $(workspaces.source.path)/source/model/deploy-model-a-server.yaml
+          workspace: source
     - name: build-ubi9
       params:
         - name: IMAGE
@@ -284,7 +193,7 @@ spec:
         name: buildah
       workspaces:
         - name: source
-          workspace: shared-workspace
+          workspace: source
     - name: build-minimal
       params:
         - name: IMAGE
@@ -302,7 +211,7 @@ spec:
         name: buildah
       workspaces:
         - name: source
-          workspace: shared-workspace
+          workspace: source
     - name: build-custom
       params:
         - name: IMAGE
@@ -320,7 +229,7 @@ spec:
         name: buildah
       workspaces:
         - name: source
-          workspace: shared-workspace
+          workspace: source
     - name: deploy-minio
       taskSpec:
         metadata:
@@ -384,43 +293,57 @@ spec:
             optional: true
       workspaces:
         - name: source
-          workspace: shared-workspace
+          workspace: source
       runAfter:
         - fetch-repository
       params:
       - name: SCRIPT
         value: |
           oc apply -k $(workspaces.source.path)/source/minio
-    - name: upload-artifacts
-      taskSpec:
-        steps:
-          - name: run-batch-file
-            image: ubi9:latest
-            env:
-              - name: MINIO_ENDPOINT
-                value: http://minio:9000
-              - name: MINIO_BUCKET
-                value: flyingthings
-              - name: MINIO_ACCESSKEY
-                value: minioadmin
-              - name: MINIO_SECRETKEY
-                value: minioadmin
-              - name: MINIO_CLIENT_URL
-                value: https://dl.min.io/client/mc/release/linux-amd64
-              - name: WORKSPACE_DIR
-                value: /opt/app-root/src/workspace/workspace
-              - name: MINCFG
-                value: $WORKSPACE_DIR/miniocfg
-              - name: SOURCE_DIR
-                value: /workspace/output
-            script: |
-              #!/usr/bin/env bash
-              echo "Let's see what we got here..." \
-              && ls -al $(workspaces.workspace.path)/source \
-              && $(workspaces.workspace.path)/source/minio-client/bucket-ops.sh
+    - name: create-bucket
+      taskRef:
+        name: create-bucket
+      params:
+        - name: SIMPLEVIS_DATA
+          value: "$(params.SIMPLEVIS_DATA)"
+        - name: MINIO_ENDPOINT
+          value: $(params.MINIO_ENDPOINT)
+        - name: MINIO_BUCKET
+          value: $(params.MINIO_BUCKET)
+        - name: MINIO_ACCESSKEY
+          value: $(params.MINIO_ACCESSKEY)
+        - name: MINIO_SECRETKEY
+          value: $(params.MINIO_SECRETKEY)
+        - name: MINIO_CLIENT_URL
+          value: $(params.MINIO_CLIENT_URL)
       runAfter:
         - deploy-minio
       workspaces:
+        - name: source
+          workspace: source
+        - name: workspace
+          workspace: shared-workspace
+    - name: upload-artifacts
+      taskRef:
+        name: upload-artifacts
+      params:
+        - name: SIMPLEVIS_DATA
+          value: "$(params.SIMPLEVIS_DATA)"
+        - name: MINIO_ENDPOINT
+          value: $(params.MINIO_ENDPOINT)
+        - name: MINIO_BUCKET
+          value: $(params.MINIO_BUCKET)
+        - name: MINIO_ACCESSKEY
+          value: $(params.MINIO_ACCESSKEY)
+        - name: MINIO_SECRETKEY
+          value: $(params.MINIO_SECRETKEY)
+        - name: MINIO_CLIENT_URL
+          value: $(params.MINIO_CLIENT_URL)
+      runAfter:
+        - create-bucket
+      workspaces:
+        - name: source
+          workspace: source
         - name: workspace
           workspace: shared-workspace
     - name: deploy-custom-notebook
@@ -486,24 +409,23 @@ spec:
             optional: true
       workspaces:
         - name: source
-          workspace: shared-workspace
+          workspace: source
       runAfter:
         - build-custom
       params:
       - name: SCRIPT
         value: |
           oc apply -k $(workspaces.source.path)/source/notebook-gpus
-
     - name: get-pretrained
       taskRef:
-        name: pretrained-task
+        name: get-pretrained
       params:
-        - name: BATCH_SIZE
-          value: $(params.BATCH_SIZE)
-        - name: NUM_EPOCHS
-          value: $(params.NUM_EPOCHS)
         - name: WEIGHTS
           value: $(params.WEIGHTS)
+        - name: BASE_MODEL
+          value: "$(params.BASE_MODEL)"
+        - name: SIMPLEVIS_DATA
+          value: "$(params.SIMPLEVIS_DATA)"
         - name: MINIO_ENDPOINT
           value: $(params.MINIO_ENDPOINT)
         - name: MINIO_BUCKET
@@ -515,75 +437,100 @@ spec:
         - name: MINIO_CLIENT_URL
           value: $(params.MINIO_CLIENT_URL)
       runAfter:
-        - build-training-job
+        - build-yolo
       workspaces:
-        - name: output
+        - name: source
+          workspace: source
+        - name: workspace
           workspace: shared-workspace
+    - name: build-model-server
+      params:
+        - name: IMAGE
+          value: $(params.MODEL_IMAGE)
+        - name: DOCKERFILE_PATH
+          value: $(params.MODEL_DOCKERFILE)          
+        - name: DOCKERFILE
+          value: $(workspaces.path)/$(params.MODEL_DOCKERFILE)/Dockerfile
+        - name: BUILD_EXTRA_ARGS
+          value: "$(params.MODEL_BUILD_ARGS)"
+      runAfter:
+        - get-pretrained
+      taskRef:
+        kind: ClusterTask
+        name: buildah
+      workspaces:
+        - name: source
+          workspace: source
+    - name: deploy-model-server
+      taskSpec:
+        metadata:
+          annotations:
+            # operator.tekton.dev/last-applied-hash: 64d9014f8c7f4cd290afc619a32a185211cae3b23d56af70197b0e936ec8d35b
+            tekton.dev/displayName: openshift client
+            tekton.dev/pipelines.minVersion: 0.17.0
+            tekton.dev/tags: cli
+          labels:
+            app.kubernetes.io/version: '0.2'
+            operator.tekton.dev/operand-name: openshift-pipelines-addons
+            operator.tekton.dev/provider-type: redhat
+        description: >-
+          This task runs commands against the cluster provided by user and if not
+          provided then where the Task is being executed.
+
+          OpenShift is a Kubernetes distribution from Red Hat which provides oc, the
+          OpenShift CLI that complements kubectl for simplifying deployment and
+          configuration applications on OpenShift.
+        params:
+          - default: oc help
+            description: The OpenShift CLI arguments to run
+            name: SCRIPT
+            type: string
+          - default: latest
+            description: The OpenShift Version to use
+            name: VERSION
+            type: string
+        steps:
+          - env:
+              - name: HOME
+                value: /tekton/home
+            image: >-
+              image-registry.openshift-image-registry.svc:5000/openshift/cli:$(params.VERSION)
+            name: oc
+            resources: {}
+            script: |
+              #!/usr/bin/env bash
+
+              [[ "$(workspaces.manifest-dir.bound)" == "true" ]] && \
+              cd $(workspaces.manifest-dir.path)
+
+              [[ "$(workspaces.kubeconfig-dir.bound)" == "true" ]] && \
+              [[ -f $(workspaces.kubeconfig-dir.path)/kubeconfig ]] && \
+              export KUBECONFIG=$(workspaces.kubeconfig-dir.path)/kubeconfig
+
+              $(params.SCRIPT)
+            securityContext:
+              runAsNonRoot: true
+              runAsUser: 65532
+        workspaces:
+          - description: >-
+              The workspace which contains kubernetes manifests which we want to apply
+              on the cluster.
+            name: manifest-dir
+            optional: true
+          - description: >-
+              The workspace which contains the the kubeconfig file if in case we want to
+              run the oc command on another cluster.
+            name: kubeconfig-dir
+            optional: true
+      workspaces:
+        - name: source
+          workspace: source
+      runAfter:
+        - build-model-server
+      params:
+      - name: SCRIPT
+        value: |
+          oc apply -f $(workspaces.source.path)/source/model/deploy-model-yolo-server.yaml
   workspaces:
     - name: shared-workspace
----
-apiVersion: tekton.dev/v1beta1
-kind: Task
-metadata:
-  name: pretrained-task
-  namespace: flyingthings-standalone
-spec:
-  params:
-    - name: BATCH_SIZE
-      type: string
-    - name: NUM_EPOCHS
-      type: string
-    - name: WEIGHTS
-      type: string
-    - name: MINIO_ENDPOINT
-      type: string
-    - name: MINIO_BUCKET
-      type: string
-    - name: MINIO_ACCESSKEY
-      type: string
-    - name: MINIO_SECRETKEY
-      type: string
-    - name: MINIO_CLIENT_URL
-      type: string
-  steps:
-    - image: image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/yolo:latest
-      # script: |
-      #   ls -al $(workspaces.output.path) && touch /workspace/this
-      script: |
-        cd /workspace && yolo predict model=yolov8n.pt && $(workspaces.output.path)/source/training-job/zz-push-pretrained.sh
-      env:
-        - name: BATCH_SIZE
-          value: $(params.BATCH_SIZE)
-        - name: NUM_EPOCHS
-          value: $(params.NUM_EPOCHS)
-        - name: WEIGHTS
-          value: $(params.WEIGHTS)
-        - name: MINIO_ENDPOINT
-          value: $(params.MINIO_ENDPOINT)
-        - name: MINIO_BUCKET
-          value: $(params.MINIO_BUCKET)
-        - name: MINIO_ACCESSKEY
-          value: $(params.MINIO_ACCESSKEY)
-        - name: MINIO_SECRETKEY
-          value: $(params.MINIO_SECRETKEY)
-        - name: MINIO_CLIENT_URL
-          value: $(params.MINIO_CLIENT_URL)
-      resources:
-        limits:
-          nvidia.com/gpu: 1
-      volumeMounts:
-        - name: workspace
-          mountPath: /opt/app-root/src/simplevis-data/workspace
-        - name: dshm
-          mountPath: /dev/shm
-        - name: output
-          mountPath: /source 
-  volumes:
-    - name: workspace
-      emptyDir: {}
-    - name: dshm
-      emptyDir:
-          medium: Memory
-    - name: output
-  workspaces:
-    - name: output
+    - name: source

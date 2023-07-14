@@ -69,11 +69,13 @@ valid_count = total_images - train_count - test_count
 
 # Copy images and labels to the train directory
 for filename in image_filenames[:train_count]:
+    name, extension = os.path.splitext(filename)
+
     src_image_path = os.path.join(image_dir, filename)
     dest_image_path = os.path.join(train_image_dir, filename)
     shutil.copy(src_image_path, dest_image_path)
 
-    label_filename = filename.replace('.jpg', '.txt')
+    label_filename = filename.replace(extension, '.txt')
     src_label_path = os.path.join(label_dir, label_filename)
     dest_label_path = os.path.join(train_label_dir, label_filename)
     shutil.copy(src_label_path, dest_label_path)
@@ -84,7 +86,7 @@ for filename in image_filenames[train_count:train_count + test_count]:
     dest_image_path = os.path.join(test_image_dir, filename)
     shutil.copy(src_image_path, dest_image_path)
 
-    label_filename = filename.replace('.jpg', '.txt')
+    label_filename = filename.replace(extension, '.txt')
     src_label_path = os.path.join(label_dir, label_filename)
     dest_label_path = os.path.join(test_label_dir, label_filename)
     shutil.copy(src_label_path, dest_label_path)
@@ -95,7 +97,7 @@ for filename in image_filenames[train_count + test_count:]:
     dest_image_path = os.path.join(valid_image_dir, filename)
     shutil.copy(src_image_path, dest_image_path)
 
-    label_filename = filename.replace('.jpg', '.txt')
+    label_filename = filename.replace(extension, '.txt')
     src_label_path = os.path.join(label_dir, label_filename)
     dest_label_path = os.path.join(valid_label_dir, label_filename)
     shutil.copy(src_label_path, dest_label_path)

@@ -10,14 +10,24 @@ spec:
       value: https://github.com/redhat-na-ssa/flyingthings.git
     - name: git-revision
       value: develop
+    - name: MINIO_CLIENT_URL
+      value: "http://util02.davenet.local"
   workspaces:
     - name: shared-workspace
       volumeClaimTemplate:
         spec:
           accessModes:
-            - ReadWriteMany # access mode may affect how you can use this volume in parallel tasks
+            - ReadWriteOnce # access mode may affect how you can use this volume in parallel tasks
           resources:
             requests:
               storage: 500Mi
-          storageClassName: ocs-storagecluster-cephfs
+          volumeMode: Filesystem
+    - name: source
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+            - ReadWriteOnce # access mode may affect how you can use this volume in parallel tasks
+          resources:
+            requests:
+              storage: 500Mi
           volumeMode: Filesystem
