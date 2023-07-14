@@ -50,159 +50,195 @@ spec:
       default: util02.davenet.local
       type: string
   tasks: 
-    # - name: fetch-repository
-    #   params:
-    #     - name: url
-    #       value: $(params.git-url)
-    #     - name: subdirectory
-    #       value: ''
-    #     - name: deleteExisting
-    #       value: 'true'
-    #     - name: revision
-    #       value: $(params.git-revision)
-    #   taskRef:
-    #     kind: ClusterTask
-    #     name: git-clone
-    #   workspaces:
-    #     - name: output
-    #       workspace: sourcecode
-    # - name: get-dataset
-    #   taskRef:
-    #     name: get-dataset
-    #   params:
-    #     - name: DATASET_ZIP
-    #       value: $(params.DATASET_ZIP)
-    #     - name: MINIO_ENDPOINT
-    #       value: $(params.MINIO_ENDPOINT)
-    #     - name: SIMPLEVIS_DATA
-    #       value: $(params.SIMPLEVIS_DATA)
-    #     - name: MINIO_BUCKET
-    #       value: $(params.MINIO_BUCKET)
-    #     - name: MINIO_ACCESSKEY
-    #       value: $(params.MINIO_ACCESSKEY)
-    #     - name: MINIO_SECRETKEY
-    #       value: $(params.MINIO_SECRETKEY)
-    #     - name: MINIO_CLIENT_URL
-    #       value: $(params.MINIO_CLIENT_URL)
-    #   runAfter:
-    #     - fetch-repository
-    #   workspaces:
-    #     - name: source
-    #       workspace: sourcecode
-    #     - name: workspace
-    #       workspace: shared-workspace
-    # - name: create-classfile
-    #   taskRef:
-    #     name: create-classfile
-    #   params:
-    #     - name: SIMPLEVIS_DATA
-    #       value: $(params.SIMPLEVIS_DATA)
-    #   runAfter:
-    #     - get-dataset
-    #   workspaces:
-    #     - name: source
-    #       workspace: sourcecode
-    #     - name: workspace
-    #       workspace: shared-workspace
-    # - name: image-resize
-    #   when:
-    #     - input: "$(params.IMG_RESIZE)"
-    #       operator: in
-    #       values: ["Y"]
-    #   taskRef:
-    #     name: image-resize
-    #   params:
-    #     - name: SIMPLEVIS_DATA
-    #       value: $(params.SIMPLEVIS_DATA)
-    #     - name: IMG_RESIZE
-    #       value: "$(params.IMG_RESIZE)"
-    #   runAfter:
-    #     - create-classfile
-    #   workspaces:
-    #     - name: source
-    #       workspace: sourcecode
-    #     - name: workspace
-    #       workspace: shared-workspace
-    # - name: distribute-dataset
-    #   taskRef:
-    #     name: distribute-data
-    #   params:
-    #     - name: SIMPLEVIS_DATA
-    #       value: $(params.SIMPLEVIS_DATA)
-    #   runAfter:
-    #     - image-resize
-    #   workspaces:
-    #     - name: source
-    #       workspace: sourcecode
-    #     - name: workspace
-    #       workspace: shared-workspace
-    # - name: train-model
-    #   taskRef:
-    #     name: train-model
-    #   params:
-    #     - name: BATCH_SIZE
-    #       value: $(params.BATCH_SIZE)
-    #     - name: NUM_EPOCHS
-    #       value: $(params.NUM_EPOCHS)
-    #     - name: WEIGHTS
-    #       value: $(params.WEIGHTS)
-    #     - name: BASE_MODEL
-    #       value: $(params.BASE_MODEL)
-    #     - name: SIMPLEVIS_DATA
-    #       value: $(params.SIMPLEVIS_DATA)
-    #   runAfter:
-    #     - distribute-dataset
-    #   workspaces:
-    #     - name: source
-    #       workspace: sourcecode
-    #     - name: workspace
-    #       workspace: shared-workspace
-    # - name: push-results
-    #   taskRef:
-    #     name: push-results
-    #   params:
-    #     - name: WEIGHTS
-    #       value: $(params.WEIGHTS)
-    #     - name: MINIO_ENDPOINT
-    #       value: $(params.MINIO_ENDPOINT)
-    #     - name: SIMPLEVIS_DATA
-    #       value: $(params.SIMPLEVIS_DATA)
-    #     - name: MINIO_BUCKET
-    #       value: $(params.MINIO_BUCKET)
-    #     - name: MINIO_ACCESSKEY
-    #       value: $(params.MINIO_ACCESSKEY)
-    #     - name: MINIO_SECRETKEY
-    #       value: $(params.MINIO_SECRETKEY)
-    #     - name: MINIO_CLIENT_URL
-    #       value: $(params.MINIO_CLIENT_URL)
-    #   runAfter:
-    #     - train-model
-    #   workspaces:
-    #     - name: source
-    #       workspace: sourcecode
-    #     - name: workspace
-    #       workspace: shared-workspace
-    - name: deploy-model-a
-      taskRef:
-        name: openshift-client
-        kind: ClusterTask
+    - name: fetch-repository
       params:
-        - name: SCRIPT
-          value: |
-            oc new-app --name=model-a \
-            --image=image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/custom-model:latest \
-            -e WEIGHTS=$(params.WEIGHTS)
-    - name: expose-model-a
+        - name: url
+          value: $(params.git-url)
+        - name: subdirectory
+          value: ''
+        - name: deleteExisting
+          value: 'true'
+        - name: revision
+          value: $(params.git-revision)
       taskRef:
-        name: openshift-client
         kind: ClusterTask
+        name: git-clone
+      workspaces:
+        - name: output
+          workspace: sourcecode
+    - name: get-dataset
+      taskRef:
+        name: get-dataset
       params:
-        - name: SCRIPT
-          value: |
-            oc expose service/model-a
+        - name: DATASET_ZIP
+          value: $(params.DATASET_ZIP)
+        - name: MINIO_ENDPOINT
+          value: $(params.MINIO_ENDPOINT)
+        - name: SIMPLEVIS_DATA
+          value: $(params.SIMPLEVIS_DATA)
+        - name: MINIO_BUCKET
+          value: $(params.MINIO_BUCKET)
+        - name: MINIO_ACCESSKEY
+          value: $(params.MINIO_ACCESSKEY)
+        - name: MINIO_SECRETKEY
+          value: $(params.MINIO_SECRETKEY)
+        - name: MINIO_CLIENT_URL
+          value: $(params.MINIO_CLIENT_URL)
       runAfter:
-        - deploy-model-a
+        - fetch-repository
+      workspaces:
+        - name: source
+          workspace: sourcecode
+        - name: workspace
+          workspace: shared-workspace
+    - name: create-classfile
+      taskRef:
+        name: create-classfile
+      params:
+        - name: SIMPLEVIS_DATA
+          value: $(params.SIMPLEVIS_DATA)
+      runAfter:
+        - get-dataset
+      workspaces:
+        - name: source
+          workspace: sourcecode
+        - name: workspace
+          workspace: shared-workspace
+    - name: image-resize
+      when:
+        - input: "$(params.IMG_RESIZE)"
+          operator: in
+          values: ["Y"]
+      taskRef:
+        name: image-resize
+      params:
+        - name: SIMPLEVIS_DATA
+          value: $(params.SIMPLEVIS_DATA)
+        - name: IMG_RESIZE
+          value: "$(params.IMG_RESIZE)"
+      runAfter:
+        - create-classfile
+      workspaces:
+        - name: source
+          workspace: sourcecode
+        - name: workspace
+          workspace: shared-workspace
+    - name: distribute-dataset
+      taskRef:
+        name: distribute-data
+      params:
+        - name: SIMPLEVIS_DATA
+          value: $(params.SIMPLEVIS_DATA)
+      runAfter:
+        - image-resize
+      workspaces:
+        - name: source
+          workspace: sourcecode
+        - name: workspace
+          workspace: shared-workspace
+    - name: train-model
+      taskRef:
+        name: train-model
+      params:
+        - name: BATCH_SIZE
+          value: $(params.BATCH_SIZE)
+        - name: NUM_EPOCHS
+          value: $(params.NUM_EPOCHS)
+        - name: WEIGHTS
+          value: $(params.WEIGHTS)
+        - name: BASE_MODEL
+          value: $(params.BASE_MODEL)
+        - name: SIMPLEVIS_DATA
+          value: $(params.SIMPLEVIS_DATA)
+      runAfter:
+        - distribute-dataset
+      workspaces:
+        - name: source
+          workspace: sourcecode
+        - name: workspace
+          workspace: shared-workspace
+    - name: push-results
+      taskRef:
+        name: push-results
+      params:
+        - name: WEIGHTS
+          value: $(params.WEIGHTS)
+        - name: MINIO_ENDPOINT
+          value: $(params.MINIO_ENDPOINT)
+        - name: SIMPLEVIS_DATA
+          value: $(params.SIMPLEVIS_DATA)
+        - name: MINIO_BUCKET
+          value: $(params.MINIO_BUCKET)
+        - name: MINIO_ACCESSKEY
+          value: $(params.MINIO_ACCESSKEY)
+        - name: MINIO_SECRETKEY
+          value: $(params.MINIO_SECRETKEY)
+        - name: MINIO_CLIENT_URL
+          value: $(params.MINIO_CLIENT_URL)
+      runAfter:
+        - train-model
+      workspaces:
+        - name: source
+          workspace: sourcecode
+        - name: workspace
+          workspace: shared-workspace
+    - name: deploy-model-a
+      taskSpec:
+        metadata:
+          annotations:
+            # operator.tekton.dev/last-applied-hash: 64d9014f8c7f4cd290afc619a32a185211cae3b23d56af70197b0e936ec8d35b
+            tekton.dev/displayName: openshift client
+            tekton.dev/pipelines.minVersion: 0.17.0
+            tekton.dev/tags: cli
+          labels:
+            app.kubernetes.io/version: '0.2'
+            operator.tekton.dev/operand-name: openshift-pipelines-addons
+            operator.tekton.dev/provider-type: redhat
+        params:
+          - default: oc help
+            description: The OpenShift CLI arguments to run
+            name: SCRIPT
+            type: string
+          - default: latest
+            description: The OpenShift Version to use
+            name: VERSION
+            type: string
+        steps:
+          - env:
+              - name: HOME
+                value: /tekton/home
+            image: >-
+              image-registry.openshift-image-registry.svc:5000/openshift/cli:$(params.VERSION)
+            name: oc
+            resources: {}
+            script: |
+              #!/usr/bin/env bash
 
+              [[ "$(workspaces.manifest-dir.bound)" == "true" ]] && \
+              cd $(workspaces.manifest-dir.path)
+
+              [[ "$(workspaces.kubeconfig-dir.bound)" == "true" ]] && \
+              [[ -f $(workspaces.kubeconfig-dir.path)/kubeconfig ]] && \
+              export KUBECONFIG=$(workspaces.kubeconfig-dir.path)/kubeconfig
+
+              $(params.SCRIPT)
+            securityContext:
+              runAsNonRoot: true
+              runAsUser: 65532
+        workspaces:
+          - name: manifest-dir
+            optional: true
+          - name: kubeconfig-dir
+            optional: true
+      workspaces:
+        - name: source
+          workspace: sourcecode
+      runAfter:
+        - push-results
+      params:
+      - name: SCRIPT
+        value: |
+          oc apply -f $(workspaces.source.path)/source/model/deploy-model-a-server.yaml
   workspaces:
     - name: shared-workspace
     - name: sourcecode

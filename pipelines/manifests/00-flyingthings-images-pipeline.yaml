@@ -140,7 +140,7 @@ spec:
               echo "Let's see what we got here..." \
               && ls -al $(workspaces.workspace.path)
       runAfter:
-        - fetch-repository
+        - upload-artifacts
       workspaces:
         - name: workspace
           workspace: shared-workspace
@@ -436,10 +436,8 @@ spec:
           value: $(params.MINIO_SECRETKEY)
         - name: MINIO_CLIENT_URL
           value: $(params.MINIO_CLIENT_URL)
-      # runAfter:
-      #   - build-yolo
       runAfter:
-        - see-stuff
+        - build-yolo
       workspaces:
         - name: source
           workspace: source
