@@ -10,7 +10,7 @@ spec:
       description: url of the git repo for the code of deployment
       type: string
     - name: git-revision
-      default: develop
+      default: main
       description: revision to be used from repo of the code for deployment
       type: string
     - name: BATCH_SIZE
@@ -21,6 +21,12 @@ spec:
       type: string
     - name: IMG_RESIZE
       default: "N"
+      type: string
+    - name: IMG_WIDTH
+      default: "200"
+      type: string
+    - name: IMG_HEIGHT
+      default: "200"
       type: string
     - name: WEIGHTS
       default: flyingthings.pt
@@ -118,6 +124,10 @@ spec:
           value: $(params.SIMPLEVIS_DATA)
         - name: IMG_RESIZE
           value: "$(params.IMG_RESIZE)"
+        - name: IMG_WIDTH
+          value: "$(params.IMG_WIDTH)"
+        - name: IMG_HEIGHT
+          value: "$(params.IMG_HEIGHT)"
       runAfter:
         - create-classfile
       workspaces:
