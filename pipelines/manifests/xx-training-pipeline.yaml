@@ -182,6 +182,63 @@ spec:
           workspace: sourcecode
         - name: workspace
           workspace: shared-workspace
+    - name: deploy-model-a
+      taskSpec:
+        metadata:
+          annotations:
+            # operator.tekton.dev/last-applied-hash: 64d9014f8c7f4cd290afc619a32a185211cae3b23d56af70197b0e936ec8d35b
+            tekton.dev/displayName: openshift client
+            tekton.dev/pipelines.minVersion: 0.17.0
+            tekton.dev/tags: cli
+          labels:
+            app.kubernetes.io/version: '0.2'
+            operator.tekton.dev/operand-name: openshift-pipelines-addons
+            operator.tekton.dev/provider-type: redhat
+        params:
+          - default: oc help
+            description: The OpenShift CLI arguments to run
+            name: SCRIPT
+            type: string
+          - default: latest
+            description: The OpenShift Version to use
+            name: VERSION
+            type: string
+        steps:
+          - env:
+              - name: HOME
+                value: /tekton/home
+            image: >-
+              image-registry.openshift-image-registry.svc:5000/openshift/cli:$(params.VERSION)
+            name: oc
+            resources: {}
+            script: |
+              #!/usr/bin/env bash
+
+              [[ "$(workspaces.manifest-dir.bound)" == "true" ]] && \
+              cd $(workspaces.manifest-dir.path)
+
+              [[ "$(workspaces.kubeconfig-dir.bound)" == "true" ]] && \
+              [[ -f $(workspaces.kubeconfig-dir.path)/kubeconfig ]] && \
+              export KUBECONFIG=$(workspaces.kubeconfig-dir.path)/kubeconfig
+
+              $(params.SCRIPT)
+            securityContext:
+              runAsNonRoot: true
+              runAsUser: 65532
+        workspaces:
+          - name: manifest-dir
+            optional: true
+          - name: kubeconfig-dir
+            optional: true
+      workspaces:
+        - name: source
+          workspace: sourcecode
+      runAfter:
+        - push-results
+      params:
+      - name: SCRIPT
+        value: |
+          oc apply -f $(workspaces.source.path)/source/model/deploy-model-a-server.yaml
   workspaces:
     - name: shared-workspace
     - name: sourcecode

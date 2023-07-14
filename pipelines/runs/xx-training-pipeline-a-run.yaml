@@ -13,10 +13,15 @@ spec:
     - name: BATCH_SIZE
       value: "-1"
     - name: NUM_EPOCHS
-      value: "10"
+      value: "100"
     - name: IMG_RESIZE
       value: "Y"
-
+    - name: WEIGHTS
+      value: flyingthings.pt
+    - name: DATASET_ZIP
+      value: flyingthings-yolo.zip
+    - name: MINIO_BUCKET
+      value: flyingthings
   workspaces:
     - name: sourcecode
       volumeClaimTemplate:
