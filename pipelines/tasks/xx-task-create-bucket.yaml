@@ -2,7 +2,6 @@ apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
   name: create-bucket
-  namespace: flyingthings-standalone
 spec:
   params:
     - name: SIMPLEVIS_DATA

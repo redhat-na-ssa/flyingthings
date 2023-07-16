@@ -2,14 +2,15 @@ apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
   name: create-classfile
-  namespace: flyingthings-standalone
 spec:
   params:
     - name: SIMPLEVIS_DATA
       type: string
+    - name: ocp-namespace
+      type: string
   steps:
     - name: distribute-data
-      image: image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/base-ubi9:latest
+      image: image-registry.openshift-image-registry.svc:5000/$(params.ocp-namespace)/base-ubi9:latest
       script: |
         cp $(workspaces.source.path)/source/training/classes.yaml.j2 $(params.SIMPLEVIS_DATA)/workspace/datasets \
         && cd $(params.SIMPLEVIS_DATA)/workspace/datasets \

@@ -2,7 +2,6 @@ apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
   name: flyingthings-images-pipeline
-  namespace: flyingthings-standalone
 spec:
   params:
     - name: git-url
@@ -13,24 +12,27 @@ spec:
       default: main
       description: revision to be used from repo of the code for deployment
       type: string
+    - name: ocp-tablespace
+      description: tablespace for the deployment
+      type: string
     - name: YOLO_IMAGE
-      default: image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/yolo:latest
+      default: image-registry.openshift-image-registry.svc:5000/$(params.ocp-tablespace)/yolo:latest
       description: base image for yolo
       type: string
     - name: UBI_IMAGE
-      default: image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/base-ubi9:latest
+      default: image-registry.openshift-image-registry.svc:5000/$(params.ocp-tablespace)/base-ubi9:latest
       description: base image for notebook
       type: string
     - name: MINIMAL_IMAGE
-      default: image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/minimal-notebook:latest
+      default: image-registry.openshift-image-registry.svc:5000/$(params.ocp-tablespace)/minimal-notebook:latest
       description: notebook template
       type: string
     - name: CUSTOM_NOTEBOOK_IMAGE
-      default: image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/yolo-notebook:latest
+      default: image-registry.openshift-image-registry.svc:5000/$(params.ocp-tablespace)/yolo-notebook:latest
       description: custom notebook image
       type: string
     - name: MODEL_IMAGE
-      default: image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/custom-model:latest
+      default: image-registry.openshift-image-registry.svc:5000/$(params.ocp-tablespace)/custom-model:latest
       description: model server image
       type: string
     - name: YOLO_DOCKERFILE
@@ -54,15 +56,15 @@ spec:
       description: dockerfile path
       type: string
     - name: MINIMAL_BUILD_ARGS
-      default: --build-arg BASE_IMAGE=image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/base-ubi9:latest
+      default: --build-arg BASE_IMAGE=image-registry.openshift-image-registry.svc:5000/$(params.ocp-tablespace)/base-ubi9:latest
       description: build arguments for minimal notebook
       type: string
     - name: MODEL_BUILD_ARGS
-      default: --build-arg WEIGHTS=flyingthings.pt --build-arg BASE_IMAGE=image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/yolo:latest
+      default: --build-arg WEIGHTS=flyingthings.pt --build-arg BASE_IMAGE=image-registry.openshift-image-registry.svc:5000/$(params.ocp-tablespace)/yolo:latest
       description: build arguments for model server
       type: string
     - name: CUSTOM_BUILD_ARGS
-      default: --build-arg BASE_IMAGE=image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/minimal-notebook:latest
+      default: --build-arg BASE_IMAGE=image-registry.openshift-image-registry.svc:5000/$(params.ocp-tablespace)/minimal-notebook:latest
       description: build arguments for custom notebook
       type: string
     - name: BATCH_SIZE
@@ -406,6 +408,8 @@ spec:
           value: $(params.MINIO_SECRETKEY)
         - name: MINIO_CLIENT_URL
           value: $(params.MINIO_CLIENT_URL)
+        - name: ocp-tablespace
+          value: $(params.ocp-tablespace)
       runAfter:
         - build-yolo
       workspaces:

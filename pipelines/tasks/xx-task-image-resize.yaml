@@ -2,7 +2,6 @@ apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
   name: image-resize
-  namespace: flyingthings-standalone
 spec:
   params:
     - name: SIMPLEVIS_DATA
@@ -11,9 +10,11 @@ spec:
       type: string
     - name: IMG_HEIGHT
       type: string
+    - name: ocp-namespace
+      type: string
   steps:
     - name: image-resize
-      image: image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/base-ubi9:latest
+      image: image-registry.openshift-image-registry.svc:5000/$(params.ocp-namespace)/base-ubi9:latest
       script: |
         set -x \
         && cd $(params.SIMPLEVIS_DATA)/workspace/datasets \

@@ -2,7 +2,6 @@ apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
   name: training-x-pipeline
-  namespace: flyingthings-standalone
 spec:
   params: 
     - name: git-url
