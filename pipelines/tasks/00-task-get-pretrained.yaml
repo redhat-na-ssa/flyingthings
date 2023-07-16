@@ -2,7 +2,6 @@ apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
   name: get-pretrained
-  namespace: flyingthings-standalone
 spec:
   params:
     - name: WEIGHTS
@@ -21,9 +20,11 @@ spec:
       type: string
     - name: MINIO_CLIENT_URL
       type: string
+    - name: ocp-tablespace
+      type: string
   steps:
     - name: pull-dataset
-      image: image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/yolo:latest
+      image: image-registry.openshift-image-registry.svc:5000/$(params.ocp-tablespace)/yolo:latest
       script: |
         cd $(params.SIMPLEVIS_DATA)/workspace \
         && $(workspaces.source.path)/source/training/00-get-yolo-model.sh \
