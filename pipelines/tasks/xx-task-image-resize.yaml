@@ -2,17 +2,25 @@ apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
   name: image-resize
-  namespace: flyingthings-standalone
 spec:
   params:
     - name: SIMPLEVIS_DATA
       type: string
+    - name: IMG_WIDTH
+      type: string
+    - name: IMG_HEIGHT
+      type: string
+    - name: ocp-tablespace
+      type: string
   steps:
     - name: image-resize
-      image: registry.access.redhat.com/ubi9/python-39
+      image: image-registry.openshift-image-registry.svc:5000/$(params.ocp-tablespace)/base-ubi9:latest
       script: |
-        cd $(params.SIMPLEVIS_DATA)/workspace \
-        && $(workspaces.source.path)/source/training/100-image-resize.py
+        set -x \
+        && cd $(params.SIMPLEVIS_DATA)/workspace/datasets \
+        && mkdir images_original \
+        && cp images/* images_original/ \
+        && $(workspaces.source.path)/source/training/100-image-resize.py images $(params.IMG_WIDTH) $(params.IMG_HEIGHT)
       env:
         - name: SIMPLEVIS_DATA
           value: $(params.SIMPLEVIS_DATA)

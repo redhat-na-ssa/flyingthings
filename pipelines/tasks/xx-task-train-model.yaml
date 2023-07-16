@@ -2,7 +2,6 @@ apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
   name: train-model
-  namespace: flyingthings-standalone
 spec:
   params:
     - name: BATCH_SIZE
@@ -15,9 +14,11 @@ spec:
       type: string
     - name: SIMPLEVIS_DATA
       type: string
+    - name: ocp-tablespace
+      type: string
   steps:
     - name: train-model
-      image: image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/yolo:latest
+      image: image-registry.openshift-image-registry.svc:5000/$(params.ocp-tablespace)/yolo:latest
       script: |
         $(workspaces.source.path)/source/training/03-run-training.sh
       env:

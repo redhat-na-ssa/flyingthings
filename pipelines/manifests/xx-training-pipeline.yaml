@@ -2,7 +2,6 @@ apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
   name: training-x-pipeline
-  namespace: flyingthings-standalone
 spec:
   params: 
     - name: git-url
@@ -10,8 +9,10 @@ spec:
       description: url of the git repo for the code of deployment
       type: string
     - name: git-revision
-      default: develop
+      default: main
       description: revision to be used from repo of the code for deployment
+      type: string
+    - name: ocp-tablespace
       type: string
     - name: BATCH_SIZE
       default: "-1"
@@ -21,6 +22,12 @@ spec:
       type: string
     - name: IMG_RESIZE
       default: "N"
+      type: string
+    - name: IMG_WIDTH
+      default: "200"
+      type: string
+    - name: IMG_HEIGHT
+      default: "200"
       type: string
     - name: WEIGHTS
       default: flyingthings.pt
@@ -49,7 +56,7 @@ spec:
     - name: MINIO_CLIENT_URL
       default: util02.davenet.local
       type: string
-    - name: DEPLOY_FILE
+    - name: MODEL_NAME
       type: string
   tasks: 
     - name: fetch-repository
@@ -99,6 +106,8 @@ spec:
       params:
         - name: SIMPLEVIS_DATA
           value: $(params.SIMPLEVIS_DATA)
+        - name: ocp-tablespace
+          value: $(params.ocp-tablespace)
       runAfter:
         - get-dataset
       workspaces:
@@ -118,6 +127,12 @@ spec:
           value: $(params.SIMPLEVIS_DATA)
         - name: IMG_RESIZE
           value: "$(params.IMG_RESIZE)"
+        - name: IMG_WIDTH
+          value: "$(params.IMG_WIDTH)"
+        - name: IMG_HEIGHT
+          value: "$(params.IMG_HEIGHT)"
+        - name: ocp-tablespace
+          value: $(params.ocp-tablespace)
       runAfter:
         - create-classfile
       workspaces:
@@ -152,6 +167,8 @@ spec:
           value: $(params.BASE_MODEL)
         - name: SIMPLEVIS_DATA
           value: $(params.SIMPLEVIS_DATA)
+        - name: ocp-tablespace
+          value: $(params.ocp-tablespace)
       runAfter:
         - distribute-dataset
       workspaces:
@@ -238,9 +255,55 @@ spec:
       runAfter:
         - push-results
       params:
+      - name: ocp-tablespace
+        value: $(params.ocp-tablespace)
+      - name: MINIO_ENDPOINT
+        value: $(params.MINIO_ENDPOINT)
+      - name: MINIO_BUCKET
+        value: $(params.MINIO_BUCKET)
+      - name: MINIO_ACCESSKEY
+        value: $(params.MINIO_ACCESSKEY)
+      - name: MINIO_SECRETKEY
+        value: $(params.MINIO_SECRETKEY)
+      - name: MODEL_NAME
+        value: $(params.MODEL_NAME)
       - name: SCRIPT
         value: |
-          oc apply -f $(workspaces.source.path)/source/model/$(params.DEPLOY_FILE)
+          oc new-app image-registry.openshift-image-registry.svc:5000/$(params.ocp-tablespace)/custom-model:latest \
+            --name=$(params.MODEL_NAME) \
+            --env=WEIGHTS=model_custom.pt \
+            --env=SIMPLEVIS_DATA=/opt/app-root/src/simplevis-data \
+            --env=MINIO_ENDPOINT=$(params.MINIO_ENDPOINT) \
+            --env=MINIO_BUCKET=$(params.MINIO_BUCKET) \
+            --env=MINIO_ACCESSKEY=$(params.MINIO_ACCESSKEY) \
+            --env=MINIO_SECRETKEY=$(params.MINIO_SECRETKEY) \
+          && oc set volume deployment/$(params.MODEL_NAME) \
+            --add \
+            --name=simplevis-data-volume \
+            --type=emptyDir \
+            --mount-path=/opt/app-root/src/simplevis-data \
+          && oc apply -f - <<EOF
+          apiVersion: route.openshift.io/v1
+          kind: Route
+          metadata:
+            name: $(params.MODEL_NAME)
+            labels:
+              app: $(params.MODEL_NAME)
+              app.kubernetes.io/component: $(params.MODEL_NAME)
+              app.kubernetes.io/instance: $(params.MODEL_NAME)
+          annotations:
+            openshift.io/host.generated: "true"
+          spec:
+            to:
+              kind: Service
+              name: $(params.MODEL_NAME)
+              weight: 100
+            port:
+              targetPort: 8000-tcp
+            tls:
+              termination: edge
+              insecureEdgeTerminationPolicy: Allow
+          EOF
   workspaces:
     - name: shared-workspace
     - name: sourcecode
