@@ -6,9 +6,7 @@ spec:
   params:
     - name: SIMPLEVIS_DATA
       type: string
-    - name: IMG_WIDTH
-      type: string
-    - name: IMG_HEIGHT
+    - name: MAX_WIDTH
       type: string
     - name: ocp-tablespace
       type: string
@@ -18,9 +16,9 @@ spec:
       script: |
         set -x \
         && cd $(params.SIMPLEVIS_DATA)/workspace/datasets \
-        && mkdir images_original \
-        && cp images/* images_original/ \
-        && $(workspaces.source.path)/source/training/100-image-resize.py images $(params.IMG_WIDTH) $(params.IMG_HEIGHT)
+        && mv images images_original \
+        && mkdir images \
+        && $(workspaces.source.path)/source/training/100-image-resize.py images_original images $(params.MAX_WIDTH)
       env:
         - name: SIMPLEVIS_DATA
           value: $(params.SIMPLEVIS_DATA)

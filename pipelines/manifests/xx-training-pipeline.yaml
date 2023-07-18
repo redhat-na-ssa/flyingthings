@@ -13,50 +13,65 @@ spec:
       description: revision to be used from repo of the code for deployment
       type: string
     - name: ocp-tablespace
+      description: target deployment for the project
       type: string
     - name: BATCH_SIZE
+      description: batch size for training NOTE* for CPU use a value of 2
       default: "-1"
       type: string
     - name: NUM_EPOCHS
+      description: number of epochs for training
       default: "10"
       type: string
     - name: IMG_RESIZE
+      description: flag to resize the source images before training
       default: "N"
       type: string
-    - name: IMG_WIDTH
-      default: "200"
-      type: string
-    - name: IMG_HEIGHT
+    - name: MAX_WIDTH
+      description: maximum width for images when resizing
       default: "200"
       type: string
     - name: WEIGHTS
+      description: target wieghts file name
       default: flyingthings.pt
       type: string
     - name: BASE_MODEL
+      description: base model used to begin training
       default: yolov8n.pt
       type: string
     - name: MINIO_ENDPOINT
+      description: endpoint of minio api
       default: http://minio:9000
       type: string
     - name: DATASET_ZIP
+      description: name of the dataset zip file for training
       default: flyingthings-yolo.zip
       type: string
     - name: SIMPLEVIS_DATA
+      description: mount point for work files during training
       default: /opt/app-root/src/simplevis-data
       type: string
     - name: MINIO_BUCKET
+      description: bucket with training dataset and target of model artifacts
       default: flyingthings
       type: string
     - name: MINIO_ACCESSKEY
+      description: access key for minio NOTE* use secrets for production
       default: minioadmin
       type: string
     - name: MINIO_SECRETKEY
+      description: secret key for minio NOTE* use secrets for production
       default: minioadmin
       type: string
     - name: MINIO_CLIENT_URL
-      default: util02.davenet.local
+      description: location of minio client binary
+      default: https://dl.min.io/client/mc/release/linux-amd64/mc
+      type: string
+    - name: DEPLOY
+      description: flag for deploying model server along with model
       type: string
     - name: MODEL_NAME
+      description: name used to deploy the model and model server
       type: string
   tasks: 
     - name: fetch-repository
@@ -127,10 +142,8 @@ spec:
           value: $(params.SIMPLEVIS_DATA)
         - name: IMG_RESIZE
           value: "$(params.IMG_RESIZE)"
-        - name: IMG_WIDTH
-          value: "$(params.IMG_WIDTH)"
-        - name: IMG_HEIGHT
-          value: "$(params.IMG_HEIGHT)"
+        - name: MAX_WIDTH
+          value: "$(params.MAX_WIDTH)"
         - name: ocp-tablespace
           value: $(params.ocp-tablespace)
       runAfter:
@@ -202,6 +215,10 @@ spec:
         - name: workspace
           workspace: shared-workspace
     - name: deploy-model-x
+      when:
+        - input: "$(params.DEPLOY)"
+          operator: in
+          values: ["Y"]
       taskSpec:
         metadata:
           annotations:

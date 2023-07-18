@@ -19,13 +19,16 @@ tkn pipeline start training-x-pipeline \
   -p BATCH_SIZE="-1" \
   -p NUM_EPOCHS="100" \
   -p IMG_RESIZE="Y" \
-  -p WEIGHTS=flyingthings.pt \
-  -p DATASET_ZIP=flyingthings-yolo.zip \
+  -p MAX_WIDTH="200" \
+  -p WEIGHTS=hotwheelz.pt \
+  -p DATASET_ZIP=hotwheelz-03.zip \
   -p MINIO_ENDPOINT=http://minio:9000 \
   -p MINIO_ACCESSKEY=minioadmin \
   -p MINIO_SECRETKEY=minioadmin \
-  -p MINIO_BUCKET=flyingthings \
-  -p MODEL_NAME=model-a \
+  -p MINIO_BUCKET=hotwheelz \
+  -p MODEL_NAME=model-hotwheelz \
+  -p MINIO_CLIENT_URL=util02.davenet.local \
+  -p DEPLOY="N" \
   --use-param-defaults --showlog
 
 # Exit the script gracefully
