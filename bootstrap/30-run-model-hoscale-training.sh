@@ -19,13 +19,16 @@ tkn pipeline start training-x-pipeline \
   -p BATCH_SIZE="-1" \
   -p NUM_EPOCHS="100" \
   -p IMG_RESIZE="Y" \
-  -p WEIGHTS=hotwheelz.pt \
-  -p DATASET_ZIP=hotwheelz-01.zip \
+  -p MAX_WIDTH="200" \
+  -p WEIGHTS=hoscale.pt \
+  -p DATASET_ZIP=hoscale.zip \
   -p MINIO_ENDPOINT=http://minio:9000 \
   -p MINIO_ACCESSKEY=minioadmin \
   -p MINIO_SECRETKEY=minioadmin \
-  -p MINIO_BUCKET=hotwheelz \
-  -p MODEL_NAME=model-b \
+  -p MINIO_BUCKET=hoscale \
+  -p MODEL_NAME=model-hoscale \
+  -p MINIO_CLIENT_URL=util02.davenet.local \
+  -p DEPLOY="Y" \
   --use-param-defaults --showlog
 
 # Exit the script gracefully
