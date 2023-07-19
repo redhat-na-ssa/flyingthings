@@ -5,7 +5,7 @@ RUN set -x && \
     source env/bin/activate && \
     python -m pip install label-studio
 
-COPY entrypoint.sh .
+COPY source/labelstudio/entrypoint.sh .
 
 EXPOSE 8080
 
