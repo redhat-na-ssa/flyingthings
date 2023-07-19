@@ -16,7 +16,7 @@ tkn pipeline start training-x-pipeline \
   -w name=shared-workspace,volumeClaimTemplateFile=work-pvc.yaml \
   -p ocp-tablespace="$TABLESPACE" \
   -p git-url=https://github.com/redhat-na-ssa/flyingthings.git \
-  -p git-revision=main \
+  -p git-revision=develop \
   -p BATCH_SIZE="-1" \
   -p NUM_EPOCHS="100" \
   -p IMG_RESIZE="Y" \
