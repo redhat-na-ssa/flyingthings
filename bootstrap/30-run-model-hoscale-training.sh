@@ -27,7 +27,7 @@ tkn pipeline start training-x-pipeline \
   -p MINIO_SECRETKEY=minioadmin \
   -p MINIO_BUCKET=hoscale \
   -p MODEL_NAME=model-hoscale \
-  -p MINIO_CLIENT_URL=util02.davenet.local \
+  -p MINIO_CLIENT_URL=https://dl.min.io/client/mc/release/linux-amd64 \
   -p DEPLOY="Y" \
   --use-param-defaults --showlog
 
