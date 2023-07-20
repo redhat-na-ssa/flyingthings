@@ -25,14 +25,14 @@ spec:
         echo "SOURCE_DIR: $SOURCE_DIR" \
         && ls -al $(workspaces.source.path)/source \
         && cd $(params.SIMPLEVIS_DATA)/workspace \
-        && $(workspaces.source.path)/source/minio-client/03-copy-artifacts.sh
+        && $(workspaces.source.path)/source/training/minio-copy-artifacts.sh
       env:
         - name: MINIO_ENDPOINT
           value: $(params.MINIO_ENDPOINT)
         - name: SIMPLEVIS_DATA
           value: $(params.SIMPLEVIS_DATA)
         - name: BASEDIR
-          value: $(workspaces.source.path)/source/minio-client
+          value: $(workspaces.source.path)/source/training
         - name: SOURCE_DIR
           value: $(workspaces.source.path)
         - name: MINIO_BUCKET
