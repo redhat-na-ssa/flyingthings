@@ -1,0 +1,365 @@
+:scrollbar:
+:data-uri:
+:toc2:
+:linkattrs:
+
+
+= _Intelligence at the Edge_
+
+:numbered:
+
+== Architecture
+
+image::images/djl-object-detect-architecture.png[]
+
+As depicted in the above diagram, the demo functionality is split into the following components:
+
+. *Edge*
++
+Containerized Quarkus/DJL app that runs on a edge device enabled with a webcam.
+Periodically sends events via MQTT when state changes occur (ie:  DJL detects probability that # of detected objects has increased from 2 to 3).
+. *Web*
++
+MQTT broker deployed in OpenShift.  Broker has default MQTT port exposed via a _LoadBalancer_ service.  Also deployed to OpenShift is a Quarkus based app that subscribes to the MQTT broker topic and forwards those MQTT events to a web browser (as `Server Sent Events` (SSE)).
+
+== DJL on _aarch64_
+
+link:https://github.com/deepjavalibrary/djl/issues/375[DJL Arm Support]
+
+== Edge app
+This application can run in your local environment.
+
+=== Pre-reqs
+
+. *Webcam*
++
+Should be mounted to your operating system at a path such as:  `/dev/video0`
+
+. *GPU/CPU*
++
+This app will auto-detect the presence of a GPU and utilize it if found.
+Otherwise, the app will default to a CPU.
++
+The app exposes various diagnostic related REST endpoints that provide insight as to the GPU/CPU it has found.
+
+. *Network*
++
+You'll need a reliable broadband network due to downloading of a large quantity of library dependencies.
+
+. *JDK11* (or more recent)
++
+ie: `sudo dnf install java-latest-openjdk-devel`
+
+. *maven*
++
+ie: `sudo dnf install maven`
+
+. *cURL* (or similar http test utility)
++
+ie: `sudo dnf install curl`
+
+. *DJL_CACHE_DIR*
++
+DJL engines link:https://djl.ai/docs/development/cache_management.html[download models] and any needed C++ shared object files to a directory specified by the environment variable: `DJL_CACHE_DIR` .  
+You are encouraged to set this environment variable in your shell.  
+Otherwise, DJL will write these files to: `$HOME/.djl.ai`
+
+. *opencv-java & gstreamer1-plugin-libav*
++
+ie: `sudo dnf install opencv-java gstreamer1-plugin-libav -y`
++
+NOTE: On Fedora/RHEL systems, opencv-java package places shared C++ object files in a path (/usr/lib/java) typically not included in `java.library.path`.   Subsequently, at runtime you'll need to specify a `java.library.path` that does include this directory.
+
+=== Quarkus `dev mode`
+
+The application can be run locally in quarkus `dev mode` (which enables live coding).
+
+NOTE:  a GPU is not required to run the application.  If deep learning engine detects the presence of a GPU, then it will use it.  If not, the deep learning engine will default to CPUs.
+
+. Seed the `maven wrapper`:
++
+-----
+$ mvn wrapper:wrapper
+-----
+
+. Run the application in quarkus `dev mode`` using any of the following deep learning engines:
+
+
+.. *PyTorch*
++
+-----
+./mvnw quarkus:dev -Djvm.args=-Djava.library.path=/usr/lib/java -Ppytorch
+-----
+
+. View RESTful API exposed by app:
++
+Open a browser tab and navigate to:  `localhost:8080/q/swagger-ui`
+
+
+=== Fedora 38 aarch64
+
+link:https://github.com/deepjavalibrary/djl/issues/375#issuecomment-1200471807[DJL ARM support] is currently only offered for PyTorch and OnnxRuntime engines.
+
+. If runtime is on _aarch64_  (ie: Raspberry Pi 4), the recommend DJL engine is: _pytorch_.
+. If running on a recent version of GLIBC (ie: in Fedora 38), you may need to replace the _libstdc++_ library that comes included with DJL's _2.0.0-cpu-precxx11-linux-aarch64_ project :
++
+-----
+$ ldd --version
+$ strings /usr/lib64/libstdc++.so.6.0.31 | grep '^CXXABI_'
+$ cp /usr/lib64/libstdc++.so.6.0.31 $HOME/.djl.ai/pytorch/2.0.0-cpu-precxx11-linux-aarch64/libstdc++.so.6
+-----
+
+. Doing so will prevent the following exception:
++
+-----
+22:58:33 ERROR [io.qu.ru.Application] (main) Failed to start application (with profile prod): java.lang.UnsatisfiedLinkError: /tmp/opencv_openpnp10653577782654499938/nu/pattern/opencv/linux/ARMv8/libopencv_java470.so: /home/jbride/.djl.ai/pytorch/2.0.0-cpu-precxx11-linux-aarch64/libstdc++.so.6: version `CXXABI_1.3.8' not found (required by /tmp/opencv_openpnp10653577782654499938/nu/pattern/opencv/linux/ARMv8/libopencv_java470.so)
+	at java.base/jdk.internal.loader.NativeLibraries.load(Native Method)
+	at java.base/jdk.internal.loader.NativeLibraries$NativeLibraryImpl.open(NativeLibraries.java:388)
+	at java.base/jdk.internal.loader.NativeLibraries.loadLibrary(NativeLibraries.java:232)
+	at java.base/jdk.internal.loader.NativeLibraries.loadLibrary(NativeLibraries.java:174)
+	at java.base/java.lang.ClassLoader.loadLibrary(ClassLoader.java:2389)
+	at java.base/java.lang.Runtime.load0(Runtime.java:755)
+	at java.base/java.lang.System.load(System.java:1953)
+	at nu.pattern.OpenCV$LocalLoader.<init>(OpenCV.java:330)
+	at nu.pattern.OpenCV$LocalLoader.<init>(OpenCV.java:326)
+	at nu.pattern.OpenCV$LocalLoader$Holder.<clinit>(OpenCV.java:336)
+	at nu.pattern.OpenCV$LocalLoader.getInstance(OpenCV.java:340)
+	at nu.pattern.OpenCV.loadLocally(OpenCV.java:323)
+	at nu.pattern.OpenCV$SharedLoader.<init>(OpenCV.java:217)
+	at nu.pattern.OpenCV$SharedLoader.<init>(OpenCV.java:189)
+	at nu.pattern.OpenCV$SharedLoader$Holder.<clinit>(OpenCV.java:261)
+	at nu.pattern.OpenCV$SharedLoader.getInstance(OpenCV.java:265)
+	at nu.pattern.OpenCV.loadShared(OpenCV.java:183)
+	at org.acme.apps.LiveObjectDetectionResource.startResource(LiveObjectDetectionResource.java:116)
+-----
+
+An alternative might be to install link:https://docs.djl.ai/engines/pytorch/pytorch-engine/index.html#load-your-own-pytorch-native-library[pytorch on the host] and specify the _PYTORCH_LIBRARY_PATH_ environment variable.
+
+. Start `edge` app in JVM:
++
+-----
+$ java \
+    -Djvm.args=-Djava.library.path=/usr/lib/java \ 
+    -jar target/quarkus-app/quarkus-run.jar
+-----
+
+
+=== Linux Containers
+
+==== Pre-reqs:
+
+. *podman*
++
+ie:  `dnf install podman`
+
+. *quay.io*
++
+Linux container images already exist in `quay.io`.
+If you want to push to quay.io, then authenticate as follows:
++
+-----
+$ podman login quay.io
+-----
+
+
+. To support link:https://github.com/deepjavalibrary/djl-serving/blob/master/serving/docs/configurations.md#djl-settings[off-line mode] of the DJL engines, a pre-seeded DJL cache will be mounted to the linux container.  
+emporary directories and/or json files might be generated in this DJL cache.  
+This DJL cache directory should be made writable by the container process for the following reasons:
+
+.. Extraction of native C++ libraries included in DJL `fatjar` to $DJL_CACHE_DIR
+.. Downloading of any models from DJL's ModelZoo that may be used by the application.
+
+. Make $DJL_CACHE_DIR writable for container process:
++
+-----
+$ export DJL_CACHE_DIR_OCI=/u02/djl.ai.oci \
+    && mkdir -p $DJL_CACHE_DIR_OCI
+
+$ sudo semanage fcontext -a \
+        -t container_file_t "$DJL_CACHE_DIR_OCI(/.*)?"
+
+$ sudo restorecon -R $DJL_CACHE_DIR_OCI
+
+$ podman unshare chown -R 185:185 $DJL_CACHE_DIR_OCI
+-----
+
+==== Create Linux Container
+
+. Change directory into:  `djl-objectdetect`
+
+. Set an environment variable that specifies one of the possible deep learning engines:
++
+-----
+$ djl_engine=pytorch
+-----
++
+NOTE:  Possible options are:  *pytorch*, *mxnet*, or *tensorflow*
+
+. Build container and generate openshift/helm configs:
++
+-----
+$ ./mvnw clean package \
+            -P$djl_engine \
+            -Dquarkus.application.name=djl-objectdetect-$djl_engine \
+            -DskipTests \
+            -Dquarkus.container-image.build=true \
+            -Dquarkus.container-image.push=true
+-----
+
+==== Execution
+
+. Set an environment variable that specifies one of the possible deep learning engines:
++
+-----
+$ djl_engine=pytorch
+-----
++
+NOTE:  Possible options are:  *pytorch*, *mxnet*, or *tensorflow*
+
+. Set environment variable indicating whether to run the DJL engine in offline mode:
++
+-----
+$ djl_offline=false
+-----
+
+. Specify the video card to capture from:
++
+-----
+$ djl_video=0
+-----
+
+. The `djl-objectdetection` container needs access to the host's video card.
++
+Podman allows for that however you need to ensure that your host operating system user is a member of the `video` group:
++
+-----
+$ sudo usermod -a -G video <your OS user name>
+-----
++
+NOTE: For more info about podman's ability to provide access to the host machine's video card, please review link:https://www.redhat.com/sysadmin/files-devices-podman[this document].
+
+. The `djl-objectdetection` container needs the ability to write video capture images to the filesystem of the host.
+Subsequently, in this step you enable the local filesystem to be writable by the container:
++
+-----
+$ I_DIR=/tmp/org.acme.objectdetection/ \
+    && mkdir -p $I_DIR
+
+$ sudo semanage fcontext -a \
+        -t container_file_t "$I_DIR(/.*)?"
+
+$ sudo restorecon -R $I_DIR
+
+$ podman unshare chown -R 185:185 $I_DIR
+-----
+
+
+. Run linux container using designated deep learning engine:
++
+-----
+$ podman run \
+    --rm \
+    --name djl-objectdetect-$djl_engine \
+    -p 8080:8080 \
+    -p 5005:5005 \
+    -e JAVA_ENABLE_DEBUG="true" \
+    -e JAVA_OPTS="-Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jboss.logmanager.LogManager -Doffline=$djl_offline -Dorg.acme.objectdetection.video.capture.device.id=$djl_video" \
+    -e DJL_CACHE_DIR=/mnt/djl.ai \
+    -v $DJL_CACHE_DIR_OCI:/mnt/djl.ai:z \
+    --device /dev/video$djl_video \
+    --group-add keep-groups \
+    -v /tmp/org.acme.objectdetection:/tmp/org.acme.objectdetection:z \
+    -v ./config/application.properties:/deployments/config/application.properties:z \
+    quay.io/redhat_naps_da/djl-objectdetect-$djl_engine:0.0.3
+-----
+
+. View RESTful API exposed by app:
++
+Open a browser tab and navigate to:  `localhost:8080/q/swagger-ui`
+
+
+== Web app
+
+=== Pre-reqs
+
+. *OpenShift Container Platform*
+.. Tested on OCP 4.12 beta  (but earlier versions should also work fine as well)
+.. CPU:
++
+Allow 1 cpu core for each deep learning engine deployed.
++
+Currently not tested using a GPU.
+.. RAM:
++
+Allow 1Gb RAM for each deep learning engine deployed.
+
+.. Storage:  no PVs needed
+
+. *helm*
++
+ie: `dnf install helm`
+
+. *cURL* (or similar http test utility)
++
+ie: `dnf install curl`
+
+=== Deploy
+
+. Create a ConfigMap from the project's _application.properties_:
++
+-----
+$ oc create cm djl-iclassification --from-file=config/application.properties
+-----
+
+. Deploy app powered by PyTorch:
++
+-----
+$ helm install djl-iclassification-pytorch https://github.com/redhat-na-ssa/djl-intro/raw/main/helm/djl-iclassification-pytorch-0.0.1.tar.gz
+-----
+
+. Deploy app powered by TensorFlow:
++
+-----
+$ helm install djl-iclassification-tensorflow https://github.com/redhat-na-ssa/djl-intro/raw/main/helm/djl-iclassification-tensorflow-0.0.1.tar.gz
+-----
+
+. Deploy app powered by Apache MXNet:
++
+-----
+$ helm install djl-iclassification-mxnet https://github.com/redhat-na-ssa/djl-intro/raw/main/helm/djl-iclassification-mxnet-0.0.1.tar.gz
+-----
+
+. Determine node that pod landed on:
++
+-----
+$ oc get pod \
+    -l deploymentconfig=djl-iclassification-pytorch \
+    -o json \
+    -n user1-services \
+    | jq -r .items[0].spec.nodeName
+-----
++
+NOTE: The result should return the id of your GPU enabled node.
+
+== Run Demo
+
+. View mqtt message counts in Artemis admin console
+
+.. Point your browser to the output of the following:
++
+-----
+$ http://localhost:8161
+-----
+
+.. Authenticate using the following credentials:  *djl*  /  *djl*
++
+image::images/djl-object-detect-mqtt-artemis-web-admin.png[]
+
+
+. View video capture events in browser
+
+.. Point your browser to the output of the following:
++
+-----
+$ echo -en "\nhttps://$(oc get route djl-objectdetect-web -n user1-djl --template='{{ .spec.host }}')/liveObject.html\n"
+-----
