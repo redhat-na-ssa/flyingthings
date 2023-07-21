@@ -15,12 +15,12 @@ cd $SIMPLEVIS_DATA/workspace
 if ./mc ls myminio/$MINIO_BUCKET/training-run.txt &> /dev/null; then
     echo "File exists. Downloading..."
     # Download the file
-    ./mc cp myminio/$MINIO_BUCKET/training-run.txt $SIMPLEVIS_DATA/workspace/
+    ./mc --config-dir miniocfg cp myminio/$MINIO_BUCKET/training-run.txt $SIMPLEVIS_DATA/workspace/
 else
     echo "File does not exist. Creating..."
     # Create the file in the bucket
     echo "0">training-run.txt
     ls -al
-    ./mc cp training-run.txt myminio/$MINIO_BUCKET/training-run.txt
+    ./mc --config-dir miniocfg cp training-run.txt myminio/$MINIO_BUCKET/training-run.txt
 fi
 
