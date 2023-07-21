@@ -47,7 +47,8 @@ if ./mc --config-dir miniocfg ls myminio/$MINIO_BUCKET/training-run.txt &> /dev/
     # Increase the value by 1
     increased_value=$(increase_value_by_one "$numeric_value")
     echo "Training run number: $increased_value"
-    cat $increased_value>training-run.txt
+    rm training-run.txt
+    echo $increased_value>training-run.txt
     ls -al
     ./mc --config-dir miniocfg cp training-run.txt myminio/$MINIO_BUCKET/training-run.txt    
     else
