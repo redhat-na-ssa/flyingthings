@@ -64,9 +64,12 @@ import ai.djl.modality.cv.Image;
 import ai.djl.modality.cv.ImageFactory;
 import ai.djl.modality.cv.output.DetectedObjects;
 import ai.djl.modality.cv.transform.CenterCrop;
+import ai.djl.modality.cv.transform.Resize;
 import ai.djl.modality.cv.transform.ToTensor;
 import ai.djl.modality.cv.translator.YoloTranslator;
 import ai.djl.modality.cv.translator.YoloTranslatorFactory;
+import ai.djl.modality.cv.translator.YoloV5Translator;
+import ai.djl.modality.cv.translator.YoloV5TranslatorFactory;
 import ai.djl.ndarray.NDArray;
 import ai.djl.ndarray.NDList;
 import ai.djl.ndarray.NDManager;
@@ -108,10 +111,10 @@ public class LiveObjectDetectionResource extends BaseResource implements IApp {
     @ConfigProperty(name = "org.acme.objectdetection.test.video.file", defaultValue = NO_TEST_FILE)
     String testVideoFile;
 
-    @ConfigProperty(name = "org.acme.objectdetection.write.unadultered.image.to.disk", defaultValue = "False")
+    @ConfigProperty(name = "org.acme.objectdetection.write.unadultered.image.to.disk", defaultValue = "True")
     boolean writeUnAdulateredImageToDisk;
 
-    @ConfigProperty(name = "org.acme.objectdetection.write.modified.image.to.disk", defaultValue = "False")
+    @ConfigProperty(name = "org.acme.objectdetection.write.modified.image.to.disk", defaultValue = "True")
     boolean writeModifiedImageToDisk;
 
     @ConfigProperty(name = "org.acme.objectdetection.continuousPublish", defaultValue = "False")
@@ -332,7 +335,6 @@ public class LiveObjectDetectionResource extends BaseResource implements IApp {
             log.info("Just exceeded max probability threshold: "+this.predictionThreshold +" : "+positiveDiff);
             return true;
         }
-        
         return false;
     }
 
@@ -367,21 +369,26 @@ public class LiveObjectDetectionResource extends BaseResource implements IApp {
 
         try {
 
+            // As per:  https://github.com/deepjavalibrary/djl/issues/1563
+            int imageSize = 640;
+            Pipeline pipeline = new Pipeline();
+            pipeline.add(new Resize(imageSize));
+            pipeline.add(new ToTensor());
+
             // as per:  $DJL_CACHE_DIR/cache/repo/model/cv/object_detection/ai/djl/pytorch/ssd/metadata.json
-            YoloTranslator.Builder yBuilder = YoloTranslator.builder()
-                    .optSynsetArtifactName("classes.txt");
-            Translator<Image, DetectedObjects> yTranslator = new YoloTranslator(yBuilder);
+            Translator<Image, DetectedObjects> yTranslator =  YoloV5Translator
+            .builder()
+            .setPipeline(pipeline)
+            .optThreshold(0.8f)
+            .optSynsetArtifactName("classes.txt")
+            .build();
 
             Criteria<Image, DetectedObjects> criteria = Criteria.builder()
-                .optApplication(Application.CV.OBJECT_DETECTION)
                 .optProgress(new ProgressBar())
                 .setTypes(Image.class, DetectedObjects.class) // defines input and output data type
+                .optModelUrls("yolo/")
                 .optModelPath(Paths.get(modelPath.getAbsolutePath())) // search models in specified path
-                //.optModelName(modelName) // specify model file name
-                //.optTranslator(yTranslator)
-                .optTranslatorFactory(new YoloTranslatorFactory())
-                // as per:  $DJL_CACHE_DIR/cache/repo/model/cv/object_detection/ai/djl/pytorch/ssd/metadata.json
-                .optArgument(AppUtils.SYNSET_FILE_NAME, "classes.txt")
+                .optTranslator(yTranslator)
                 .build();
 
             model = criteria.loadModel();
