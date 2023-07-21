@@ -19,7 +19,8 @@ if ./mc ls myminio/$MINIO_BUCKET/training-run.txt &> /dev/null; then
 else
     echo "File does not exist. Creating..."
     # Create the file in the bucket
-    echo "0" > training-run.txt
+    echo "0">training-run.txt
+    ls -al
     ./mc cp training-run.txt myminio/$MINIO_BUCKET/training-run.txt
 fi
 
