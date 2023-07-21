@@ -12,4 +12,4 @@ ls -l $SIMPLEVIS_DATA
 # TODO: Add a check to see if the training run was successful
 # TODO: modify model deployment to use name of new model
 ./mc --config-dir miniocfg cp $SIMPLEVIS_DATA/workspace/runs/train/weights/best.pt myminio/$MINIO_BUCKET/model_custom.pt --insecure
-./mc --config-dir miniocfg cp $SIMPLEVIS_DATA/workspace/best.torchscript myminio/$MINIO_BUCKET/model_custom.torchscript --insecure
+./mc --config-dir miniocfg cp $SIMPLEVIS_DATA/workspace/runs/train/weights/best.torchscript myminio/$MINIO_BUCKET/model_custom.torchscript --insecure
