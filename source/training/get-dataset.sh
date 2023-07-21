@@ -29,7 +29,7 @@ ls -l $SIMPLEVIS_DATA/workspace/datasets
 
 # Check if the file exists in the bucket
 cd $SIMPLEVIS_DATA/workspace
-if ./mc ls myminio/$MINIO_BUCKET/training-run.txt &> /dev/null; then
+if ./mc --config-dir miniocfg ls myminio/$MINIO_BUCKET/training-run.txt &> /dev/null; then
     echo "File exists. Downloading..."
     # Download the file
     ./mc --config-dir miniocfg cp myminio/$MINIO_BUCKET/training-run.txt $SIMPLEVIS_DATA/workspace/
