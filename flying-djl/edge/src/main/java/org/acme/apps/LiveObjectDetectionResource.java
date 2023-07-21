@@ -65,6 +65,8 @@ import ai.djl.modality.cv.ImageFactory;
 import ai.djl.modality.cv.output.DetectedObjects;
 import ai.djl.modality.cv.transform.CenterCrop;
 import ai.djl.modality.cv.transform.ToTensor;
+import ai.djl.modality.cv.translator.YoloTranslator;
+import ai.djl.modality.cv.translator.YoloTranslatorFactory;
 import ai.djl.ndarray.NDArray;
 import ai.djl.ndarray.NDList;
 import ai.djl.ndarray.NDManager;
@@ -76,6 +78,7 @@ import ai.djl.translate.Batchifier;
 import ai.djl.translate.Pipeline;
 import ai.djl.translate.Translator;
 import ai.djl.translate.TranslatorContext;
+import ai.djl.translate.TranslatorFactory;
 
 import java.awt.image.BufferedImage;
 
@@ -364,49 +367,10 @@ public class LiveObjectDetectionResource extends BaseResource implements IApp {
 
         try {
 
-            Translator<Image, Classifications> cTranslator = new Translator<Image, Classifications>() {
-
-                @Override
-                public NDList processInput(TranslatorContext ctx, Image inputImage) {
-
-                    // Convert Image to NDArray
-                    NDArray array = inputImage.toNDArray(ctx.getNDManager(), Image.Flag.GRAYSCALE);
-                    Pipeline pipeline = new Pipeline();
-                    pipeline.add(new CenterCrop());
-                    pipeline.add(new ToTensor());
-
-                    // Transform to NDList
-                    NDList inList = pipeline.transform(new NDList(array));
-                    log.debugv("inList size = {0}", inList.size());
-                    return inList;
-                }
-            
-                @Override
-                public Classifications processOutput(TranslatorContext ctx, NDList list) {
-
-                    for(NDArray ndA : list.getResourceNDArrays()) {
-                        log.debugv("NDArray prior to softmax = {0} {1}", ndA.toDebugString(true), ndA.getName());
-                    }
-
-                    NDArray probabilities = list.singletonOrThrow().softmax(0);
-
-                    for(NDArray ndA : probabilities.getResourceNDArrays()) {
-                        log.debugv("probabilities = {0} {1}", ndA.toDebugString(true), ndA.getName());
-                    }
-                    
-                    List<String> classNames = new ArrayList<String>();
-
-                    // Create a Classifications with the output probabilities
-                    return new Classifications(classNames, probabilities);
-                }
-            
-                @Override
-                public Batchifier getBatchifier() {
-                    // The Batchifier describes how to combine a batch together
-                    // Stacking, the most common batchifier, takes N [X1, X2, ...] arrays to a single [N, X1, X2, ...] array
-                    return Batchifier.STACK;
-                }
-            };
+            // as per:  $DJL_CACHE_DIR/cache/repo/model/cv/object_detection/ai/djl/pytorch/ssd/metadata.json
+            YoloTranslator.Builder yBuilder = YoloTranslator.builder()
+                    .optSynsetArtifactName("classes.txt");
+            Translator<Image, DetectedObjects> yTranslator = new YoloTranslator(yBuilder);
 
             Criteria<Image, DetectedObjects> criteria = Criteria.builder()
                 .optApplication(Application.CV.OBJECT_DETECTION)
@@ -414,7 +378,10 @@ public class LiveObjectDetectionResource extends BaseResource implements IApp {
                 .setTypes(Image.class, DetectedObjects.class) // defines input and output data type
                 .optModelPath(Paths.get(modelPath.getAbsolutePath())) // search models in specified path
                 //.optModelName(modelName) // specify model file name
-                //.optTranslator(cTranslator)
+                //.optTranslator(yTranslator)
+                .optTranslatorFactory(new YoloTranslatorFactory())
+                // as per:  $DJL_CACHE_DIR/cache/repo/model/cv/object_detection/ai/djl/pytorch/ssd/metadata.json
+                .optArgument(AppUtils.SYNSET_FILE_NAME, "classes.txt")
                 .build();
 
             model = criteria.loadModel();

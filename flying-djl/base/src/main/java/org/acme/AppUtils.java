@@ -27,5 +27,6 @@ public class AppUtils {
     public static final String MODEL_NOTIFY = "modelNotify";
     public static final String S3_OBJECT_CREATED = "s3:ObjectCreated:Put";
     public static final String S3_OBJECT_DELETED = "s3:ObjectRemoved:Delete";
+    public static final String SYNSET_FILE_NAME = "synsetFileName";
     
 }
