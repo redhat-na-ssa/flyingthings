@@ -20,7 +20,10 @@ spec:
     - name: train-model
       image: image-registry.openshift-image-registry.svc:5000/$(params.ocp-tablespace)/yolo:latest
       script: |
-        $(workspaces.source.path)/source/training/03-run-training.sh
+        set -x \
+        && $(workspaces.source.path)/source/training/03-run-training.sh \
+        && $(workspaces.source.path)/source/training/export-model.sh \
+        && ls -l $(params.SIMPLEVIS_DATA)/workspace
       env:
         - name: BATCH_SIZE
           value: $(params.BATCH_SIZE)
