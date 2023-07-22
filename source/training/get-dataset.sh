@@ -39,7 +39,7 @@ while IFS= read -r item; do
     fi
 done <<< "$list"
 
-if [ "filexists" = "true" ]; then
+if [ "$filexists" = "true" ]; then
     echo "File exists. Downloading..."
     # Download the file
     ./mc --config-dir miniocfg cp myminio/$MINIO_BUCKET/training-run.txt $SIMPLEVIS_DATA/workspace/
