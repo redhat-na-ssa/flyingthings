@@ -2,7 +2,6 @@ package org.acme.apps;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
@@ -12,9 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
-import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -36,14 +33,10 @@ import jakarta.annotation.PreDestroy;
 import org.acme.AppUtils;
 import org.acme.apps.s3.S3ModelLifecycle;
 import org.acme.apps.s3.S3Notification;
-import org.apache.commons.io.FileUtils;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.reactive.messaging.Incoming;
 import org.jboss.logging.Logger;
-import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import org.opencv.core.Core;
-import org.opencv.core.MatOfByte;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
 import org.opencv.videoio.Videoio;
@@ -55,34 +48,21 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import nu.pattern.OpenCV;
 
-import ai.djl.Application;
-import ai.djl.ModelException;
-import ai.djl.engine.Engine;
 import ai.djl.inference.Predictor;
 import ai.djl.modality.Classifications;
 import ai.djl.modality.cv.Image;
 import ai.djl.modality.cv.ImageFactory;
+import ai.djl.modality.cv.output.BoundingBox;
 import ai.djl.modality.cv.output.DetectedObjects;
-import ai.djl.modality.cv.transform.CenterCrop;
+import ai.djl.modality.cv.output.Rectangle;
 import ai.djl.modality.cv.transform.Resize;
 import ai.djl.modality.cv.transform.ToTensor;
-import ai.djl.modality.cv.translator.YoloTranslator;
-import ai.djl.modality.cv.translator.YoloTranslatorFactory;
 import ai.djl.modality.cv.translator.YoloV5Translator;
-import ai.djl.modality.cv.translator.YoloV5TranslatorFactory;
-import ai.djl.ndarray.NDArray;
-import ai.djl.ndarray.NDList;
-import ai.djl.ndarray.NDManager;
 import ai.djl.repository.zoo.Criteria;
 import ai.djl.repository.zoo.ZooModel;
-import ai.djl.repository.zoo.Criteria.Builder;
 import ai.djl.training.util.ProgressBar;
-import ai.djl.translate.Batchifier;
 import ai.djl.translate.Pipeline;
 import ai.djl.translate.Translator;
-import ai.djl.translate.TranslatorContext;
-import ai.djl.translate.TranslatorFactory;
-
 import java.awt.image.BufferedImage;
 
 import com.sun.security.auth.module.UnixSystem;
@@ -142,15 +122,19 @@ public class LiveObjectDetectionResource extends BaseResource implements IApp {
     S3ModelLifecycle modelLifecycle;
 
     ZooModel<Image, DetectedObjects> model;
-    File fileDir;
-
+    File rawAndBoxedImageFileDir;
     VideoCapture vCapture = null;
     private VideoCapturePayload previousCapture;
-
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern(PATTERN_FORMAT).withZone(ZoneId.systemDefault());
-
-    Mat unboxedMat = null;
     Cancellable multiCancellable = null;
+
+    /* The Mat class of OpenCV library is used to store the values of an image.
+     * It represents an n-dimensional array and is used to store image data of grayscale or color images, voxel volumes, vector fields, tensors, histograms, etc
+     * 
+     * Reference:
+     *   https://www.tutorialspoint.com/opencv/opencv_storing_images.htm            :   OpenCV - Storing Images
+     */
+    Mat unboxedMat = null;
 
     @PostConstruct
     public void startResource() {
@@ -159,40 +143,31 @@ public class LiveObjectDetectionResource extends BaseResource implements IApp {
         try {
 
             // 1)  Ensure that app can write captured images to file system
-            fileDir = new File(oDetectionDirString);
-            if(!fileDir.exists())
-            fileDir.mkdirs();
-            
-            if(!(fileDir).canWrite())
-                throw new RuntimeException("Can not write in the following directory: "+fileDir.getAbsolutePath());
+            rawAndBoxedImageFileDir = new File(oDetectionDirString);
+            if(!rawAndBoxedImageFileDir.exists())
+            rawAndBoxedImageFileDir.mkdirs();
+            if(!(rawAndBoxedImageFileDir).canWrite())
+                throw new RuntimeException("Can not write in the following directory: "+rawAndBoxedImageFileDir.getAbsolutePath());
 
             
             // 2) Enable web cam  (but don't start capturing images and executing object detection predictions on those images just yet)
             instantiateVideoCapture();
-                
-            /* Implementations:
-             *      ai.djl.pytorch.engine.PtNDManager
-             *      ai.djl.mxnet.engine.MxNDManager
-             *      ai.djl.tensorflow.engine.TfNDManager
-             */
-            NDManager ndManager = NDManager.newBaseManager();
 
+            // 3) Instantiate a single OpenCV Mat class to store raw image data
             unboxedMat = new Mat();
 
-            // 3)  Load model
+            // 4)  Load model
             loadModel();
 
-            continueToPredict = true;
-
-            // 4)  Keep pace with video buffer by reading frames from it at a configurable number of millis
-            // On a different thread, this app will periodically evaluate the latest captured frame at that instant in time
+            // 5)  Keep pace with video buffer by reading frames from it at a configurable number of millis
+            //     On a different thread, this app will periodically evaluate the latest captured frame at that instant in time
             Multi<Long> vCaptureStreamer = Multi.createFrom().ticks().every((Duration.ofMillis(videoCaptureIntevalMillis))).onCancellation().invoke( () -> {
                 log.info("just cancelled video capture streamer");
             });
+            continueToPredict = true;
             multiCancellable = vCaptureStreamer.subscribe().with( (i) -> {
                 vCapture.read(unboxedMat);
             });
-
 
         }catch(RuntimeException x) {
             throw x;
@@ -200,6 +175,59 @@ public class LiveObjectDetectionResource extends BaseResource implements IApp {
             throw new RuntimeException(x);
         }finally {
             
+        }
+    }
+
+    private void loadModel() {
+        File rootModelPath = new File(rootModelPathString);
+        if(!rootModelPath.exists() || !rootModelPath.isDirectory())
+            throw new RuntimeException("Following root directory does not exist: "+rootModelPathString);
+            
+        File modelPath = new File(rootModelPath, modelName);
+        if(!modelPath.exists())
+            throw new RuntimeException("Following model does not exist: "+modelName);
+
+        try {
+
+            /* Reference
+             *     https://pytorch.org/hub/ultralytics_yolov5/                          :   Ultralytics YOLOv5; PyTorch
+             *     https://github.com/deepjavalibrary/djl/issues/1563                   :   Yolov5 using DJL; April 2022
+             */ 
+            int imageSize = 640;
+            Pipeline pipeline = new Pipeline();
+            pipeline.add(new Resize(imageSize));
+            pipeline.add(new ToTensor());
+
+            int numYoloClasses = 80;
+            List<String> synset = new ArrayList<>(numYoloClasses);
+            for (int i = 0; i < (numYoloClasses/2); i++) {
+                synset.add("Rotor Craft");
+                synset.add("Fixed Wing");
+            }
+
+            // as per:  $DJL_CACHE_DIR/cache/repo/model/cv/object_detection/ai/djl/pytorch/ssd/metadata.json
+            Translator<Image, DetectedObjects> yTranslator =  YoloV5Translator
+            .builder()
+            .setPipeline(pipeline)
+            .optThreshold(0.8f)
+            //.optSynsetArtifactName("classes.txt")
+            .optSynset(synset)
+            .build();
+
+            Criteria<Image, DetectedObjects> criteria = Criteria.builder()
+                .optProgress(new ProgressBar())
+                .setTypes(Image.class, DetectedObjects.class) // defines input and output data type
+                .optModelUrls("yolo/")
+                .optModelPath(Paths.get(modelPath.getAbsolutePath())) // search models in specified path
+                .optTranslator(yTranslator)
+                .build();
+
+            model = criteria.loadModel();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage());
+        }finally {
         }
     }
 
@@ -220,7 +248,6 @@ public class LiveObjectDetectionResource extends BaseResource implements IApp {
 
             bus.publish(AppUtils.CAPTURED_IMAGE, cPayload);
         }
-
     }
 
     // Consume raw video snapshots and apply prediction analysis
@@ -253,7 +280,7 @@ public class LiveObjectDetectionResource extends BaseResource implements IApp {
 
                     if(writeUnAdulateredImageToDisk){
                         // Write un-boxed image to local file system
-                        File uBoxedImageFile = new File(fileDir,  "unAdulteredImage-"+startCaptureTime.getEpochSecond() +".png");
+                        File uBoxedImageFile = new File(rawAndBoxedImageFileDir,  "unAdulteredImage-"+startCaptureTime.getEpochSecond() +".png");
                         BufferedImage uBoxedImage = toBufferedImage(unboxedMat);
                         ImageIO.write(uBoxedImage, "png", uBoxedImageFile);
                         rNode.put(AppUtils.UNADULTERED_IMAGE_FILE_PATH, uBoxedImageFile.getAbsolutePath());
@@ -264,7 +291,8 @@ public class LiveObjectDetectionResource extends BaseResource implements IApp {
                     rNode.put(AppUtils.DETECTED_OBJECT_PROBABILITY, capturePayload.getDetected_object_probability());
                     
                     // Annotate video capture image w/ any detected objects
-                    img.drawBoundingBoxes(detections);
+                    // img.drawBoundingBoxes(detections);
+                    drawBoundingBoxWithCustomizedDetections(img, detections);
 
                      // Encode binary image to Base64 string and add to payload
                     Mat boxedImage = (Mat)img.getWrappedImage();
@@ -276,7 +304,7 @@ public class LiveObjectDetectionResource extends BaseResource implements IApp {
                     rNode.put(AppUtils.BASE64_DETECTED_IMAGE, stringEncodedImage);
                     
                     if(writeModifiedImageToDisk) {
-                        File boxedImageFile = new File(fileDir,  "boxedImage-"+ startCaptureTime.getEpochSecond()+".png");
+                        File boxedImageFile = new File(rawAndBoxedImageFileDir,  "boxedImage-"+ startCaptureTime.getEpochSecond()+".png");
                         ImageIO.write(bBoxedImage, "png", boxedImageFile);
                         rNode.put(AppUtils.DETECTED_IMAGE_FILE_PATH, boxedImageFile.getAbsolutePath());
                     }
@@ -304,24 +332,13 @@ public class LiveObjectDetectionResource extends BaseResource implements IApp {
         log.info(captureCount + " : "+ timeElapsed); 
     }
 
-
-    @PreDestroy
-    public void shutdown() {
-        multiCancellable.cancel();
-        if(vCapture != null && vCapture.isOpened()){
-            vCapture.release();
-            log.infov("shutdown() video capture device = {0}", this.videoCaptureDevice );
-        }
-    }
-
     private boolean isDifferent(VideoCapturePayload latest) {
         if(previousCapture == null){
-            //log.info("previous was null");
             return true;
         }
 
         if(previousCapture.getDetectionCount() != latest.getDetectionCount()){
-            //log.info("capture count different: "+previousCapture.getDetectionCount()+" : "+latest.getDetectionCount());
+            log.info("capture count different: "+previousCapture.getDetectionCount()+" : "+latest.getDetectionCount());
             return true;
         }
         if(!previousCapture.getDetectedObjectClassification().equals(latest.getDetectedObjectClassification()))
@@ -338,67 +355,28 @@ public class LiveObjectDetectionResource extends BaseResource implements IApp {
         return false;
     }
 
-    public ZooModel<?,?> getAppModel(){
-        return model;
-    }
-
-    public Uni<Response> stopPrediction() {
-
-        log.info("stopPrediction");
-        this.continueToPredict=false;
-        this.previousCapture=null;
-        Response eRes = Response.status(Response.Status.OK).entity(this.videoCaptureDevice).build();
-        return Uni.createFrom().item(eRes);
-    }
-    
-    public Uni<Response> predict() {
-        log.info("will now begin to predict on video capture stream");
-        this.continueToPredict=true;
-        Response eRes = Response.status(Response.Status.OK).entity(this.videoCaptureDevice).build();
-        return Uni.createFrom().item(eRes);
-    }
-
-    private void loadModel() {
-        File rootModelPath = new File(rootModelPathString);
-        if(!rootModelPath.exists() || !rootModelPath.isDirectory())
-            throw new RuntimeException("Following root directory does not exist: "+rootModelPathString);
-            
-        File modelPath = new File(rootModelPath, modelName);
-        if(!modelPath.exists())
-            throw new RuntimeException("Following model does not exist: "+modelName);
-
-        try {
-
-            // As per:  https://github.com/deepjavalibrary/djl/issues/1563
-            int imageSize = 640;
-            Pipeline pipeline = new Pipeline();
-            pipeline.add(new Resize(imageSize));
-            pipeline.add(new ToTensor());
-
-            // as per:  $DJL_CACHE_DIR/cache/repo/model/cv/object_detection/ai/djl/pytorch/ssd/metadata.json
-            Translator<Image, DetectedObjects> yTranslator =  YoloV5Translator
-            .builder()
-            .setPipeline(pipeline)
-            .optThreshold(0.8f)
-            .optSynsetArtifactName("classes.txt")
-            .build();
-
-            Criteria<Image, DetectedObjects> criteria = Criteria.builder()
-                .optProgress(new ProgressBar())
-                .setTypes(Image.class, DetectedObjects.class) // defines input and output data type
-                .optModelUrls("yolo/")
-                .optModelPath(Paths.get(modelPath.getAbsolutePath())) // search models in specified path
-                .optTranslator(yTranslator)
-                .build();
-
-            model = criteria.loadModel();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException(e.getMessage());
-        }finally {
+    private static void drawBoundingBoxWithCustomizedDetections(Image img, DetectedObjects detections){
+        List<BoundingBox> boxes = new ArrayList<>();
+        List<String> names = new ArrayList<>();
+        List<Double> prob = new ArrayList<>();
+        for (Classifications.Classification obj : detections.items()) {
+            DetectedObjects.DetectedObject objConvered = (DetectedObjects.DetectedObject) obj;
+            BoundingBox box = objConvered.getBoundingBox();
+            Rectangle rec = box.getBounds();
+            Rectangle rec2 = new Rectangle(
+                rec.getX() / 640,
+                rec.getY() / 640,
+                rec.getWidth() / 640,
+                rec.getHeight() / 640
+                );
+            boxes.add(rec2);
+            names.add(obj.getClassName());
+            prob.add(obj.getProbability());
         }
+        DetectedObjects converted = new DetectedObjects(names, prob, boxes);
+        img.drawBoundingBoxes(converted);
     }
+
 
 
     private static BufferedImage toBufferedImage(Mat mat) {
@@ -496,6 +474,35 @@ public class LiveObjectDetectionResource extends BaseResource implements IApp {
         }else{
             log.errorv("WILL IGNORE model state change: type= {0} ; key= {1}", modelN.eventName, key);
         }
-
      }
+
+    public ZooModel<?,?> getAppModel(){
+        return model;
+    }
+    
+    public Uni<Response> predict() {
+        log.info("will now begin to predict on video capture stream");
+        this.continueToPredict=true;
+        Response eRes = Response.status(Response.Status.OK).entity(this.videoCaptureDevice).build();
+        return Uni.createFrom().item(eRes);
+    }
+
+
+    public Uni<Response> stopPrediction() {
+
+        log.info("stopPrediction");
+        this.continueToPredict=false;
+        this.previousCapture=null;
+        Response eRes = Response.status(Response.Status.OK).entity(this.videoCaptureDevice).build();
+        return Uni.createFrom().item(eRes);
+    }
+
+    @PreDestroy
+    public void shutdown() {
+        multiCancellable.cancel();
+        if(vCapture != null && vCapture.isOpened()){
+            vCapture.release();
+            log.infov("shutdown() video capture device = {0}", this.videoCaptureDevice );
+        }
+    }
 }
