@@ -29,7 +29,17 @@ ls -l $SIMPLEVIS_DATA/workspace/datasets
 
 # Check if the file exists in the bucket
 cd $SIMPLEVIS_DATA/workspace
-if ./mc --config-dir miniocfg ls myminio/$MINIO_BUCKET/training-run.txt &> /dev/null; then
+list = $(./mc --config-dir miniocfg ls myminio/$MINIO_BUCKET | awk '{ print $6 }')
+filexists=false
+# Loop through the list
+while IFS= read -r item; do
+    # Process each item here
+    if [ "$item" = "training-run.txt" ]; then
+        filexists=true
+    fi
+done <<< "$list"
+
+if [ filexists ]; then
     echo "File exists. Downloading..."
     # Download the file
     ./mc --config-dir miniocfg cp myminio/$MINIO_BUCKET/training-run.txt $SIMPLEVIS_DATA/workspace/
