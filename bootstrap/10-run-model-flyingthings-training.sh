@@ -10,6 +10,7 @@ TABLESPACE=$1
 
 # Execute your code here using the TABLESPACE variable
 # NOTE: if not hosting the minio client binary ommit MINIO_CLIENT_URL to use the hosted file
+# Official minio client https://dl.min.io/client/mc/release/linux-amd64
 echo "Run model training"
 tkn pipeline start training-x-pipeline \
   -w name=sourcecode,volumeClaimTemplateFile=code-pvc.yaml \
@@ -28,7 +29,7 @@ tkn pipeline start training-x-pipeline \
   -p MINIO_SECRETKEY=minioadmin \
   -p MINIO_BUCKET=flyingthings \
   -p MODEL_NAME=model-flyingthings \
-  -p MINIO_CLIENT_URL=https://dl.min.io/client/mc/release/linux-amd64 \
+  -p MINIO_CLIENT_URL=util02.davenet.local \
   -p DEPLOY="Y" \
   --use-param-defaults --showlog
 

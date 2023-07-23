@@ -18,11 +18,13 @@ spec:
       type: string
     - name: MINIO_CLIENT_URL
       type: string
+    - name: training-run
+      type: string
   steps:
     - name: push-results
       image: registry.access.redhat.com/ubi9/python-39
       script: |
-        $(workspaces.source.path)/source/training/04-push-results.sh
+        $(workspaces.source.path)/source/training/minio-push-results.sh
       env:
         - name: WEIGHTS
           value: $(params.WEIGHTS)
@@ -40,6 +42,8 @@ spec:
           value: $(params.MINIO_SECRETKEY)
         - name: MINIO_CLIENT_URL
           value: $(params.MINIO_CLIENT_URL)
+        - name: trainingrun
+          value: $(params.training-run)
   workspaces:
     - name: workspace
       mountPath: /opt/app-root/src/simplevis-data/workspace

@@ -18,11 +18,15 @@ spec:
       type: string
     - name: MINIO_CLIENT_URL
       type: string
+    - name: output-value
+      type: string
   steps:
     - name: pull-dataset
       image: registry.access.redhat.com/ubi9/python-39
       script: |
-        $(workspaces.source.path)/source/training/01-dataprep.sh
+        set -x \
+        && $(workspaces.source.path)/source/training/get-dataset.sh \
+        && result=`echo $SIMPLEVIS_DATA/workspace/training-run.txt` \
       env:
         - name: DATASET_ZIP
           value: $(params.DATASET_ZIP)
@@ -40,6 +44,8 @@ spec:
           value: $(params.MINIO_SECRETKEY)
         - name: MINIO_CLIENT_URL
           value: $(params.MINIO_CLIENT_URL)
+        - name: OUTPUT_VALUE
+          value: $(result)
   workspaces:
     - name: workspace
       mountPath: /opt/app-root/src/simplevis-data/workspace
