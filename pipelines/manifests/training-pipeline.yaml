@@ -227,7 +227,7 @@ spec:
         - name: MINIO_CLIENT_URL
           value: $(params.MINIO_CLIENT_URL)
       runAfter:
-        - train-model
+        - export-model
       workspaces:
         - name: source
           workspace: sourcecode
