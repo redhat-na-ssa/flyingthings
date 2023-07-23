@@ -108,8 +108,6 @@ spec:
           value: $(params.MINIO_SECRETKEY)
         - name: MINIO_CLIENT_URL
           value: $(params.MINIO_CLIENT_URL)
-        - name: output-value
-          value: "0"
       runAfter:
         - fetch-repository
       workspaces:
@@ -117,80 +115,99 @@ spec:
           workspace: sourcecode
         - name: workspace
           workspace: shared-workspace
-    # - name: create-classfile
-    #   taskRef:
-    #     name: create-classfile
-    #   params:
-    #     - name: SIMPLEVIS_DATA
-    #       value: $(params.SIMPLEVIS_DATA)
-    #     - name: ocp-tablespace
-    #       value: $(params.ocp-tablespace)
-    #   runAfter:
-    #     - get-dataset
-    #   workspaces:
-    #     - name: source
-    #       workspace: sourcecode
-    #     - name: workspace
-    #       workspace: shared-workspace
-    # - name: image-resize
-    #   when:
-    #     - input: "$(params.IMG_RESIZE)"
-    #       operator: in
-    #       values: ["Y"]
-    #   taskRef:
-    #     name: image-resize
-    #   params:
-    #     - name: SIMPLEVIS_DATA
-    #       value: $(params.SIMPLEVIS_DATA)
-    #     - name: IMG_RESIZE
-    #       value: "$(params.IMG_RESIZE)"
-    #     - name: MAX_WIDTH
-    #       value: "$(params.MAX_WIDTH)"
-    #     - name: ocp-tablespace
-    #       value: $(params.ocp-tablespace)
-    #   runAfter:
-    #     - create-classfile
-    #   workspaces:
-    #     - name: source
-    #       workspace: sourcecode
-    #     - name: workspace
-    #       workspace: shared-workspace
-    # - name: distribute-dataset
-    #   taskRef:
-    #     name: distribute-data
-    #   params:
-    #     - name: SIMPLEVIS_DATA
-    #       value: $(params.SIMPLEVIS_DATA)
-    #   runAfter:
-    #     - image-resize
-    #   workspaces:
-    #     - name: source
-    #       workspace: sourcecode
-    #     - name: workspace
-    #       workspace: shared-workspace
-    # - name: train-model
-    #   taskRef:
-    #     name: train-model
-    #   params:
-    #     - name: BATCH_SIZE
-    #       value: $(params.BATCH_SIZE)
-    #     - name: NUM_EPOCHS
-    #       value: $(params.NUM_EPOCHS)
-    #     - name: WEIGHTS
-    #       value: $(params.WEIGHTS)
-    #     - name: BASE_MODEL
-    #       value: $(params.BASE_MODEL)
-    #     - name: SIMPLEVIS_DATA
-    #       value: $(params.SIMPLEVIS_DATA)
-    #     - name: ocp-tablespace
-    #       value: $(params.ocp-tablespace)
-    #   runAfter:
-    #     - distribute-dataset
-    #   workspaces:
-    #     - name: source
-    #       workspace: sourcecode
-    #     - name: workspace
-    #       workspace: shared-workspace
+    - name: create-classfile
+      taskRef:
+        name: create-classfile
+      params:
+        - name: SIMPLEVIS_DATA
+          value: $(params.SIMPLEVIS_DATA)
+        - name: ocp-tablespace
+          value: $(params.ocp-tablespace)
+      runAfter:
+        - get-dataset
+      workspaces:
+        - name: source
+          workspace: sourcecode
+        - name: workspace
+          workspace: shared-workspace
+    - name: image-resize
+      when:
+        - input: "$(params.IMG_RESIZE)"
+          operator: in
+          values: ["Y"]
+      taskRef:
+        name: image-resize
+      params:
+        - name: SIMPLEVIS_DATA
+          value: $(params.SIMPLEVIS_DATA)
+        - name: IMG_RESIZE
+          value: "$(params.IMG_RESIZE)"
+        - name: MAX_WIDTH
+          value: "$(params.MAX_WIDTH)"
+        - name: ocp-tablespace
+          value: $(params.ocp-tablespace)
+      runAfter:
+        - create-classfile
+      workspaces:
+        - name: source
+          workspace: sourcecode
+        - name: workspace
+          workspace: shared-workspace
+    - name: distribute-dataset
+      taskRef:
+        name: distribute-data
+      params:
+        - name: SIMPLEVIS_DATA
+          value: $(params.SIMPLEVIS_DATA)
+      runAfter:
+        - image-resize
+      workspaces:
+        - name: source
+          workspace: sourcecode
+        - name: workspace
+          workspace: shared-workspace
+    - name: train-model
+      taskRef:
+        name: train-model
+      params:
+        - name: BATCH_SIZE
+          value: $(params.BATCH_SIZE)
+        - name: NUM_EPOCHS
+          value: $(params.NUM_EPOCHS)
+        - name: WEIGHTS
+          value: $(params.WEIGHTS)
+        - name: BASE_MODEL
+          value: $(params.BASE_MODEL)
+        - name: SIMPLEVIS_DATA
+          value: $(params.SIMPLEVIS_DATA)
+        - name: ocp-tablespace
+          value: $(params.ocp-tablespace)
+      runAfter:
+        - distribute-dataset
+      workspaces:
+        - name: source
+          workspace: sourcecode
+        - name: workspace
+          workspace: shared-workspace
+    - name: export-model
+      taskRef:
+        name: export-model
+      params:
+        - name: WEIGHTS
+          value: $(params.WEIGHTS)
+        - name: BASE_MODEL
+          value: $(params.BASE_MODEL)
+        - name: SIMPLEVIS_DATA
+          value: $(params.SIMPLEVIS_DATA)
+        - name: ocp-tablespace
+          value: $(params.ocp-tablespace)
+      runAfter:
+        - train-model
+      workspaces:
+        - name: source
+          workspace: sourcecode
+        - name: workspace
+          workspace: shared-workspace
     - name: push-results
       taskRef:
         name: push-results
@@ -209,124 +226,120 @@ spec:
           value: $(params.MINIO_SECRETKEY)
         - name: MINIO_CLIENT_URL
           value: $(params.MINIO_CLIENT_URL)
-        - name: training-run
-          value: $(tasks.get-dataset.results.output-value)
-      # runAfter:
-      #   - train-model
       runAfter:
-        - get-dataset
+        - train-model
       workspaces:
         - name: source
           workspace: sourcecode
         - name: workspace
           workspace: shared-workspace
-    # - name: deploy-model-x
-    #   when:
-    #     - input: "$(params.DEPLOY)"
-    #       operator: in
-    #       values: ["Y"]
-    #   taskSpec:
-    #     metadata:
-    #       annotations:
-    #         # operator.tekton.dev/last-applied-hash: 64d9014f8c7f4cd290afc619a32a185211cae3b23d56af70197b0e936ec8d35b
-    #         tekton.dev/displayName: openshift client
-    #         tekton.dev/pipelines.minVersion: 0.17.0
-    #         tekton.dev/tags: cli
-    #       labels:
-    #         app.kubernetes.io/version: '0.2'
-    #         operator.tekton.dev/operand-name: openshift-pipelines-addons
-    #         operator.tekton.dev/provider-type: redhat
-    #     params:
-    #       - default: oc help
-    #         description: The OpenShift CLI arguments to run
-    #         name: SCRIPT
-    #         type: string
-    #       - default: latest
-    #         description: The OpenShift Version to use
-    #         name: VERSION
-    #         type: string
-    #     steps:
-    #       - env:
-    #           - name: HOME
-    #             value: /tekton/home
-    #         image: >-
-    #           image-registry.openshift-image-registry.svc:5000/openshift/cli:$(params.VERSION)
-    #         name: oc
-    #         resources: {}
-    #         script: |
-    #           #!/usr/bin/env bash
+    - name: deploy-model-x
+      when:
+        - input: "$(params.DEPLOY)"
+          operator: in
+          values: ["Y"]
+      taskSpec:
+        metadata:
+          annotations:
+            # operator.tekton.dev/last-applied-hash: 64d9014f8c7f4cd290afc619a32a185211cae3b23d56af70197b0e936ec8d35b
+            tekton.dev/displayName: openshift client
+            tekton.dev/pipelines.minVersion: 0.17.0
+            tekton.dev/tags: cli
+          labels:
+            app.kubernetes.io/version: '0.2'
+            operator.tekton.dev/operand-name: openshift-pipelines-addons
+            operator.tekton.dev/provider-type: redhat
+        params:
+          - default: oc help
+            description: The OpenShift CLI arguments to run
+            name: SCRIPT
+            type: string
+          - default: latest
+            description: The OpenShift Version to use
+            name: VERSION
+            type: string
+        steps:
+          - env:
+              - name: HOME
+                value: /tekton/home
+            image: >-
+              image-registry.openshift-image-registry.svc:5000/openshift/cli:$(params.VERSION)
+            name: oc
+            resources: {}
+            script: |
+              #!/usr/bin/env bash
 
-    #           [[ "$(workspaces.manifest-dir.bound)" == "true" ]] && \
-    #           cd $(workspaces.manifest-dir.path)
+              [[ "$(workspaces.manifest-dir.bound)" == "true" ]] && \
+              cd $(workspaces.manifest-dir.path)
 
-    #           [[ "$(workspaces.kubeconfig-dir.bound)" == "true" ]] && \
-    #           [[ -f $(workspaces.kubeconfig-dir.path)/kubeconfig ]] && \
-    #           export KUBECONFIG=$(workspaces.kubeconfig-dir.path)/kubeconfig
+              [[ "$(workspaces.kubeconfig-dir.bound)" == "true" ]] && \
+              [[ -f $(workspaces.kubeconfig-dir.path)/kubeconfig ]] && \
+              export KUBECONFIG=$(workspaces.kubeconfig-dir.path)/kubeconfig
 
-    #           $(params.SCRIPT)
-    #         securityContext:
-    #           runAsNonRoot: true
-    #           runAsUser: 65532
-    #     workspaces:
-    #       - name: manifest-dir
-    #         optional: true
-    #       - name: kubeconfig-dir
-    #         optional: true
-    #   workspaces:
-    #     - name: source
-    #       workspace: sourcecode
-    #   runAfter:
-    #     - push-results
-    #   params:
-    #   - name: ocp-tablespace
-    #     value: $(params.ocp-tablespace)
-    #   - name: MINIO_ENDPOINT
-    #     value: $(params.MINIO_ENDPOINT)
-    #   - name: MINIO_BUCKET
-    #     value: $(params.MINIO_BUCKET)
-    #   - name: MINIO_ACCESSKEY
-    #     value: $(params.MINIO_ACCESSKEY)
-    #   - name: MINIO_SECRETKEY
-    #     value: $(params.MINIO_SECRETKEY)
-    #   - name: MODEL_NAME
-    #     value: $(params.MODEL_NAME)
-    #   - name: SCRIPT
-    #     value: |
-    #       oc new-app image-registry.openshift-image-registry.svc:5000/$(params.ocp-tablespace)/custom-model:latest \
-    #         --name=$(params.MODEL_NAME) \
-    #         --env=WEIGHTS=model_custom.pt \
-    #         --env=SIMPLEVIS_DATA=/opt/app-root/src/simplevis-data \
-    #         --env=MINIO_ENDPOINT=$(params.MINIO_ENDPOINT) \
-    #         --env=MINIO_BUCKET=$(params.MINIO_BUCKET) \
-    #         --env=MINIO_ACCESSKEY=$(params.MINIO_ACCESSKEY) \
-    #         --env=MINIO_SECRETKEY=$(params.MINIO_SECRETKEY) \
-    #       && oc set volume deployment/$(params.MODEL_NAME) \
-    #         --add \
-    #         --name=simplevis-data-volume \
-    #         --type=emptyDir \
-    #         --mount-path=/opt/app-root/src/simplevis-data \
-    #       && oc apply -f - <<EOF
-    #       apiVersion: route.openshift.io/v1
-    #       kind: Route
-    #       metadata:
-    #         name: $(params.MODEL_NAME)
-    #         labels:
-    #           app: $(params.MODEL_NAME)
-    #           app.kubernetes.io/component: $(params.MODEL_NAME)
-    #           app.kubernetes.io/instance: $(params.MODEL_NAME)
-    #       annotations:
-    #         openshift.io/host.generated: "true"
-    #       spec:
-    #         to:
-    #           kind: Service
-    #           name: $(params.MODEL_NAME)
-    #           weight: 100
-    #         port:
-    #           targetPort: 8000-tcp
-    #         tls:
-    #           termination: edge
-    #           insecureEdgeTerminationPolicy: Allow
-    #       EOF
+              $(params.SCRIPT)
+            securityContext:
+              runAsNonRoot: true
+              runAsUser: 65532
+        workspaces:
+          - name: manifest-dir
+            optional: true
+          - name: kubeconfig-dir
+            optional: true
+      workspaces:
+        - name: source
+          workspace: sourcecode
+      runAfter:
+        - push-results
+      params:
+      - name: ocp-tablespace
+        value: $(params.ocp-tablespace)
+      - name: MINIO_ENDPOINT
+        value: $(params.MINIO_ENDPOINT)
+      - name: MINIO_BUCKET
+        value: $(params.MINIO_BUCKET)
+      - name: MINIO_ACCESSKEY
+        value: $(params.MINIO_ACCESSKEY)
+      - name: MINIO_SECRETKEY
+        value: $(params.MINIO_SECRETKEY)
+      - name: MODEL_NAME
+        value: $(params.MODEL_NAME)
+      - name: SCRIPT
+        value: |
+          oc new-app image-registry.openshift-image-registry.svc:5000/$(params.ocp-tablespace)/custom-model:latest \
+            --name=$(params.MODEL_NAME) \
+            --env=WEIGHTS=model_custom.pt \
+            --env=SIMPLEVIS_DATA=/opt/app-root/src/simplevis-data \
+            --env=MINIO_ENDPOINT=$(params.MINIO_ENDPOINT) \
+            --env=MINIO_BUCKET=$(params.MINIO_BUCKET) \
+            --env=MINIO_ACCESSKEY=$(params.MINIO_ACCESSKEY) \
+            --env=MINIO_SECRETKEY=$(params.MINIO_SECRETKEY) \
+          && oc set volume deployment/$(params.MODEL_NAME) \
+            --add \
+            --name=simplevis-data-volume \
+            --type=emptyDir \
+            --mount-path=/opt/app-root/src/simplevis-data \
+          && oc apply -f - <<EOF
+          apiVersion: route.openshift.io/v1
+          kind: Route
+          metadata:
+            name: $(params.MODEL_NAME)
+            labels:
+              app: $(params.MODEL_NAME)
+              app.kubernetes.io/component: $(params.MODEL_NAME)
+              app.kubernetes.io/instance: $(params.MODEL_NAME)
+          annotations:
+            openshift.io/host.generated: "true"
+          spec:
+            to:
+              kind: Service
+              name: $(params.MODEL_NAME)
+              weight: 100
+            port:
+              targetPort: 8000-tcp
+            tls:
+              termination: edge
+              insecureEdgeTerminationPolicy: Allow
+          EOF
   workspaces:
     - name: shared-workspace
     - name: sourcecode
