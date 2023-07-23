@@ -16,20 +16,20 @@ tkn pipeline start training-x-pipeline \
   -p ocp-tablespace="$TABLESPACE" \
   -p git-url=https://github.com/redhat-na-ssa/flyingthings.git \
   -p git-revision=main \
-  -p GPU="N" \
+  -p GPU="Y" \
   -p BATCH_SIZE="2" \
   -p NUM_EPOCHS="1" \
   -p IMG_RESIZE="Y" \
   -p MAX_WIDTH="200" \
   -p WEIGHTS=hoscale.pt \
-  -p DATASET_ZIP=hoscale.zip \
+  -p DATASET_ZIP=hoscale-03.zip \
   -p MINIO_ENDPOINT=http://minio:9000 \
   -p MINIO_ACCESSKEY=minioadmin \
   -p MINIO_SECRETKEY=minioadmin \
   -p MINIO_BUCKET=hoscale \
   -p MODEL_NAME=model-hoscale \
-  -p MINIO_CLIENT_URL=https://dl.min.io/client/mc/release/linux-amd64 \
-  -p DEPLOY="Y" \
+  -p MINIO_CLIENT_URL=http://util02.davenet.local \
+  -p DEPLOY="N" \
   --use-param-defaults --showlog
 
 # Exit the script gracefully
