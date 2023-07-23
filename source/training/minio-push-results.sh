@@ -31,7 +31,8 @@ echo "This training run number: $TRAINING_RUN_NUM"
 # TODO: modify model deployment to use name of new model
 ./mc --config-dir miniocfg cp $SIMPLEVIS_DATA/workspace/runs/train/weights/best.pt myminio/$MINIO_BUCKET/model_custom.pt --insecure
 ./mc --config-dir miniocfg cp $SIMPLEVIS_DATA/workspace/runs/train/weights/best.torchscript myminio/$MINIO_BUCKET/model_custom.torchscript --insecure
-
+./mc --config-dir miniocfg cp $SIMPLEVIS_DATA/workspace/datasets/classes.txt myminio/$MINIO_BUCKET/classes.txt --insecure
 # Set the training run for all objects
 ./mc --config-dir miniocfg tag set myminio/$MINIO_BUCKET/model_custom.pt "training-run=$TRAINING_RUN_NUM" --insecure
 ./mc --config-dir miniocfg tag set myminio/$MINIO_BUCKET/model_custom.torchscript "training-run=$TRAINING_RUN_NUM" --insecure
+./mc --config-dir miniocfg tag set myminio/$MINIO_BUCKET/classes.txt "training-run=$TRAINING_RUN_NUM" --insecure
