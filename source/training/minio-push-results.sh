@@ -14,7 +14,7 @@ CURRENT_RUN=0000
 
 # Get previous training run if it exists, otherwise set it to 0
 # First, list all objects with the tag "training-run=latest"
-LATEST_MOD_FILES=$(./mc --config-dir miniocfg find myminio/$MINIO_BUCKET --tags "training-run=latest" --insecure)
+LATEST_MOD_FILES=$(./mc --config-dir miniocfg find myminio/$MINIO_BUCKET/models --tags "training-run=latest" --insecure)
 
 # Check if any objects are returned
 if [ -n "$LATEST_MOD_FILES" ]; then
