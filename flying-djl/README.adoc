@@ -353,7 +353,7 @@ $ http://localhost:8161
 
 .. Authenticate using the following credentials:  *djl*  /  *djl*
 +
-image::images/djl-object-detect-mqtt-artemis-web-admin.png[]
+image::docs/images/djl-object-detect-mqtt-artemis-web-admin.png[]
 
 
 . View video capture events in browser
@@ -362,4 +362,17 @@ image::images/djl-object-detect-mqtt-artemis-web-admin.png[]
 +
 -----
 $ echo -en "\nhttps://$(oc get route djl-objectdetect-web -n user1-djl --template='{{ .spec.host }}')/liveObject.html\n"
+-----
+
+== Model Diagnostics
+
+-----
+$ https://github.com/ultralytics/yolov5
+
+$ python -m venv ~/venv
+$ source ~/venv/bin/activate
+(venv) $ pip install -U ultralytics
+(venv) $ python yolov5/detect.py \
+         --source https://github.com/ultralytics/yolov5/raw/master/data/images/bus.jpg \
+         --weights ~/Downloads/flyingthings/model_custom.pt
 -----
