@@ -48,11 +48,11 @@ echo "Current run: $CURRENT_RUN"
 ./mc --config-dir miniocfg cp $SIMPLEVIS_DATA/workspace/runs/train/weights/best.pt myminio/$MINIO_BUCKET/training-run-$CURRENT_RUN/$WEIGHTS --insecure
 
 # Push the latest model files to the root of the bucket
-./mc --config-dir miniocfg cp $SIMPLEVIS_DATA/workspace/runs/train/weights/best.pt myminio/$MINIO_BUCKET/model_custom_$CURRENT_RUN.pt --insecure
-./mc --config-dir miniocfg cp $SIMPLEVIS_DATA/workspace/runs/train/weights/best.torchscript myminio/$MINIO_BUCKET/model_custom_$CURRENT_RUN.torchscript --insecure
-./mc --config-dir miniocfg cp $SIMPLEVIS_DATA/workspace/datasets/classes.txt myminio/$MINIO_BUCKET/classes_$CURRENT_RUN.txt --insecure
+./mc --config-dir miniocfg cp $SIMPLEVIS_DATA/workspace/runs/train/weights/best.pt myminio/$MINIO_BUCKET/models/model_custom_$CURRENT_RUN.pt --insecure
+./mc --config-dir miniocfg cp $SIMPLEVIS_DATA/workspace/runs/train/weights/best.torchscript myminio/$MINIO_BUCKET/models/model_custom_$CURRENT_RUN.torchscript --insecure
+./mc --config-dir miniocfg cp $SIMPLEVIS_DATA/workspace/datasets/classes.txt myminio/$MINIO_BUCKET/models/classes_$CURRENT_RUN.txt --insecure
 
 # Set the training run tag to latest
-./mc --config-dir miniocfg tag set myminio/$MINIO_BUCKET/model_custom_$CURRENT_RUN.pt "training-run=latest" --insecure
-./mc --config-dir miniocfg tag set myminio/$MINIO_BUCKET/model_custom_$CURRENT_RUN.torchscript "training-run=latest" --insecure
-./mc --config-dir miniocfg tag set myminio/$MINIO_BUCKET/classes_$CURRENT_RUN.txt "training-run=latest" --insecure
+./mc --config-dir miniocfg tag set myminio/$MINIO_BUCKET/models/model_custom_$CURRENT_RUN.pt "training-run=latest" --insecure
+./mc --config-dir miniocfg tag set myminio/$MINIO_BUCKET/models/model_custom_$CURRENT_RUN.torchscript "training-run=latest" --insecure
+./mc --config-dir miniocfg tag set myminio/$MINIO_BUCKET/models/classes_$CURRENT_RUN.txt "training-run=latest" --insecure
