@@ -15,6 +15,12 @@ TRAINING_RUN=$(./mc --config-dir miniocfg tag list --json myminio/$MINIO_BUCKET/
 training_run_value=$(echo "$TRAINING_RUN" | jq -r '.tagset."training-run"')
 echo "Previous training-run: $training_run_value"
 
+# Store previous training run in a variable and tag previous objects
+PRIOR_TRAINING_RUN=$training_run_value
+./mc --config-dir miniocfg tag set myminio/$MINIO_BUCKET/model_custom.pt "training-run=$PRIOR_TRAINING_RUN" --insecure
+./mc --config-dir miniocfg tag set myminio/$MINIO_BUCKET/model_custom.torchscript "training-run=$PRIOR_TRAINING_RUN" --insecure
+./mc --config-dir miniocfg tag set myminio/$MINIO_BUCKET/classes.txt "training-run=$PRIOR_TRAINING_RUN" --insecure
+
 # Check if the value is null and set TRAINING_RUN_NUM accordingly
 if [ "$training_run_value" = "null" ]; then
     TRAINING_RUN_NUM=0
@@ -28,11 +34,12 @@ echo "This training run number: $TRAINING_RUN_NUM"
 ./mc --config-dir miniocfg cp $SIMPLEVIS_DATA/workspace/runs/training-results.tgz myminio/$MINIO_BUCKET/training-run-$TRAINING_RUN_NUM/training-results.tgz --insecure
 ./mc --config-dir miniocfg cp $SIMPLEVIS_DATA/workspace/runs/train/weights/best.pt myminio/$MINIO_BUCKET/training-run-$TRAINING_RUN_NUM/$WEIGHTS --insecure
 # TODO: Add a check to see if the training run was successful
-# TODO: modify model deployment to use name of new model
+
 ./mc --config-dir miniocfg cp $SIMPLEVIS_DATA/workspace/runs/train/weights/best.pt myminio/$MINIO_BUCKET/model_custom.pt --insecure
 ./mc --config-dir miniocfg cp $SIMPLEVIS_DATA/workspace/runs/train/weights/best.torchscript myminio/$MINIO_BUCKET/model_custom.torchscript --insecure
 ./mc --config-dir miniocfg cp $SIMPLEVIS_DATA/workspace/datasets/classes.txt myminio/$MINIO_BUCKET/classes.txt --insecure
+
 # Set the training run for all objects
-./mc --config-dir miniocfg tag set myminio/$MINIO_BUCKET/model_custom.pt "training-run=$TRAINING_RUN_NUM" --insecure
-./mc --config-dir miniocfg tag set myminio/$MINIO_BUCKET/model_custom.torchscript "training-run=$TRAINING_RUN_NUM" --insecure
-./mc --config-dir miniocfg tag set myminio/$MINIO_BUCKET/classes.txt "training-run=$TRAINING_RUN_NUM" --insecure
+./mc --config-dir miniocfg tag set myminio/$MINIO_BUCKET/model_custom.pt "training-run=latest" --insecure
+./mc --config-dir miniocfg tag set myminio/$MINIO_BUCKET/model_custom.torchscript "training-run=latest" --insecure
+./mc --config-dir miniocfg tag set myminio/$MINIO_BUCKET/classes.txt "training-run=latest" --insecure
