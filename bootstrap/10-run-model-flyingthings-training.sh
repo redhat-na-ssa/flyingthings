@@ -18,7 +18,7 @@ tkn pipeline start training-x-pipeline \
   -p ocp-tablespace="$TABLESPACE" \
   -p git-url=https://github.com/redhat-na-ssa/flyingthings.git \
   -p git-revision=djw \
-  -p GPU="N" \
+  -p GPU="Y" \
   -p BATCH_SIZE="2" \
   -p NUM_EPOCHS="1" \
   -p IMG_RESIZE="Y" \
@@ -31,7 +31,7 @@ tkn pipeline start training-x-pipeline \
   -p MINIO_BUCKET=flyingthings \
   -p MODEL_NAME=model-flyingthings \
   -p MINIO_CLIENT_URL=util02.davenet.local \
-  -p DEPLOY="Y" \
+  -p DEPLOY="N" \
   --use-param-defaults --showlog
 
 # Exit the script gracefully

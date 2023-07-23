@@ -28,18 +28,20 @@ else
     # If the value is not null, interpret it as a number and increment by 1
     TRAINING_RUN_NUM=$((training_run_value + 1))
 fi
-echo "This training run number: $TRAINING_RUN_NUM"  
+#padded_number=$(printf "%04d" "$TRAINING_RUN_NUM")
+PADDED_NUMBER=$(printf "%04d" "$TRAINING_RUN_NUM")
+echo "This training run number: $PADDED_NUMBER"  
 
 
-./mc --config-dir miniocfg cp $SIMPLEVIS_DATA/workspace/runs/training-results.tgz myminio/$MINIO_BUCKET/training-run-$TRAINING_RUN_NUM/training-results.tgz --insecure
-./mc --config-dir miniocfg cp $SIMPLEVIS_DATA/workspace/runs/train/weights/best.pt myminio/$MINIO_BUCKET/training-run-$TRAINING_RUN_NUM/$WEIGHTS --insecure
+./mc --config-dir miniocfg cp $SIMPLEVIS_DATA/workspace/runs/training-results.tgz myminio/$MINIO_BUCKET/training-run-$PADDED_NUMBER/training-results.tgz --insecure
+./mc --config-dir miniocfg cp $SIMPLEVIS_DATA/workspace/runs/train/weights/best.pt myminio/$MINIO_BUCKET/training-run-$PADDED_NUMBER/$WEIGHTS --insecure
 # TODO: Add a check to see if the training run was successful
 
-./mc --config-dir miniocfg cp $SIMPLEVIS_DATA/workspace/runs/train/weights/best.pt myminio/$MINIO_BUCKET/model_custom.pt --insecure
-./mc --config-dir miniocfg cp $SIMPLEVIS_DATA/workspace/runs/train/weights/best.torchscript myminio/$MINIO_BUCKET/model_custom.torchscript --insecure
-./mc --config-dir miniocfg cp $SIMPLEVIS_DATA/workspace/datasets/classes.txt myminio/$MINIO_BUCKET/classes.txt --insecure
+./mc --config-dir miniocfg cp $SIMPLEVIS_DATA/workspace/runs/train/weights/best.pt myminio/$MINIO_BUCKET/model_custom_$PADDED_NUMBER.pt --insecure
+./mc --config-dir miniocfg cp $SIMPLEVIS_DATA/workspace/runs/train/weights/best.torchscript myminio/$MINIO_BUCKET/model_custom_$PADDED_NUMBER.torchscript --insecure
+./mc --config-dir miniocfg cp $SIMPLEVIS_DATA/workspace/datasets/classes.txt myminio/$MINIO_BUCKET/classes_$PADDED_NUMBER.txt --insecure
 
 # Set the training run for all objects
-./mc --config-dir miniocfg tag set myminio/$MINIO_BUCKET/model_custom.pt "training-run=latest" --insecure
-./mc --config-dir miniocfg tag set myminio/$MINIO_BUCKET/model_custom.torchscript "training-run=latest" --insecure
-./mc --config-dir miniocfg tag set myminio/$MINIO_BUCKET/classes.txt "training-run=latest" --insecure
+./mc --config-dir miniocfg tag set myminio/$MINIO_BUCKET/model_custom_$PADDED_NUMBER.pt "training-run=latest" --insecure
+./mc --config-dir miniocfg tag set myminio/$MINIO_BUCKET/model_custom_$PADDED_NUMBER.torchscript "training-run=latest" --insecure
+./mc --config-dir miniocfg tag set myminio/$MINIO_BUCKET/classes_$PADDED_NUMBER.txt "training-run=latest" --insecure
