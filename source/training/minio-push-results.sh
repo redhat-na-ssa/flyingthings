@@ -35,7 +35,7 @@ if [ -n "$LATEST_MOD_FILES" ]; then
     # Tag the previous run files with the previous run number
     for file in $LATEST_MOD_FILES; do
     echo "$COMMAND $file"
-        ./mc --config-dir miniocfg tag set myminio/$MINIO_BUCKET/$file "training-run=$PREVIOUS_RUN" --insecure
+        ./mc --config-dir miniocfg tag set $file "training-run=$PREVIOUS_RUN" --insecure
     done
 else
   echo "No files found."
