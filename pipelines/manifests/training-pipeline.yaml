@@ -226,6 +226,8 @@ spec:
           value: $(params.MINIO_SECRETKEY)
         - name: MINIO_CLIENT_URL
           value: $(params.MINIO_CLIENT_URL)
+        - name: ocp-tablespace
+          value: $(params.ocp-tablespace)
       runAfter:
         - export-model
       workspaces:
