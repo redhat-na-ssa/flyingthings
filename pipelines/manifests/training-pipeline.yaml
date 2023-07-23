@@ -73,6 +73,9 @@ spec:
     - name: MODEL_NAME
       description: name used to deploy the model and model server
       type: string
+    - name: GPU
+      description: flag for use of GPU for training
+      type: string
   tasks: 
     - name: fetch-repository
       params:
@@ -166,9 +169,13 @@ spec:
           workspace: sourcecode
         - name: workspace
           workspace: shared-workspace
-    - name: train-model
+    - name: train-model-gpu
+      when:
+        - input: "$(params.GPU)"
+          operator: in
+          values: ["Y"]
       taskRef:
-        name: train-model
+        name: train-model-gpu
       params:
         - name: BATCH_SIZE
           value: $(params.BATCH_SIZE)
@@ -189,6 +196,36 @@ spec:
           workspace: sourcecode
         - name: workspace
           workspace: shared-workspace
+    - name: train-model-cpu
+      when:
+        - input: "$(params.GPU)"
+          operator: in
+          values: ["N"]
+      taskRef:
+        name: train-model-cpu
+      params:
+        - name: BATCH_SIZE
+          value: $(params.BATCH_SIZE)
+        - name: NUM_EPOCHS
+          value: $(params.NUM_EPOCHS)
+        - name: WEIGHTS
+          value: $(params.WEIGHTS)
+        - name: BASE_MODEL
+          value: $(params.BASE_MODEL)
+        - name: SIMPLEVIS_DATA
+          value: $(params.SIMPLEVIS_DATA)
+        - name: ocp-tablespace
+          value: $(params.ocp-tablespace)
+      runAfter:
+        - distribute-dataset
+      workspaces:
+        - name: source
+          workspace: sourcecode
+        - name: workspace
+          workspace: shared-workspace
+    - name: fan-out
+      taskRef:
+        name: fan-out
     - name: export-model
       taskRef:
         name: export-model
@@ -202,7 +239,8 @@ spec:
         - name: ocp-tablespace
           value: $(params.ocp-tablespace)
       runAfter:
-        - train-model
+        - train-model-cpu
+        - train-model-gpu
       workspaces:
         - name: source
           workspace: sourcecode

@@ -16,8 +16,9 @@ tkn pipeline start training-x-pipeline \
   -p ocp-tablespace="$TABLESPACE" \
   -p git-url=https://github.com/redhat-na-ssa/flyingthings.git \
   -p git-revision=main \
-  -p BATCH_SIZE="-1" \
-  -p NUM_EPOCHS="100" \
+  -p GPU="Y" \
+  -p BATCH_SIZE="2" \
+  -p NUM_EPOCHS="1" \
   -p IMG_RESIZE="Y" \
   -p MAX_WIDTH="200" \
   -p WEIGHTS=hotwheelz.pt \
