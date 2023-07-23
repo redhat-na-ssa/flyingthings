@@ -21,7 +21,7 @@ USER 0
 # Update base image for latest security updates
 # (ubi images are not released that often)
 RUN dnf -y  --setopt=tsflags=nodocs update && \
-    dnf -y install libGL && \
+    dnf -y install libGL jq && \
     dnf -y clean all --enablerepo='*'
 
 USER 1001
