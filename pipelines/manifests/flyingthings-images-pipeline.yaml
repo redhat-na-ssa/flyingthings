@@ -111,6 +111,9 @@ spec:
     - name: MINIO_CLIENT_URL
       default: "https://dl.min.io/client/mc/release/linux-amd64"
       type: string
+    - name: DEPLOY_LABELSTUDIO
+      default: "N"
+      type: string
   tasks:
     - name: fetch-repository
       params:
@@ -458,6 +461,10 @@ spec:
               insecureEdgeTerminationPolicy: Allow
           EOF
     - name: build-labelstud
+      when:
+        - input: "$(params.DEPLOY_LABELSTUDIO)"
+          operator: in
+          values: ["Y"]
       params:
         - name: IMAGE
           value: $(params.LABELSTUD_IMAGE)
@@ -474,6 +481,10 @@ spec:
         - name: source
           workspace: source
     - name: deploy-labelstudio
+      when:
+        - input: "$(params.DEPLOY_LABELSTUDIO)"
+          operator: in
+          values: ["Y"]    
       taskSpec:
         metadata:
           annotations:
