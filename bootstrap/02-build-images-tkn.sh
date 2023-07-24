@@ -13,6 +13,10 @@ echo "Deploying project to $TABLESPACE"
 tkn pipeline start flyingthings-images-pipeline \
   -w name=source,volumeClaimTemplateFile=code-pvc.yaml \
   -w name=shared-workspace,volumeClaimTemplateFile=work-pvc.yaml \
+<<<<<<< HEAD
+=======
+  -p git-url="https://github.com/redhat-na-ssa/flyingthings.git" \
+>>>>>>> djw
   -p git-revision="main" \
   -p YOLO_IMAGE="image-registry.openshift-image-registry.svc:5000/$TABLESPACE/yolo:latest" \
   -p UBI_IMAGE="image-registry.openshift-image-registry.svc:5000/$TABLESPACE/base-ubi9:latest" \
@@ -27,6 +31,7 @@ tkn pipeline start flyingthings-images-pipeline \
   -p MINIO_SECRETKEY="minioadmin" \
   -p MINIO_CLIENT_URL="https://dl.min.io/client/mc/release/linux-amd64" \
   -p ocp-tablespace="$TABLESPACE" \
+  -p DEPLOY_LABELSTUDIO="N" \
   --use-param-defaults --showlog
 
 # Exit the script gracefully
