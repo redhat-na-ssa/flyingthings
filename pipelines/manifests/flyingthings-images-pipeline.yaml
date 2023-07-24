@@ -357,13 +357,16 @@ spec:
           OpenShift CLI that complements kubectl for simplifying deployment and
           configuration applications on OpenShift.
         params:
-          - default: oc help
+          - name: SCRIPT
+            default: oc help
             description: The OpenShift CLI arguments to run
-            name: SCRIPT
             type: string
-          - default: latest
+          - name: VERSION
+            default: latest
             description: The OpenShift Version to use
-            name: VERSION
+          - name: BASE_MODEL            
+            type: string
+            description: Base model for training
             type: string
         steps:
           - env:
@@ -414,6 +417,8 @@ spec:
         value: $(params.MINIO_ACCESSKEY)
       - name: MINIO_SECRETKEY
         value: $(params.MINIO_SECRETKEY)
+      - name: BASE_MODEL
+        value: $(params.BASE_MODEL)
       - name: SCRIPT
         value: |
           oc new-app image-registry.openshift-image-registry.svc:5000/$(params.ocp-tablespace)/custom-model:latest \
@@ -424,6 +429,7 @@ spec:
             --env=MINIO_BUCKET=$(params.MINIO_BUCKET) \
             --env=MINIO_ACCESSKEY=$(params.MINIO_ACCESSKEY) \
             --env=MINIO_SECRETKEY=$(params.MINIO_SECRETKEY) \
+            --env=BASE_MODEL=$(params.BASE_MODEL) \
           && oc set volume deployment/model-yolo \
             --add \
             --name=simplevis-data-volume \

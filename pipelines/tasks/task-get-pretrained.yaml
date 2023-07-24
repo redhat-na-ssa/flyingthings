@@ -23,10 +23,11 @@ spec:
     - name: ocp-tablespace
       type: string
   steps:
-    - name: pull-dataset
+    - name: get-pretrained-model
       image: image-registry.openshift-image-registry.svc:5000/$(params.ocp-tablespace)/yolo:latest
       script: |
-        cd $(params.SIMPLEVIS_DATA)/workspace \
+        set -x \
+        && cd $(params.SIMPLEVIS_DATA)/workspace \
         && $(workspaces.source.path)/source/training/00-get-yolo-model.sh \
         && $(workspaces.source.path)/source/training/minio-setup-client.sh \
         && $(workspaces.source.path)/source/training/00-push-yolo-model.sh
