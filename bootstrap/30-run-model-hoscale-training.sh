@@ -17,7 +17,7 @@ tkn pipeline start training-x-pipeline \
   -p git-url=https://github.com/redhat-na-ssa/flyingthings.git \
   -p git-revision=djw \
   -p GPU="Y" \
-  -p BATCH_SIZE="2" \
+  -p BATCH_SIZE="-1" \
   -p NUM_EPOCHS="1" \
   -p IMG_RESIZE="Y" \
   -p MAX_WIDTH="200" \
@@ -29,7 +29,7 @@ tkn pipeline start training-x-pipeline \
   -p MINIO_BUCKET=hoscale \
   -p MODEL_NAME=model-hoscale \
   -p MINIO_CLIENT_URL=http://util02.davenet.local \
-  -p DEPLOY="N" \
+  -p DEPLOY="Y" \
   --use-param-defaults --showlog
 
 # Exit the script gracefully
