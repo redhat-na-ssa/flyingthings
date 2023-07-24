@@ -370,7 +370,6 @@ spec:
           - name: BASE_MODEL            
             type: string
             description: Base model for training
-            type: string
         steps:
           - env:
               - name: HOME
