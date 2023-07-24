@@ -10,7 +10,7 @@
 
 == Architecture
 
-image::images/djl-object-detect-architecture.png[]
+image::docs/images/djl-object-detect-architecture.png[]
 
 As depicted in the above diagram, the demo functionality is split into the following components:
 
@@ -366,12 +366,49 @@ $ echo -en "\nhttps://$(oc get route djl-objectdetect-web -n user1-djl --templat
 
 == Model Diagnostics
 
+. Initial setup:
++
 -----
 $ https://github.com/ultralytics/yolov5
 
 $ python -m venv ~/venv
 $ source ~/venv/bin/activate
 (venv) $ pip install -U ultralytics
+-----
+
+. Detect and predict:
++
+-----
+(venv) $ python yolov5/detect.py \
+           --source /tmp/org.acme.objectdetection/unAdulteredImage-1690148580.png
+
+detect: weights=yolov5/yolov5s.pt, source=/tmp/org.acme.objectdetection/unAdulteredImage-1690148580.png, data=yolov5/data/coco128.yaml, imgsz=[640, 640], conf_thres=0.25, iou_thres=0.45, max_det=1000, device=, view_img=False, save_txt=False, save_conf=False, save_crop=False, nosave=False, classes=None, agnostic_nms=False, augment=False, visualize=False, update=False, project=yolov5/runs/detect, name=exp, exist_ok=False, line_thickness=3, hide_labels=False, hide_conf=False, half=False, dnn=False, vid_stride=1
+YOLOv5 🚀 v7.0-195-g7a70d09 Python-3.11.4 torch-2.0.1+cu117 CPU
+
+Fusing layers... 
+YOLOv5s summary: 213 layers, 7225885 parameters, 0 gradients
+image 1/1 /tmp/org.acme.objectdetection/unAdulteredImage-1690148580.png: 384x640 1 airplane, 52.7ms
+Speed: 0.2ms pre-process, 52.7ms inference, 0.6ms NMS per image at shape (1, 3, 640, 640)
+Results saved to yolov5/runs/detect/exp10
+-----
+
+. Predict using `yolo` executable and a model from its model zoo
++
+-----
+(venv) $  yolo predict \
+              model=yolov8n.pt \
+              source=/tmp/org.acme.objectdetection/unAdulteredImage-1690148580.png \
+              exist_ok=True
+
+
+YOLOv8n summary (fused): 168 layers, 3151904 parameters, 0 gradients
+
+image 1/1 /tmp/org.acme.objectdetection/unAdulteredImage-1690148580.png: 384x640 1 airplane, 54.5ms
+Speed: 1.1ms preprocess, 54.5ms inference, 0.8ms postprocess per image at shape (1, 3, 384, 640)
+-----
+
+-----
+(venv) $ pip install dill
 (venv) $ python yolov5/detect.py \
          --source https://github.com/ultralytics/yolov5/raw/master/data/images/bus.jpg \
          --weights ~/Downloads/flyingthings/model_custom.pt
