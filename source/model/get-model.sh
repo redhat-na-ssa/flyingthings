@@ -9,7 +9,7 @@ MCONFIG=/opt/app-root/src/simplevis-data/mconfig
 # If BASE_MODEL is pretrained, use the pretrained pytorch model file
 if [ "$BASE_MODEL" == "model_pretrained.pt" ]; then
   echo "Using pretrained model..."
-  ./mc --config-dir=$MCONFIG cp  myminio/$MINIO_BUCKET/$model_pretrained $WEIGHTS --insecure
+  ./mc --config-dir=$MCONFIG cp  myminio/$MINIO_BUCKET/model_pretrained.pt $WEIGHTS --insecure
 else
   echo "Using custom model..."
 
