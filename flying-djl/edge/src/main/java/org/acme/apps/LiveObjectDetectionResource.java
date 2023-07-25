@@ -2,7 +2,6 @@ package org.acme.apps;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -55,16 +54,10 @@ import ai.djl.modality.cv.ImageFactory;
 import ai.djl.modality.cv.output.BoundingBox;
 import ai.djl.modality.cv.output.DetectedObjects;
 import ai.djl.modality.cv.output.Rectangle;
-import ai.djl.modality.cv.transform.Resize;
-import ai.djl.modality.cv.transform.ToTensor;
-import ai.djl.modality.cv.translator.YoloV5Translator;
 import ai.djl.modality.cv.translator.YoloV5TranslatorFactory;
-import ai.djl.modality.cv.translator.YoloV5Translator.YoloOutputType;
 import ai.djl.repository.zoo.Criteria;
 import ai.djl.repository.zoo.ZooModel;
 import ai.djl.training.util.ProgressBar;
-import ai.djl.translate.Pipeline;
-import ai.djl.translate.Translator;
 import java.awt.image.BufferedImage;
 
 import com.sun.security.auth.module.UnixSystem;
@@ -108,8 +101,8 @@ public class LiveObjectDetectionResource extends BaseResource implements IApp {
     @ConfigProperty(name = "org.acme.objectdetection.video.capture.interval.millis", defaultValue = "50")
     int videoCaptureIntevalMillis;
 
-    @ConfigProperty(name = "org.acme.djl.root.model.path", defaultValue=AppUtils.NA)
-    String rootModelPathString;
+    @ConfigProperty(name = "org.acme.djl.model.zip.path", defaultValue=AppUtils.NA)
+    String modelZipPath;
 
     @ConfigProperty(name = "org.acme.djl.model.artifact.name", defaultValue = AppUtils.NA)
     String modelName;
@@ -181,53 +174,35 @@ public class LiveObjectDetectionResource extends BaseResource implements IApp {
     }
 
     private void loadModel() {
+        /*
         File rootModelPath = new File(rootModelPathString);
         if(!rootModelPath.exists() || !rootModelPath.isDirectory())
             throw new RuntimeException("Following root directory does not exist: "+rootModelPathString);
             
         File modelPath = new File(rootModelPath, modelName);
         if(!modelPath.exists())
-            throw new RuntimeException("Following model does not exist: "+modelName);
+            throw new RuntimeException("Following model does not exist: "+modelName);*/
 
         try {
 
             /* Reference
-             *     https://pytorch.org/hub/ultralytics_yolov5/                          :   Ultralytics YOLOv5; PyTorch
-             *     https://github.com/deepjavalibrary/djl/issues/1563                   :   Yolov5 using DJL; April 2022
+             *     https://stackabuse.com/object-detection-inference-in-python-with-yolov5-and-pytorch/             :   Background on Ultralytics and yolov5
+             *     https://pytorch.org/hub/ultralytics_yolov5/                                                      :   Ultralytics YOLOv5; PyTorch
+             *     https://github.com/deepjavalibrary/djl/issues/1563                                               :   Yolov5 using DJL; April 2022
+             *     https://github.com/deepjavalibrary/djl/blob/master/examples/docs/mask_detection.md               :   Mask detection w/ yolov5 - training and inference
+             *     http://aishelf.org/yolo-nms/                                                                     :   Non Maxima Suppression (NMS)
+             *     https://learnopencv.com/deep-learning-based-object-detection-using-yolov3-with-opencv-python-c/  :   Yolov3 with OpenCV
+             *     https://towardsdatascience.com/guide-to-car-detection-using-yolo-48caac8e4ded                    :   Car Detection using Yolo
              */ 
-            int imageSize = 640;
-            Pipeline pipeline = new Pipeline();
-            pipeline.add(new Resize(imageSize));
-            pipeline.add(new ToTensor());
-
-            int numYoloClasses = 2;
-            List<String> synset = new ArrayList<>(numYoloClasses);
-            for (int i = 0; i < (numYoloClasses/2); i++) {
-                synset.add("Fixed Wing");
-                synset.add("Rotor Craft");
-                //synset.add("airplane");
-                
-            }
-
-            // as per:  $DJL_CACHE_DIR/cache/repo/model/cv/object_detection/ai/djl/pytorch/ssd/metadata.json
-            Translator<Image, DetectedObjects> yTranslator =  YoloV5Translator
-            .builder()
-            //.setPipeline(pipeline)
-            .optThreshold(0.45f)
-            .optNmsThreshold(0.25f)
-            //.optOutputType(YoloOutputType.AUTO)
-            .optSynsetArtifactName("synset.txt")
-            //.optSynset(synset)
-            .optApplyRatio(true)
-            .build();
-
             Criteria<Image, DetectedObjects> criteria = Criteria.builder()
-                .optProgress(new ProgressBar())
                 .setTypes(Image.class, DetectedObjects.class) // defines input and output data type
-                .optModelPath(Paths.get(modelPath.getAbsolutePath())) // search models in specified path
-                //.optTranslator(yTranslator)
+                .optModelUrls(this.modelZipPath)
+                .optModelName(this.modelName)
+                .optEngine("OnnxRuntime")  // Specify OnnX explicitly because classpath also includes pytorch
                 .optTranslatorFactory(new YoloV5TranslatorFactory())
-                .optArgument("rescale", true)
+                .optProgress(new ProgressBar())
+                .optArgument("optApplyRatio", true)  // post process
+                .optArgument("rescale", true) // post process
                 .build();
 
             model = criteria.loadModel();
@@ -272,8 +247,10 @@ public class LiveObjectDetectionResource extends BaseResource implements IApp {
             ImageFactory factory = ImageFactory.getInstance();
             Mat unboxedMat = capturePayload.getMat();
             Image img = factory.fromImage(unboxedMat);
+
             predictor = model.newPredictor();
             DetectedObjects detections = predictor.predict(img);
+            log.debugv("{0}", detections);
             capturePayload.setDetectionCount(detections.getNumberOfObjects());
            
             try {
@@ -299,8 +276,8 @@ public class LiveObjectDetectionResource extends BaseResource implements IApp {
                     rNode.put(AppUtils.DETECTED_OBJECT_PROBABILITY, capturePayload.getDetected_object_probability());
                     
                     // Annotate video capture image w/ any detected objects
-                    // img.drawBoundingBoxes(detections);
-                    drawBoundingBoxWithCustomizedDetections(img, detections);
+                    img.drawBoundingBoxes(detections);
+                    //drawBoundingBoxWithCustomizedDetections(img, detections);
 
                      // Encode binary image to Base64 string and add to payload
                     Mat boxedImage = (Mat)img.getWrappedImage();
@@ -309,7 +286,7 @@ public class LiveObjectDetectionResource extends BaseResource implements IApp {
                     ImageIO.write(bBoxedImage, "png", baos);
                     byte[] bytes = baos.toByteArray();
                     String stringEncodedImage = Base64.getEncoder().encodeToString(bytes);
-                    //rNode.put(AppUtils.BASE64_DETECTED_IMAGE, stringEncodedImage);
+                    rNode.put(AppUtils.BASE64_DETECTED_IMAGE, stringEncodedImage);
                     
                     if(writeModifiedImageToDisk) {
                         File boxedImageFile = new File(rawAndBoxedImageFileDir,  "boxedImage-"+ startCaptureTime.getEpochSecond()+".png");
@@ -346,7 +323,7 @@ public class LiveObjectDetectionResource extends BaseResource implements IApp {
         }
 
         if(previousCapture.getDetectionCount() != latest.getDetectionCount()){
-            log.info("capture count different: "+previousCapture.getDetectionCount()+" : "+latest.getDetectionCount());
+            log.debug("capture count different: "+previousCapture.getDetectionCount()+" : "+latest.getDetectionCount());
             return true;
         }
         if(!previousCapture.getDetectedObjectClassification().equals(latest.getDetectedObjectClassification()))
@@ -357,7 +334,7 @@ public class LiveObjectDetectionResource extends BaseResource implements IApp {
         double diff = cProb - pProb;
         double positiveDiff = Math.abs(diff);
         if(positiveDiff > this.predictionThreshold){
-            log.info("Just exceeded max probability threshold: "+this.predictionThreshold +" : "+positiveDiff);
+            log.warn("Just exceeded max probability threshold: "+this.predictionThreshold +" : "+positiveDiff);
             return true;
         }
         return false;
@@ -423,7 +400,7 @@ public class LiveObjectDetectionResource extends BaseResource implements IApp {
             if(!vCapture.isOpened())
                 throw new RuntimeException("Unable to access video capture device w/ id = " + this.videoCaptureDevice+" and OS groups: "+Arrays.toString(groups));
 
-            log.infov("instantiateVideoCapture() video capture device = {0} is open =  {1}. Using NDManager {2}", 
+            log.infov("instantiateVideoCapture() video capture device = {0} is open =  {1}.", 
                 this.videoCaptureDevice, 
                 vCapture.isOpened());
 

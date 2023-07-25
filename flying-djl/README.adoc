@@ -64,11 +64,19 @@ DJL engines link:https://djl.ai/docs/development/cache_management.html[download 
 You are encouraged to set this environment variable in your shell.  
 Otherwise, DJL will write these files to: `$HOME/.djl.ai`
 
-. *opencv-java & gstreamer1-plugin-libav*
+. *opencv-java*
 +
-ie: `sudo dnf install opencv-java gstreamer1-plugin-libav -y`
+ie: `sudo dnf install opencv-java`
 +
 NOTE: On Fedora/RHEL systems, opencv-java package places shared C++ object files in a path (/usr/lib/java) typically not included in `java.library.path`.   Subsequently, at runtime you'll need to specify a `java.library.path` that does include this directory.
++
+NOTE: RPM packages for `opencv-java` appear to link:https://www.rpmfind.net/linux/rpm2html/search.php?query=opencv-java[only exist] for F36 / RHEL9  (or more recent)
+
+.*gstreamer1-plugin-libav*
++
+ie: `sudo dnf install gstreamer1-plugin-libav -y`
++
+NOTE RPM packages for `gstreamer1-plugin-libav` appear to link:https://packages.fedoraproject.org/pkgs/gstreamer1-plugin-libav/gstreamer1-plugin-libav/[only exist] for F37 (or more recent)
 
 === Quarkus `dev mode`
 
@@ -371,7 +379,7 @@ $ echo -en "\nhttps://$(oc get route djl-objectdetect-web -n user1-djl --templat
 . Initial setup:
 +
 -----
-$ python -m venv ~/venv
+$ python3.9 -m venv ~/venv
 $ source ~/venv/bin/activate
 (venv) $ pip install -U ultralytics
 -----
@@ -461,4 +469,10 @@ Traceback (most recent call last):
     s += f"{n} {names[int(c)]}{'s' * (n > 1)}, "  # add to string
                 ~~~~~^^^^^^^^
 KeyError: 1994
+-----
+
+=== onnx
+
+-----
+(venv) $ python export.py --include=onnx
 -----

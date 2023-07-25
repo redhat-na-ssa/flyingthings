@@ -76,6 +76,15 @@
       <artifactId>opencv</artifactId>
     </dependency>
 
+    <!--
+      TO-DO:  Research why pytorch engine is needed when specifying onnx
+            https://github.com/deepjavalibrary/djl-demo/tree/master/development/fatjar
+    -->
+    <dependency>
+        <groupId>ai.djl.pytorch</groupId>
+        <artifactId>pytorch-model-zoo</artifactId>
+    </dependency>
+
     <!-- Testing -->
     <dependency>
       <groupId>io.quarkus</groupId>
