@@ -96,7 +96,7 @@ $ mvn wrapper:wrapper
 .. *PyTorch*
 +
 -----
-./mvnw quarkus:dev -Djvm.args=-Djava.library.path=/usr/lib/java -Ppytorch
+./mvnw quarkus:dev -Djvm.args=-Djava.library.path=/usr/lib/java -Ponnx
 -----
 
 . View RESTful API exposed by app:
@@ -291,25 +291,31 @@ Open a browser tab and navigate to:  `localhost:8080/q/swagger-ui`
 === Pre-reqs
 
 . *OpenShift Container Platform*
-.. Tested on OCP 4.12 beta  (but earlier versions should also work fine as well)
+.. Tested on OCP 4.13  (but earlier versions should also work fine as well)
 .. CPU:
 +
-Allow 1 cpu core for each deep learning engine deployed.
-+
-Currently not tested using a GPU.
+Plan for 500 millis
+
 .. RAM:
 +
-Allow 1Gb RAM for each deep learning engine deployed.
+Plan for 500Mb RAM
 
 .. Storage:  no PVs needed
-
-. *helm*
-+
-ie: `dnf install helm`
 
 . *cURL* (or similar http test utility)
 +
 ie: `dnf install curl`
+
+=== Build
+
+. Build linux container image and push to quay.io:
++
+-----
+$ mvn clean package \
+      -DskipTests \
+      -Dquarkus.container-image.build=true \
+      -Dquarkus.container-image.push=true
+-----
 
 === Deploy
 
@@ -319,23 +325,6 @@ ie: `dnf install curl`
 $ oc create cm djl-iclassification --from-file=config/application.properties
 -----
 
-. Deploy app powered by PyTorch:
-+
------
-$ helm install djl-iclassification-pytorch https://github.com/redhat-na-ssa/djl-intro/raw/main/helm/djl-iclassification-pytorch-0.0.1.tar.gz
------
-
-. Deploy app powered by TensorFlow:
-+
------
-$ helm install djl-iclassification-tensorflow https://github.com/redhat-na-ssa/djl-intro/raw/main/helm/djl-iclassification-tensorflow-0.0.1.tar.gz
------
-
-. Deploy app powered by Apache MXNet:
-+
------
-$ helm install djl-iclassification-mxnet https://github.com/redhat-na-ssa/djl-intro/raw/main/helm/djl-iclassification-mxnet-0.0.1.tar.gz
------
 
 . Determine node that pod landed on:
 +

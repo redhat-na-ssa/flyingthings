@@ -23,10 +23,8 @@ import io.minio.errors.InvalidResponseException;
 import io.minio.errors.ServerException;
 import io.minio.errors.XmlParserException;
 import io.quarkiverse.minio.client.MinioQualifier;
-import io.quarkus.runtime.StartupEvent;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 
 @ApplicationScoped
@@ -41,8 +39,8 @@ public class S3ModelLifecycle {
     @ConfigProperty(name = "com.rht.na.gtm.s3.bucket.name", defaultValue = AppUtils.NA)
     String bucketName;
 
-    @ConfigProperty(name = "org.acme.djl.root.model.path")
-    String rootModelPathString;    
+    @ConfigProperty(name = "org.acme.djl.model.zip.path")
+    String modelZipPath;    
 
     @PostConstruct
     public void start() {
@@ -80,7 +78,7 @@ public class S3ModelLifecycle {
             byte[] buffer = new byte[1024];
             zis = new ZipInputStream(stream);
             ZipEntry zipEntry = zis.getNextEntry();
-            File destDir = new File(this.rootModelPathString);
+            File destDir = new File(this.modelZipPath);
             while(zipEntry != null){
                 File newFile = newFile(destDir, zipEntry);
                 if (zipEntry.isDirectory()) {
@@ -104,7 +102,7 @@ public class S3ModelLifecycle {
                 }
                 zipEntry = zis.getNextEntry();
             }
-            log.infov("pullAndSaveModel() just refreshed model in {0} of the following zipped size (in bytes) {1}", this.rootModelPathString, modelSize);
+            log.infov("pullAndSaveModel() just refreshed model in {0} of the following zipped size (in bytes) {1}", this.modelZipPath, modelSize);
             return true;
         }catch(Exception x){
             x.printStackTrace();

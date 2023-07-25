@@ -50,6 +50,12 @@
         <artifactId>quarkus-kubernetes</artifactId>
     </dependency>
 
+    <!-- Auto generate a "view" enabled Kubernetes RoleBinding and corresponding Service Account -->
+    <dependency>
+        <groupId>io.quarkus</groupId>
+        <artifactId>quarkus-kubernetes-client</artifactId>
+    </dependency>
+
   </dependencies>
   <build>
     <plugins>

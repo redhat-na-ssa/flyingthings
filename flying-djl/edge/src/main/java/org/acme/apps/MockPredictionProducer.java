@@ -21,7 +21,7 @@ public class MockPredictionProducer implements PredictionProducer {
     @ConsumeEvent(AppUtils.LIVE_OBJECT_DETECTION)
     public boolean send(String message) {
         log.infov("send() message of length in bytes = {0}", message.length());
-        log.infov("message = {0}", message);
+        log.debugv("message = {0}", message);
         return true;
     }
     

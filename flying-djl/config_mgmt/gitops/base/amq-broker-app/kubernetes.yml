@@ -1,0 +1,45 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mqtt-lb
+  namespace: user1-flying-djl
+spec:
+  type: LoadBalancer 
+  externalTrafficPolicy: Local
+  ports:
+    - port: 1883
+      targetPort: 1883
+      protocol: TCP
+      name: mqtt
+  selector:
+    ActiveMQArtemis: artemis
+    application: artemis-app
+    statefulset.kubernetes.io/pod-name: artemis-ss-0
+---
+apiVersion: broker.amq.io/v1beta1
+kind: ActiveMQArtemis
+metadata:
+  name: artemis
+  namespace: user1-flying-djl
+spec:
+  console:
+    expose: true
+  acceptors:
+    - name: mqtt
+      port: 1883
+      protocols: mqtt
+    - name: amqp
+      port: 5672
+      protocols: amqp
+  adminPassword: admin
+  adminUser: admin
+  deploymentPlan:
+    image: placeholder
+    jolokiaAgentEnabled: false
+    journalType: nio
+    managementRBACEnabled: true
+    messageMigration: false
+    persistenceEnabled: false
+    requireLogin: false
+    size: 1

@@ -67,9 +67,6 @@ import com.sun.security.auth.module.UnixSystem;
 @ApplicationScoped
 public class LiveObjectDetectionResource extends BaseResource implements IApp {
 
-    private static final String PYTORCH="pytorch";
-    private static final String TENSORFLOW="tensorflow";
-    private static final String MXNET="mxnet";
     private static final String PATTERN_FORMAT = "yyyy.MM.dd HH:mm:ss";
     private static final String NO_TEST_FILE="NO_TEST_FILE";
 

@@ -1,0 +1,135 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/name: minio
+    app.kubernetes.io/managed-by: quarkus
+  name: minio
+spec:
+  ports:
+    - name: http
+      port: 9000
+      protocol: TCP
+      targetPort: 9000
+    - name: console
+      port: 9001
+      protocol: TCP
+      targetPort: 9001
+  selector:
+    app.kubernetes.io/name: minio
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/name: minio
+    app.kubernetes.io/managed-by: quarkus
+  name: minio
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: minio
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: minio
+        app.kubernetes.io/managed-by: quarkus
+    spec:
+      containers:
+        - env:
+            - name: MINIO_ROOT_USER
+              value: minio
+            - name: MINIO_ROOT_PASSWORD
+              value: minio123
+            - name: MINIO_NOTIFY_MQTT_ENABLE_MLNOTIFY
+              value: on
+            - name: MINIO_NOTIFY_MQTT_BROKER_MLNOTIFY
+              value: tcp://artemis-mqtt-0-svc:1883
+            - name: MINIO_NOTIFY_MQTT_TOPIC_MLNOTIFY
+              value: djl-model-notify
+            - name: MINIO_NOTIFY_MQTT_USERNAME_MLNOTIFY
+              value: djl
+            - name: MINIO_NOTIFY_MQTT_PASSWORD_MLNOTIFY
+              value: djl
+
+            # Used by minio console to invoke minio REST APIs
+            MINIO_SERVER_URL: 'https://minio-user1-flying-djl.apps.den-east.ratwater.xyz'
+
+          # https://github.com/jbride/minio_integrations_quickstart/blob/main/etc/minio/Dockerfile
+          image: quay.io/redhat_naps_da/minio:0.0.1
+
+          imagePullPolicy: Always
+          command: 
+            - /usr/bin/docker-entrypoint.sh 
+            - minio 
+            - server 
+            - /data 
+            - --console-address :9001
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                - /bin/sh
+                - /opt/initialize.sh
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /minio/health/live
+              port: 9000
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 10
+          name: minio
+          ports:
+            - containerPort: 9000
+              name: http
+              protocol: TCP
+            - containerPort: 9001
+              name: console
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /minio/health/live
+              port: 9000
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 10
+          resources:
+            limits:
+              cpu: 500m
+              memory: 512Mi
+            requests:
+              cpu: 100m
+              memory: 128Mi
+          volumeMounts:
+            - mountPath: /opt/initialize.sh
+              name: config
+              readOnly: true
+          startupProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /minio/health/live
+              port: 9000
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 10
+      serviceAccountName: minio
+      volumes:
+        - configMap:
+            defaultMode: 420
+            items:
+              - key: initialize.sh
+                path: initialize.sh
+            name: minio
+            optional: false
+          name: config

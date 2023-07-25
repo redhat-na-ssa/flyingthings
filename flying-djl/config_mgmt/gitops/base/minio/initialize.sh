@@ -1,6 +1,6 @@
 sleep 10
 
-mc alias set rht http://rht:9000/ $MINIO_ROOT_USER $MINIO_ROOT_PASSWORD
+mc alias set rht http://minio:9000/ $MINIO_ROOT_USER $MINIO_ROOT_PASSWORD
 mc mb rht/flyingthings-models
 mc policy set public rht/flyingthings-models
 mc admin user add rht/ bucketwriter minio123
