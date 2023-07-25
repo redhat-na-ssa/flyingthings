@@ -58,6 +58,8 @@ import ai.djl.modality.cv.output.Rectangle;
 import ai.djl.modality.cv.transform.Resize;
 import ai.djl.modality.cv.transform.ToTensor;
 import ai.djl.modality.cv.translator.YoloV5Translator;
+import ai.djl.modality.cv.translator.YoloV5TranslatorFactory;
+import ai.djl.modality.cv.translator.YoloV5Translator.YoloOutputType;
 import ai.djl.repository.zoo.Criteria;
 import ai.djl.repository.zoo.ZooModel;
 import ai.djl.training.util.ProgressBar;
@@ -198,28 +200,34 @@ public class LiveObjectDetectionResource extends BaseResource implements IApp {
             pipeline.add(new Resize(imageSize));
             pipeline.add(new ToTensor());
 
-            int numYoloClasses = 80;
+            int numYoloClasses = 2;
             List<String> synset = new ArrayList<>(numYoloClasses);
             for (int i = 0; i < (numYoloClasses/2); i++) {
-                synset.add("Rotor Craft");
                 synset.add("Fixed Wing");
+                synset.add("Rotor Craft");
+                //synset.add("airplane");
+                
             }
 
             // as per:  $DJL_CACHE_DIR/cache/repo/model/cv/object_detection/ai/djl/pytorch/ssd/metadata.json
             Translator<Image, DetectedObjects> yTranslator =  YoloV5Translator
             .builder()
-            .setPipeline(pipeline)
-            .optThreshold(0.8f)
-            //.optSynsetArtifactName("classes.txt")
-            .optSynset(synset)
+            //.setPipeline(pipeline)
+            .optThreshold(0.45f)
+            .optNmsThreshold(0.25f)
+            //.optOutputType(YoloOutputType.AUTO)
+            .optSynsetArtifactName("synset.txt")
+            //.optSynset(synset)
+            .optApplyRatio(true)
             .build();
 
             Criteria<Image, DetectedObjects> criteria = Criteria.builder()
                 .optProgress(new ProgressBar())
                 .setTypes(Image.class, DetectedObjects.class) // defines input and output data type
-                .optModelUrls("yolo/")
                 .optModelPath(Paths.get(modelPath.getAbsolutePath())) // search models in specified path
-                .optTranslator(yTranslator)
+                //.optTranslator(yTranslator)
+                .optTranslatorFactory(new YoloV5TranslatorFactory())
+                .optArgument("rescale", true)
                 .build();
 
             model = criteria.loadModel();
@@ -301,7 +309,7 @@ public class LiveObjectDetectionResource extends BaseResource implements IApp {
                     ImageIO.write(bBoxedImage, "png", baos);
                     byte[] bytes = baos.toByteArray();
                     String stringEncodedImage = Base64.getEncoder().encodeToString(bytes);
-                    rNode.put(AppUtils.BASE64_DETECTED_IMAGE, stringEncodedImage);
+                    //rNode.put(AppUtils.BASE64_DETECTED_IMAGE, stringEncodedImage);
                     
                     if(writeModifiedImageToDisk) {
                         File boxedImageFile = new File(rawAndBoxedImageFileDir,  "boxedImage-"+ startCaptureTime.getEpochSecond()+".png");
@@ -329,7 +337,7 @@ public class LiveObjectDetectionResource extends BaseResource implements IApp {
                 predictor.close();
         }
         Duration timeElapsed = Duration.between(startCaptureTime, Instant.now());
-        log.info(captureCount + " : "+ timeElapsed); 
+        log.info("processCapturedEvent() "+captureCount + " : "+ timeElapsed); 
     }
 
     private boolean isDifferent(VideoCapturePayload latest) {
@@ -415,7 +423,7 @@ public class LiveObjectDetectionResource extends BaseResource implements IApp {
             if(!vCapture.isOpened())
                 throw new RuntimeException("Unable to access video capture device w/ id = " + this.videoCaptureDevice+" and OS groups: "+Arrays.toString(groups));
 
-            log.infov("start() video capture device = {0} is open =  {1}. Using NDManager {2}", 
+            log.infov("instantiateVideoCapture() video capture device = {0} is open =  {1}. Using NDManager {2}", 
                 this.videoCaptureDevice, 
                 vCapture.isOpened());
 

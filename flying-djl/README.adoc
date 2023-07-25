@@ -392,6 +392,21 @@ image 1/1 image 1/1 /u01/labs/mw/redhat-na-ssa/flyingthings/flying-djl/docs/imag
 Speed: 1.1ms preprocess, 54.5ms inference, 0.8ms postprocess per image at shape (1, 3, 384, 640)
 -----
 
+. Predict using `yolo` executable and custom model:
++
+-----
+(venv) $ yolo predict \
+            model=$HOME/Downloads/flyingthings/model_custom.pt \
+            source=docs/images/unAdulteredImage-1690148580.png
+
+
+Ultralytics YOLOv8.0.141 🚀 Python-3.11.4 torch-2.0.1+cu117 CPU (11th Gen Intel Core(TM) i7-1185G7 3.00GHz)
+Model summary (fused): 168 layers, 3006038 parameters, 0 gradients, 8.1 GFLOPs
+
+image 1/1 /u01/labs/mw/redhat-na-ssa/flyingthings/flying-djl/docs/images/unAdulteredImage-1690148580.png: 384x640 1 Fixed Wing, 36.9ms
+Speed: 1.6ms preprocess, 36.9ms inference, 0.6ms postprocess per image at shape (1, 3, 384, 640)
+-----
+
 
 === Detection using Ultralytics `detect.py`
 
@@ -430,4 +445,20 @@ Results saved to yolov5/runs/detect/exp10
 (venv) $ python yolov5/detect.py \
          --source https://github.com/redhat-na-ssa/flyingthings/blob/djl/flying-djl/docs/images/unAdulteredImage-1690148580.png \
          --weights ~/Downloads/flyingthings/model_custom.pt
+
+
+
+Model summary (fused): 168 layers, 3006038 parameters, 0 gradients, 8.1 GFLOPs
+Traceback (most recent call last):
+  File "/u01/ai/ultralytics/yolov5/detect.py", line 261, in <module>
+    main(opt)
+  File "/u01/ai/ultralytics/yolov5/detect.py", line 256, in main
+    run(**vars(opt))
+  File "/home/jbride/venv/lib64/python3.11/site-packages/torch/utils/_contextlib.py", line 115, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/u01/ai/ultralytics/yolov5/detect.py", line 160, in run
+    s += f"{n} {names[int(c)]}{'s' * (n > 1)}, "  # add to string
+                ~~~~~^^^^^^^^
+KeyError: 1994
 -----
