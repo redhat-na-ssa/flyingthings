@@ -124,6 +124,28 @@
       </dependencies>
     </profile>
     <profile>
+      <id>pytorch-aarch64</id>
+      <dependencies>
+        <dependency>
+          <groupId>ai.djl.pytorch</groupId>
+          <artifactId>pytorch-model-zoo</artifactId>
+        </dependency>
+<dependency>
+    <groupId>ai.djl.pytorch</groupId>
+    <artifactId>pytorch-native-cpu-precxx11</artifactId>
+    <classifier>linux-aarch64</classifier>
+    <scope>runtime</scope>
+    <version>2.0.1</version>
+</dependency>
+<dependency>
+    <groupId>ai.djl.pytorch</groupId>
+    <artifactId>pytorch-jni</artifactId>
+    <version>2.0.1-0.23.0</version>
+    <scope>runtime</scope>
+</dependency>
+      </dependencies>
+    </profile>
+    <profile>
       <id>pytorch-gpu</id>
       <dependencies>
         <dependency>

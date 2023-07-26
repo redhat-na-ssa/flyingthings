@@ -465,3 +465,67 @@ KeyError: 1994
 -----
 (venv) $ python export.py --include=onnx
 -----
+
+=== aarch64 (Pi 4)
+
+. video file processing requires appropriate gstreamer-plugins (webcam processing apparently does not)
+. those gstreamer-plugins (along with opencv) are compiled using glibc++ libraries for F38
+. DJL pytorch libraries (required when running onnxruntime engine) are compiled using an older version of glibc++
+. Attempt to install torch libraries via pip and reference when DJL starts-up
+. DJL JNI wrappers for triplet (DJL version, aarch64 cpu, pytorch version) doesn't exist
+
+-----
+$ ./mvnw clean quarkus:dev -Djvm.args=-Djava.library.path=/usr/lib/java -P onnx,pytorch-aarch64
+
+Caused by: java.lang.UnsatisfiedLinkError: /usr/lib/java/libopencv_java470.so: /home/jbride/.djl.ai/pytorch/2.0.1-20230709-cpu-precxx11-linux-aarch64/libstdc++.so.6: version `GLIBCXX_3.4.29' not found (required by /usr/lib/java/libopencv_java470.so)
+	at java.base/jdk.internal.loader.NativeLibraries.load(Native Method)
+	at java.base/jdk.internal.loader.NativeLibraries$NativeLibraryImpl.open(NativeLibraries.java:388)
+	at java.base/jdk.internal.loader.NativeLibraries.loadLibrary(NativeLibraries.java:232)
+	at java.base/jdk.internal.loader.NativeLibraries.loadLibrary(NativeLibraries.java:174)
+	at java.base/jdk.internal.loader.NativeLibraries.findFromPaths(NativeLibraries.java:315)
+	at java.base/jdk.internal.loader.NativeLibraries.loadLibrary(NativeLibraries.java:287)
+	at java.base/java.lang.ClassLoader.loadLibrary(ClassLoader.java:2422)
+	at java.base/java.lang.Runtime.loadLibrary0(Runtime.java:818)
+	at java.base/java.lang.System.loadLibrary(System.java:1989)
+	at nu.pattern.OpenCV$SharedLoader.<init>(OpenCV.java:200)
+
+$ strings /home/jbride/.djl.ai/pytorch/2.0.1-20230709-cpu-precxx11-linux-aarch64/libstdc++.so.6 | grep GLIBCXX
+
+...
+GLIBCXX_3.4.19
+
+
+$ strings /usr/lib64/libstdc++.so.6 | grep GLIBCXX
+
+...
+GLIBCXX_3.4.32
+
+
+-----
+
+-----
+$ sudo dnf install python39
+$ python3.9 -m ensurepip --default-pip
+$ python3.9 -m pip install torch
+$ python3.9 -m pip show -f torch | grep Location
+$ python3.9 -m pip show -f torch | grep Version
+$ export PYTORCH_LIBRARY_PATH=/home/jbride/.local/lib/python3.9/site-packages/torch/lib \
+    && export PYTORCH_VERSION=2.0.1 \
+    && export PYTORCH_FLAVOR=cpu
+$ (cd edge; ./mvnw clean quarkus:dev -Djvm.args=-Djava.library.path=/usr/lib/java -Ponnx)
+
+Caused by: java.io.FileNotFoundException: https://publish.djl.ai/pytorch/2.0.1/jnilib/0.23.0/linux-aarch64/cpu/libdjl_torch.so
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.getInputStream0(HttpURLConnection.java:1993)
+	at java.base/sun.net.www.protocol.http.HttpURLConnection.getInputStream(HttpURLConnection.java:1589)
+	at java.base/sun.net.www.protocol.https.HttpsURLConnectionImpl.getInputStream(HttpsURLConnectionImpl.java:224)
+	at java.base/java.net.URL.openStream(URL.java:1161)
+	at ai.djl.util.Utils.openUrl(Utils.java:463)
+	at ai.djl.util.Utils.openUrl(Utils.java:447)
+	at ai.djl.pytorch.jni.LibUtils.downloadJniLib(LibUtils.java:509)
+	... 44 more
+
+$ ls -lt ~/.djl.ai/pytorch/2.0.1-20230709-cpu-precxx11-linux-aarch64/
+0.23.0-libdjl_torch.so            libarm_compute_core-0793f69d.so   libc10.so                         libgomp-efb3da07.so.1.0.0         libtorch_cpu.so                   
+libarm_compute-23619548.so        libarm_compute_graph-ebe58799.so  libgomp-d22c30c5.so.1.0.0         libstdc++.so.6                    libtorch.so
+
+-----
