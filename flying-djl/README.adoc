@@ -72,9 +72,9 @@ NOTE: On Fedora/RHEL systems, opencv-java package places shared C++ object files
 +
 NOTE: RPM packages for `opencv-java` appear to link:https://www.rpmfind.net/linux/rpm2html/search.php?query=opencv-java[only exist] for F36 / RHEL9  (or more recent)
 
-.*gstreamer1-plugin-libav*
+.*gstreamer plugins*
 +
-ie: `sudo dnf install gstreamer1-plugin-libav -y`
+ie: `sudo dnf install gstreamer1-plugin-libav gstreamer1-plugins-bad-free gstreamer1-plugins-good -y`
 +
 NOTE RPM packages for `gstreamer1-plugin-libav` appear to link:https://packages.fedoraproject.org/pkgs/gstreamer1-plugin-libav/gstreamer1-plugin-libav/[only exist] for F37 (or more recent)
 
