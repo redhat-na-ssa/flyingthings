@@ -190,6 +190,7 @@ public class LiveObjectDetectionResource extends BaseResource implements IApp {
              *     http://aishelf.org/yolo-nms/                                                                     :   Non Maxima Suppression (NMS)
              *     https://learnopencv.com/deep-learning-based-object-detection-using-yolov3-with-opencv-python-c/  :   Yolov3 with OpenCV
              *     https://towardsdatascience.com/guide-to-car-detection-using-yolo-48caac8e4ded                    :   Car Detection using Yolo
+             *     https://cloudblogs.microsoft.com/opensource/2022/04/19/scaling-up-pytorch-inference-serving-billions-of-daily-nlp-inferences-with-onnx-runtime/      :   MS blog on ONNX & DJL; April 2022
              */ 
             Criteria<Image, DetectedObjects> criteria = Criteria.builder()
                 .setTypes(Image.class, DetectedObjects.class) // defines input and output data type

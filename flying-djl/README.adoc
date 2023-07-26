@@ -114,7 +114,7 @@ link:https://github.com/deepjavalibrary/djl/issues/375#issuecomment-1200471807[D
 -----
 $ ldd --version
 $ strings /usr/lib64/libstdc++.so.6.0.31 | grep '^CXXABI_'
-$ cp /usr/lib64/libstdc++.so.6.0.31 $HOME/.djl.ai/pytorch/2.0.0-cpu-precxx11-linux-aarch64/libstdc++.so.6
+$ cp /usr/lib64/libstdc++.so.6.0.31 $HOME/.djl.ai/pytorch/2.0.1-20230709-cpu-precxx11-linux-aarch64/libstdc++.so.6
 -----
 
 . Doing so will prevent the following exception:
