@@ -4,6 +4,20 @@ metadata:
   name: minio
 spec:
   port:
+    targetPort: http
+  tls:
+    termination: edge
+  to:
+    kind: Service
+    name: minio
+  wildcardPolicy: None
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: minio-console
+spec:
+  port:
     targetPort: console
   tls:
     termination: edge

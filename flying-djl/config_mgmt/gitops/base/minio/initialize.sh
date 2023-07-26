@@ -1,12 +1,12 @@
 sleep 10
 
-mc alias set rht http://minio:9000/ $MINIO_ROOT_USER $MINIO_ROOT_PASSWORD
-mc mb rht/flyingthings-models
-mc policy set public rht/flyingthings-models
-mc admin user add rht/ bucketwriter minio123
+mc --config-dir /data alias set rht http://minio:9000/ $MINIO_ROOT_USER $MINIO_ROOT_PASSWORD
+mc --config-dir /data mb rht/flyingthings-models
+mc --config-dir /data policy set public rht/flyingthings-models
+mc --config-dir /data admin user add rht/ bucketwriter minio123
 
-mc event add  rht/flyingthings-models arn:minio:sqs::MLNOTIFY:mqtt --event "put,delete" --suffix ".txt"
-mc event add  rht/flyingthings-models arn:minio:sqs::MLNOTIFY:mqtt --event "put,delete" --suffix ".zip"
-mc event add  rht/flyingthings-models arn:minio:sqs::MLNOTIFY:mqtt --event "put,delete" --suffix ".pt"
+mc --config-dir /data event add  rht/flyingthings-models arn:minio:sqs::MLNOTIFY:mqtt --event "put,delete" --suffix ".txt"
+mc --config-dir /data event add  rht/flyingthings-models arn:minio:sqs::MLNOTIFY:mqtt --event "put,delete" --suffix ".zip"
+mc --config-dir /data event add  rht/flyingthings-models arn:minio:sqs::MLNOTIFY:mqtt --event "put,delete" --suffix ".pt"
 
-mc admin service restart rht
+mc --config-dir /data admin service restart rht

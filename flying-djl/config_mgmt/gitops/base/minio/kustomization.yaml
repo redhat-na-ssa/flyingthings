@@ -9,5 +9,6 @@ configMapGenerator:
 generatorOptions:
   disableNameSuffixHash: true # use a static name
 resources:
+- pvc.yml
 - kubernetes.yml
 - route.yml

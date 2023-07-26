@@ -1,5 +1,25 @@
 ---
 apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: quarkus
+    app.kubernetes.io/name: minio
+  name: minio
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: minio-view
+roleRef:
+  kind: ClusterRole
+  apiGroup: rbac.authorization.k8s.io
+  name: view
+subjects:
+  - kind: ServiceAccount
+    name: minio
+---
+apiVersion: v1
 kind: Service
 metadata:
   labels:
@@ -13,9 +33,9 @@ spec:
       protocol: TCP
       targetPort: 9000
     - name: console
-      port: 9001
+      port: 9090
       protocol: TCP
-      targetPort: 9001
+      targetPort: 9090
   selector:
     app.kubernetes.io/name: minio
   type: ClusterIP
@@ -55,19 +75,15 @@ spec:
             - name: MINIO_NOTIFY_MQTT_PASSWORD_MLNOTIFY
               value: djl
 
-            # Used by minio console to invoke minio REST APIs
-            MINIO_SERVER_URL: 'https://minio-user1-flying-djl.apps.den-east.ratwater.xyz'
-
           # https://github.com/jbride/minio_integrations_quickstart/blob/main/etc/minio/Dockerfile
           image: quay.io/redhat_naps_da/minio:0.0.1
 
           imagePullPolicy: Always
           command: 
-            - /usr/bin/docker-entrypoint.sh 
-            - minio 
-            - server 
-            - /data 
-            - --console-address :9001
+          - /bin/bash
+          - -c
+          args: 
+          - minio server /data --console-address :9090
           lifecycle:
             postStart:
               exec:
@@ -89,7 +105,7 @@ spec:
             - containerPort: 9000
               name: http
               protocol: TCP
-            - containerPort: 9001
+            - containerPort: 9090
               name: console
               protocol: TCP
           readinessProbe:
@@ -113,6 +129,10 @@ spec:
             - mountPath: /opt/initialize.sh
               name: config
               readOnly: true
+              subPath: initialize.sh
+            - mountPath: /data
+              name: appdata
+              readOnly: false
           startupProbe:
             failureThreshold: 3
             httpGet:
@@ -126,10 +146,14 @@ spec:
       serviceAccountName: minio
       volumes:
         - configMap:
-            defaultMode: 420
+            defaultMode: 0755
             items:
               - key: initialize.sh
                 path: initialize.sh
             name: minio
             optional: false
           name: config
+        - name: appdata 
+          persistentVolumeClaim:
+            claimName: minio
+            readOnly: false
