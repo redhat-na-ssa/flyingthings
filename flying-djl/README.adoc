@@ -22,9 +22,60 @@ Periodically sends events via MQTT when state changes occur (ie:  DJL detects pr
 +
 MQTT broker deployed in OpenShift.  Broker has default MQTT port exposed via a _LoadBalancer_ service.  Also deployed to OpenShift is a Quarkus based app that subscribes to the MQTT broker topic and forwards those MQTT events to a web browser (as `Server Sent Events` (SSE)).
 
-== DJL on _aarch64_
 
-link:https://github.com/deepjavalibrary/djl/issues/375[DJL Arm Support]
+== Web app
+
+=== Pre-reqs
+
+. *OpenShift Container Platform*
+.. Tested on OCP 4.13  (but earlier versions should also work fine as well)
+.. CPU:
++
+Plan for 500 millis
+
+.. RAM:
++
+Plan for 500Mb RAM
+
+.. Storage:  no PVs needed
+
+. *cURL* (or similar http test utility)
++
+ie: `dnf install curl`
+
+=== Build
+
+. Build linux container image and push to quay.io:
++
+NOTE:  execute the following from the root parent maven project dir.  ie: `flying-djl`
++
+-----
+$ mvn clean package -pl web -am \
+      -DskipTests \
+      -Dquarkus.container-image.build=true \
+      -Dquarkus.container-image.push=true
+-----
+
+=== Deploy
+
+. Create a ConfigMap from the project's _application.properties_:
++
+-----
+$ oc create cm djl-iclassification --from-file=config/application.properties
+-----
+
+
+. Determine node that pod landed on:
++
+-----
+$ oc get pod \
+    -l deploymentconfig=djl-iclassification-pytorch \
+    -o json \
+    -n user1-services \
+    | jq -r .items[0].spec.nodeName
+-----
++
+NOTE: The result should return the id of your GPU enabled node.
 
 == Edge app
 This application can run in your local environment.
@@ -72,52 +123,56 @@ NOTE: On Fedora/RHEL systems, opencv-java package places shared C++ object files
 +
 NOTE: RPM packages for `opencv-java` appear to link:https://www.rpmfind.net/linux/rpm2html/search.php?query=opencv-java[only exist] for F36 / RHEL9  (or more recent)
 
-.*gstreamer plugins*
+. *gstreamer plugins*
 +
 ie: `sudo dnf install gstreamer1-plugin-libav gstreamer1-plugins-bad-free gstreamer1-plugins-good -y`
 +
 NOTE RPM packages for `gstreamer1-plugin-libav` appear to link:https://packages.fedoraproject.org/pkgs/gstreamer1-plugin-libav/gstreamer1-plugin-libav/[only exist] for F37 (or more recent)
 
-=== Quarkus `dev mode`
+=== JVM startup (x86_64)
 
 The application can be run locally in quarkus `dev mode` (which enables live coding).
 
-NOTE:  a GPU is not required to run the application.  If deep learning engine detects the presence of a GPU, then it will use it.  If not, the deep learning engine will default to CPUs.
-
-. Seed the `maven wrapper`:
+. Run the application in quarkus `dev mode``:
 +
 -----
-$ mvn wrapper:wrapper
+(cd edge; ./mvn quarkus:dev -Djvm.args=-Djava.library.path=/usr/lib/java -P onnx,pytorch)
 -----
 
-. Run the application in quarkus `dev mode`` using any of the following deep learning engines:
-
-
-.. *PyTorch*
-+
------
-./mvnw quarkus:dev -Djvm.args=-Djava.library.path=/usr/lib/java -Ponnx
------
-
-. View RESTful API exposed by app:
+. View RESTful API exposed by edge app:
 +
 Open a browser tab and navigate to:  `localhost:8080/q/swagger-ui`
 
+. Build `edge` app:
++
+-----
+$ ( cd edge; mvn clean package -DskipTests -P onnx,pytorch )
+-----
 
-=== Fedora 38 aarch64
+. Start `edge` app in JVM:
++
+-----
+$ (cd edge; java \
+    -Djava.library.path=/usr/lib/java \
+    -jar target/quarkus-app/quarkus-run.jar)
+-----
 
-link:https://github.com/deepjavalibrary/djl/issues/375#issuecomment-1200471807[DJL ARM support] is currently only offered for PyTorch and OnnxRuntime engines.
 
+=== JVM startup (aarch64)
 
+==== Reference
 
-An alternative might be to install link:https://docs.djl.ai/engines/pytorch/pytorch-engine/index.html#load-your-own-pytorch-native-library[pytorch on the host] and specify the _PYTORCH_LIBRARY_PATH_ environment variable.
+* link:https://github.com/deepjavalibrary/djl/issues/375[DJL Arm Support]
 
+* link:https://github.com/deepjavalibrary/djl/issues/375#issuecomment-1200471807[DJL ARM support] is currently only offered for PyTorch and OnnxRuntime engines.
+
+==== Procedure
 . Run `edge` app in `quarkus:dev` mode:
 +
 -----
-$ ./mvnw clean quarkus:dev \
+$ (cd edge; mvn clean quarkus:dev \
       -Djvm.args=-Djava.library.path=/usr/lib/java \
-      -P onnx,pytorch-aarch64
+      -P onnx,pytorch-aarch64 )
 -----
 
 .. If running on a recent version of GLIBC (ie: in Fedora 38), you may need to replace the _libstdc++_ library that comes included with DJL's _2.0.1-20230709-cpu-precxx11-linux-aarch64_ package :
@@ -155,15 +210,15 @@ $ cp /usr/lib64/libstdc++.so.6.0.32 $HOME/.djl.ai/pytorch/2.0.1-20230709-cpu-pre
 . Build `edge` app:
 +
 -----
-$ mvn clean package -DskipTests -P onnx,pytorch-aarch64
+$ ( cd edge; mvn clean package -DskipTests -P onnx,pytorch-aarch64 )
 -----
 
 . Start `edge` app in JVM:
 +
 -----
-$ java \
+$ (cd edge; java \
     -Djava.library.path=/usr/lib/java \
-    -jar target/quarkus-app/quarkus-run.jar
+    -jar target/quarkus-app/quarkus-run.jar)
 -----
 
 
@@ -301,59 +356,6 @@ $ podman run \
 Open a browser tab and navigate to:  `localhost:8080/q/swagger-ui`
 
 
-== Web app
-
-=== Pre-reqs
-
-. *OpenShift Container Platform*
-.. Tested on OCP 4.13  (but earlier versions should also work fine as well)
-.. CPU:
-+
-Plan for 500 millis
-
-.. RAM:
-+
-Plan for 500Mb RAM
-
-.. Storage:  no PVs needed
-
-. *cURL* (or similar http test utility)
-+
-ie: `dnf install curl`
-
-=== Build
-
-. Build linux container image and push to quay.io:
-+
-NOTE:  execute the following from the root parent maven project dir.  ie: `flying-djl`
-+
------
-$ mvn clean package -pl web -am \
-      -DskipTests \
-      -Dquarkus.container-image.build=true \
-      -Dquarkus.container-image.push=true
------
-
-=== Deploy
-
-. Create a ConfigMap from the project's _application.properties_:
-+
------
-$ oc create cm djl-iclassification --from-file=config/application.properties
------
-
-
-. Determine node that pod landed on:
-+
------
-$ oc get pod \
-    -l deploymentconfig=djl-iclassification-pytorch \
-    -o json \
-    -n user1-services \
-    | jq -r .items[0].spec.nodeName
------
-+
-NOTE: The result should return the id of your GPU enabled node.
 
 == Run Demo
 

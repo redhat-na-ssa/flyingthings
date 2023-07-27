@@ -65,14 +65,17 @@ public class S3ModelLifecycle {
 
     public boolean pullAndSaveModelZip(String modelName){
         FileInputStream fis = null;
+        File targetModelZipFile = null;
         try {
+            targetModelZipFile = new File(this.modelZipPath, modelName);
+
             // Get input stream to have content of 'my-objectname' from 'my-bucketname'
             InputStream stream =
                 mClient.getObject(GetObjectArgs.builder().bucket(bucketName).object(modelName).build());
-                File targetModelZipFile = new File(this.modelZipPath, modelName);
                 FileUtils.copyInputStreamToFile(stream, targetModelZipFile);
 
         } catch (IOException | InvalidKeyException | ErrorResponseException | InsufficientDataException | InternalException | InvalidResponseException | NoSuchAlgorithmException | ServerException | XmlParserException | IllegalArgumentException e) {
+            log.errorv("pullAndSaveModelZip() unable to write zip to: {0}", targetModelZipFile.getAbsolutePath());
             e.printStackTrace();
             return false;
         }finally{
