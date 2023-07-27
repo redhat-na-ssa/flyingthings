@@ -22,10 +22,119 @@ Periodically sends events via MQTT when state changes occur (ie:  DJL detects pr
 +
 MQTT broker deployed in OpenShift.  Broker has default MQTT port exposed via a _LoadBalancer_ service.  Also deployed to OpenShift is a Quarkus based app that subscribes to the MQTT broker topic and forwards those MQTT events to a web browser (as `Server Sent Events` (SSE)).
 
+== OpenShift
 
-== Web app
+=== Pre-Reqs
 
-=== Pre-reqs
+- OpenShift Container Platform 4.12 (or more recent)
+. *Resource requirements*
++
+Resource requirements as needed by the app (doesn’t include resource requirements of Openshift to support itself) is as follows:
+
+.. RAM: 6 GB
+
+.. CPU: 6
+
+.. Storage: 3 PVCs of type RWO (no RWX requirement) and each of size 5 GiB
+
+. *cluster-admin credentials* to this OpenShift cluster are needed
+
+. *wildcard certificate for routes*
++
+Out-of-the-box install of OCP typically includes self-signed certs to secure the cluster's routes.  It is highly recommended that a wildcard cert issued by a well-known certificate authority (ie:  ZeroSSL) be applied to the cluster.
+
+- *oc utility* (of version correspsonding to OCP cluster) installed locally
++
+All versions of this utility are available at either of the following:
+
+.. https://access.redhat.com/downloads/content/290
++
+RHN subscription required
+
+.. https://mirror.openshift.com/pub/openshift-v4/clients/ocp/?C=M;O=D
++
+Accessible without a RHN subscription
+
+
+=== Deployment
+
+
+. Deployment of Red Hat AMQ Broker operator and creation of `user1-flying-djl` namespace:
++
+-----
+$ cd flying-djl
+$ oc apply -k config_mgmt/gitops/base/infra/
+-----
+
+. Wait until AMQ Broker operator is running in `openshift-operators` namespace:
++
+-----
+$ oc wait \
+    --for=condition=ready pod \
+    -l name=amq-broker-operator \
+    -n openshift-operators
+-----
++
+Within about a minute, you should see a statement similar to the following:
++
+-----
+pod/amq-broker-operator-76b7f5985b-w9pwj condition met
+-----
+
+. Deploy all apps into `user1-flying-djl` namespace:
++
+-----
+$ oc apply -k config_mgmt/gitops/base/apps -n user1-flying-djl
+-----
+
+
+=== Admin Consoles
+
+Environment variables:
++
+----- 
+$ export MINIO_CONSOLE__URL=https://$(oc get route minio-console -n user1-flying-djl --template='{{ .spec.host }}') \
+  && export ARTEMIS_ADMIN_URL=https://$(oc get route artemis-wconsj-0-svc-rte -n user1-flying-djl --template='{{ .spec.host }}')
+-----
+
+==== Minio
+
+. Point your browser to the output of the following:
++
+-----
+$ echo $MINIO_CONSOLE_URL
+-----
+
+. login using credentials:  minio / minio123
+
+==== ActiveMQ Artemis
+
+. View mqtt message counts in Artemis admin console
+
+.. Point your browser to the output of the following:
++
+-----
+$ echo $ARTEMIS_ADMIN_URL
+-----
+
+.. Authenticate using the following credentials:  *djl*  /  *djl*
++
+image::docs/images/djl-object-detect-mqtt-artemis-web-admin.png[]
+
+
+. View video capture events in browser
+
+.. Point your browser to the output of the following:
++
+-----
+$ echo -en "\nhttps://$(oc get route djl-objectdetect-web -n user1-djl --template='{{ .spec.host }}')/liveObject.html\n"
+-----
+
+== Development
+
+=== Web app
+
+==== Pre-reqs
 
 . *OpenShift Container Platform*
 .. Tested on OCP 4.13  (but earlier versions should also work fine as well)
@@ -56,7 +165,7 @@ $ mvn clean package -pl web -am \
       -Dquarkus.container-image.push=true
 -----
 
-=== Deploy
+==== Deploy
 
 . Create a ConfigMap from the project's _application.properties_:
 +
@@ -77,10 +186,10 @@ $ oc get pod \
 +
 NOTE: The result should return the id of your GPU enabled node.
 
-== Edge app
+=== Edge app
 This application can run in your local environment.
 
-=== Pre-reqs
+==== Pre-reqs
 
 . *Webcam*
 +
@@ -129,7 +238,7 @@ ie: `sudo dnf install gstreamer1-plugin-libav gstreamer1-plugins-bad-free gstrea
 +
 NOTE RPM packages for `gstreamer1-plugin-libav` appear to link:https://packages.fedoraproject.org/pkgs/gstreamer1-plugin-libav/gstreamer1-plugin-libav/[only exist] for F37 (or more recent)
 
-=== JVM startup (x86_64)
+==== JVM startup (x86_64)
 
 The application can be run locally in quarkus `dev mode` (which enables live coding).
 
@@ -158,15 +267,15 @@ $ (cd edge; java \
 -----
 
 
-=== JVM startup (aarch64)
+==== JVM startup (aarch64)
 
-==== Reference
+===== Reference
 
 * link:https://github.com/deepjavalibrary/djl/issues/375[DJL Arm Support]
 
 * link:https://github.com/deepjavalibrary/djl/issues/375#issuecomment-1200471807[DJL ARM support] is currently only offered for PyTorch and OnnxRuntime engines.
 
-==== Procedure
+===== Procedure
 . Run `edge` app in `quarkus:dev` mode:
 +
 -----
@@ -355,30 +464,6 @@ $ podman run \
 +
 Open a browser tab and navigate to:  `localhost:8080/q/swagger-ui`
 
-
-
-== Run Demo
-
-. View mqtt message counts in Artemis admin console
-
-.. Point your browser to the output of the following:
-+
------
-$ http://localhost:8161
------
-
-.. Authenticate using the following credentials:  *djl*  /  *djl*
-+
-image::docs/images/djl-object-detect-mqtt-artemis-web-admin.png[]
-
-
-. View video capture events in browser
-
-.. Point your browser to the output of the following:
-+
------
-$ echo -en "\nhttps://$(oc get route djl-objectdetect-web -n user1-djl --template='{{ .spec.host }}')/liveObject.html\n"
------
 
 == Model Diagnostics
 
