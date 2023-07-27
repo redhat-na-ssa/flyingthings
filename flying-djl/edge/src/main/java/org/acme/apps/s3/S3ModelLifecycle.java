@@ -1,6 +1,7 @@
 package org.acme.apps.s3;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,6 +11,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import org.acme.AppUtils;
+import org.apache.commons.io.FileUtils;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 
@@ -61,11 +63,34 @@ public class S3ModelLifecycle {
 
     }
 
+    public boolean pullAndSaveModelZip(String modelName){
+        FileInputStream fis = null;
+        try {
+            // Get input stream to have content of 'my-objectname' from 'my-bucketname'
+            InputStream stream =
+                mClient.getObject(GetObjectArgs.builder().bucket(bucketName).object(modelName).build());
+                File targetModelZipFile = new File(this.modelZipPath, modelName);
+                FileUtils.copyInputStreamToFile(stream, targetModelZipFile);
+
+        } catch (IOException | InvalidKeyException | ErrorResponseException | InsufficientDataException | InternalException | InvalidResponseException | NoSuchAlgorithmException | ServerException | XmlParserException | IllegalArgumentException e) {
+            e.printStackTrace();
+            return false;
+        }finally{
+            if(fis != null)
+                try {
+                    fis.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+        }
+        return true;
+    }
+
     /*
      * given a modelName, retrieves a model zip file and unpacks onto file system.
      * returns boolean success or failure
      */
-    public boolean pullAndSaveModel(String modelName, int modelSize){
+    public boolean pullAndUnzipModel(String modelName){
 
         ZipInputStream zis = null;
         try {
@@ -102,7 +127,7 @@ public class S3ModelLifecycle {
                 }
                 zipEntry = zis.getNextEntry();
             }
-            log.infov("pullAndSaveModel() just refreshed model in {0} of the following zipped size (in bytes) {1}", this.modelZipPath, modelSize);
+            log.infov("pullAndSaveModel() just refreshed model in {0}", this.modelZipPath);
             return true;
         }catch(Exception x){
             x.printStackTrace();

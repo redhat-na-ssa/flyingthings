@@ -47,11 +47,11 @@ public class DJLMainTest {
 class DJLBaseApp extends DJLMain{
 
     @Inject
-    Instance<IApp> djlApp;
+    Instance<IApp> djlAppInstance;
 
     void startup(@Observes StartupEvent event)  {
-        super.setDjlApp(djlApp);
-        log.info("startup() djlApp = "+djlApp.get());
+        super.setDjlApp(djlAppInstance.get());
+        log.info("startup() djlApp = "+djlAppInstance.get());
     }
 }
 

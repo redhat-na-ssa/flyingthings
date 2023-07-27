@@ -65,7 +65,7 @@ import com.sun.security.auth.module.UnixSystem;
 
 @LookupIfProperty(name = "org.acme.djl.resource", stringValue = "LiveObjectDetectionResource")
 @ApplicationScoped
-public class LiveObjectDetectionResource extends BaseResource implements IApp {
+public class LiveObjectDetectionResource extends BaseResource implements ILiveObjectDetection {
 
     private static final String PATTERN_FORMAT = "yyyy.MM.dd HH:mm:ss";
     private static final String NO_TEST_FILE="NO_TEST_FILE";
@@ -101,6 +101,9 @@ public class LiveObjectDetectionResource extends BaseResource implements IApp {
     @ConfigProperty(name = "org.acme.djl.model.zip.path", defaultValue=AppUtils.NA)
     String modelZipPath;
 
+    @ConfigProperty(name = "org.acme.djl.model.zip.name", defaultValue=AppUtils.NA)
+    String modelZipName;
+
     @ConfigProperty(name = "org.acme.djl.model.artifact.name", defaultValue = AppUtils.NA)
     String modelName;
 
@@ -119,6 +122,7 @@ public class LiveObjectDetectionResource extends BaseResource implements IApp {
     private VideoCapturePayload previousCapture;
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern(PATTERN_FORMAT).withZone(ZoneId.systemDefault());
     Cancellable multiCancellable = null;
+    Multi<Long> vCaptureStreamer = null;
 
     /* The Mat class of OpenCV library is used to store the values of an image.
      * It represents an n-dimensional array and is used to store image data of grayscale or color images, voxel volumes, vector fields, tensors, histograms, etc
@@ -143,23 +147,17 @@ public class LiveObjectDetectionResource extends BaseResource implements IApp {
 
             
             // 2) Enable web cam  (but don't start capturing images and executing object detection predictions on those images just yet)
-            instantiateVideoCapture();
+            refreshVideoCapture();
 
             // 3) Instantiate a single OpenCV Mat class to store raw image data
             unboxedMat = new Mat();
 
             // 4)  Load model
-            loadModel();
+            loadModel(this.modelZipPath, this.modelZipName);
 
             // 5)  Keep pace with video buffer by reading frames from it at a configurable number of millis
             //     On a different thread, this app will periodically evaluate the latest captured frame at that instant in time
-            Multi<Long> vCaptureStreamer = Multi.createFrom().ticks().every((Duration.ofMillis(videoCaptureIntevalMillis))).onCancellation().invoke( () -> {
-                log.info("just cancelled video capture streamer");
-            });
-            continueToPredict = true;
-            multiCancellable = vCaptureStreamer.subscribe().with( (i) -> {
-                vCapture.read(unboxedMat);
-            });
+            refreshVideoCaptureStreamer();
 
         }catch(RuntimeException x) {
             throw x;
@@ -170,31 +168,32 @@ public class LiveObjectDetectionResource extends BaseResource implements IApp {
         }
     }
 
-    private void loadModel() {
-        /*
-        File rootModelPath = new File(rootModelPathString);
-        if(!rootModelPath.exists() || !rootModelPath.isDirectory())
-            throw new RuntimeException("Following root directory does not exist: "+rootModelPathString);
-            
-        File modelPath = new File(rootModelPath, modelName);
-        if(!modelPath.exists())
-            throw new RuntimeException("Following model does not exist: "+modelName);*/
+    private void refreshVideoCaptureStreamer() {
+        if(multiCancellable != null){
+            multiCancellable.cancel();
+            multiCancellable = null;
+            vCaptureStreamer = null;
+        }
 
-        try {
+        vCaptureStreamer = Multi.createFrom().ticks().every((Duration.ofMillis(videoCaptureIntevalMillis))).onCancellation().invoke( () -> {
+                log.info("just cancelled video capture streamer");
+        });
+        continueToPredict = true;
+        multiCancellable = vCaptureStreamer.subscribe().with( (i) -> {
+            if(vCapture != null)
+                vCapture.read(unboxedMat);
+        });
+    }
 
-            /* Reference
-             *     https://stackabuse.com/object-detection-inference-in-python-with-yolov5-and-pytorch/             :   Background on Ultralytics and yolov5
-             *     https://pytorch.org/hub/ultralytics_yolov5/                                                      :   Ultralytics YOLOv5; PyTorch
-             *     https://github.com/deepjavalibrary/djl/issues/1563                                               :   Yolov5 using DJL; April 2022
-             *     https://github.com/deepjavalibrary/djl/blob/master/examples/docs/mask_detection.md               :   Mask detection w/ yolov5 - training and inference
-             *     http://aishelf.org/yolo-nms/                                                                     :   Non Maxima Suppression (NMS)
-             *     https://learnopencv.com/deep-learning-based-object-detection-using-yolov3-with-opencv-python-c/  :   Yolov3 with OpenCV
-             *     https://towardsdatascience.com/guide-to-car-detection-using-yolo-48caac8e4ded                    :   Car Detection using Yolo
-             *     https://cloudblogs.microsoft.com/opensource/2022/04/19/scaling-up-pytorch-inference-serving-billions-of-daily-nlp-inferences-with-onnx-runtime/      :   MS blog on ONNX & DJL; April 2022
-             */ 
+    private void loadModel(String newModelZipPath, String newModelZipName) {
+
+        String existingModelFilePath = this.modelZipPath+"/"+this.modelZipName;
+        String newModelFilePath = newModelZipPath+"/"+newModelZipName;
+        log.infov("loadModel() {0}", newModelFilePath);
+        try { 
             Criteria<Image, DetectedObjects> criteria = Criteria.builder()
                 .setTypes(Image.class, DetectedObjects.class) // defines input and output data type
-                .optModelUrls(this.modelZipPath)
+                .optModelUrls(newModelFilePath)
                 .optModelName(this.modelName)
                 .optEngine("OnnxRuntime")  // Specify OnnX explicitly because classpath also includes pytorch
                 .optTranslatorFactory(new YoloV5TranslatorFactory())
@@ -203,11 +202,19 @@ public class LiveObjectDetectionResource extends BaseResource implements IApp {
                 .optArgument("rescale", true) // post process
                 .build();
 
-            model = criteria.loadModel();
+            ZooModel<Image, DetectedObjects> newModel = criteria.loadModel();
+            this.model = newModel;
+            this.modelZipPath = newModelZipPath;
+            this.modelZipName = newModelZipName;
 
         } catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException(e.getMessage());
+            if(this.model != null){
+                log.errorv("loadModel() Error occurred when loading new model at: {0} . Subsequently, will stick with previously working model at {1}", newModelFilePath, existingModelFilePath);
+            }else {
+                log.errorv("loadModel() Error attempting to load model at {0}", newModelFilePath);
+                throw new RuntimeException(e.getMessage());
+            }
         }finally {
         }
     }
@@ -234,6 +241,11 @@ public class LiveObjectDetectionResource extends BaseResource implements IApp {
     // Consume raw video snapshots and apply prediction analysis
     @ConsumeEvent(AppUtils.CAPTURED_IMAGE)
     public void processCapturedEvent(VideoCapturePayload capturePayload){
+
+        if(this.model == null){
+            log.debug("processCapturedEvent() model == null, will not attempt to predict");
+            return;
+        }
 
         Instant startCaptureTime = capturePayload.getStartCaptureTime();
         int captureCount = capturePayload.getCaptureCount();
@@ -360,8 +372,6 @@ public class LiveObjectDetectionResource extends BaseResource implements IApp {
         img.drawBoundingBoxes(converted);
     }
 
-
-
     private static BufferedImage toBufferedImage(Mat mat) {
         int width = mat.width();
         int height = mat.height();
@@ -382,7 +392,12 @@ public class LiveObjectDetectionResource extends BaseResource implements IApp {
         return ret;
     }
     
-    private void instantiateVideoCapture() throws Exception {
+    private void refreshVideoCapture() {
+
+        if(vCapture != null){
+            vCapture.release();
+            vCapture = null;
+        }
 
         if(videoCaptureDevice > -1){
 
@@ -398,7 +413,7 @@ public class LiveObjectDetectionResource extends BaseResource implements IApp {
             if(!vCapture.isOpened())
                 throw new RuntimeException("Unable to access video capture device w/ id = " + this.videoCaptureDevice+" and OS groups: "+Arrays.toString(groups));
 
-            log.infov("instantiateVideoCapture() video capture device = {0} is open =  {1}.", 
+            log.infov("refreshVideoCapture() video capture device = {0} is open =  {1}.", 
                 this.videoCaptureDevice, 
                 vCapture.isOpened());
 
@@ -427,7 +442,7 @@ public class LiveObjectDetectionResource extends BaseResource implements IApp {
                 this.testVideoFile, 
                 vCapture.isOpened());
         }else {
-            throw new Exception("need to specify either a video capture device or a video file");
+            throw new RuntimeException("need to specify either a video capture device or a video file");
         }
     }
 
@@ -446,9 +461,9 @@ public class LiveObjectDetectionResource extends BaseResource implements IApp {
             org.acme.apps.s3.Record record = modelN.records.get(0);
             String fileName = record.s3.object.key;
             String fileSize = record.s3.object.size;
-            boolean success = modelLifecycle.pullAndSaveModel(fileName, Integer.parseInt(fileSize));
+            boolean success = modelLifecycle.pullAndSaveModelZip(fileName);
             if(success){
-                loadModel();
+                loadModel(this.modelZipPath, fileName);
                 this.continueToPredict = true;
             }
 
@@ -476,6 +491,13 @@ public class LiveObjectDetectionResource extends BaseResource implements IApp {
         log.info("stopPrediction");
         this.continueToPredict=false;
         this.previousCapture=null;
+        Response eRes = Response.status(Response.Status.OK).entity(this.videoCaptureDevice).build();
+        return Uni.createFrom().item(eRes);
+    }
+
+    public Uni<Response> refreshVideoAndPrediction() {
+        this.refreshVideoCapture();
+        this.refreshVideoCaptureStreamer();
         Response eRes = Response.status(Response.Status.OK).entity(this.videoCaptureDevice).build();
         return Uni.createFrom().item(eRes);
     }

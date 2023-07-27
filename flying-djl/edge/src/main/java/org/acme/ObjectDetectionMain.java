@@ -10,16 +10,15 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.sse.OutboundSseEvent;
 import jakarta.ws.rs.sse.Sse;
 import jakarta.ws.rs.sse.SseEventSink;
 
-import org.acme.apps.IApp;
-import org.acme.apps.LiveObjectDetectionResource;
-
-import io.quarkus.arc.impl.InstanceImpl;
+import org.acme.apps.ILiveObjectDetection;
 import io.quarkus.runtime.StartupEvent;
 import io.quarkus.vertx.ConsumeEvent;
+import io.smallrye.mutiny.Uni;
 
 import org.jboss.logging.Logger;
 
@@ -39,11 +38,20 @@ public class ObjectDetectionMain extends DJLMain {
     private SseEventSink sseEventSink = null;
 
     @Inject
-    Instance<IApp> djlApp;
+    Instance<ILiveObjectDetection> lidInstance;
+
+    @POST
+    @Path("/refreshVideoAndPrediction")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Uni<Response> refreshVideoAndPrediction() {
+        return lidInstance.get().refreshVideoAndPrediction();
+    }
 
     void startup(@Observes StartupEvent event)  {
-        super.setDjlApp(djlApp);
-        log.info("startup() djlApp = "+djlApp.get());
+
+        super.setDjlApp( lidInstance.get() );
+
+        log.info("startup() djlApp = "+lidInstance.get());
 
         this.eventBuilder = sse.newEventBuilder();
 

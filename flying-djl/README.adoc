@@ -108,16 +108,27 @@ Open a browser tab and navigate to:  `localhost:8080/q/swagger-ui`
 
 link:https://github.com/deepjavalibrary/djl/issues/375#issuecomment-1200471807[DJL ARM support] is currently only offered for PyTorch and OnnxRuntime engines.
 
-. If runtime is on _aarch64_  (ie: Raspberry Pi 4), the recommend DJL engine is: _pytorch_.
-. If running on a recent version of GLIBC (ie: in Fedora 38), you may need to replace the _libstdc++_ library that comes included with DJL's _2.0.0-cpu-precxx11-linux-aarch64_ project :
+
+
+An alternative might be to install link:https://docs.djl.ai/engines/pytorch/pytorch-engine/index.html#load-your-own-pytorch-native-library[pytorch on the host] and specify the _PYTORCH_LIBRARY_PATH_ environment variable.
+
+. Run `edge` app in `quarkus:dev` mode:
++
+-----
+$ ./mvnw clean quarkus:dev \
+      -Djvm.args=-Djava.library.path=/usr/lib/java \
+      -P onnx,pytorch-aarch64
+-----
+
+.. If running on a recent version of GLIBC (ie: in Fedora 38), you may need to replace the _libstdc++_ library that comes included with DJL's _2.0.1-20230709-cpu-precxx11-linux-aarch64_ package :
 +
 -----
 $ ldd --version
 $ strings /usr/lib64/libstdc++.so.6.0.31 | grep '^CXXABI_'
-$ cp /usr/lib64/libstdc++.so.6.0.31 $HOME/.djl.ai/pytorch/2.0.1-20230709-cpu-precxx11-linux-aarch64/libstdc++.so.6
+$ cp /usr/lib64/libstdc++.so.6.0.32 $HOME/.djl.ai/pytorch/2.0.1-20230709-cpu-precxx11-linux-aarch64/libstdc++.so.6
 -----
 
-. Doing so will prevent the following exception:
+.. Doing so will prevent the following exception:
 +
 -----
 22:58:33 ERROR [io.qu.ru.Application] (main) Failed to start application (with profile prod): java.lang.UnsatisfiedLinkError: /tmp/opencv_openpnp10653577782654499938/nu/pattern/opencv/linux/ARMv8/libopencv_java470.so: /home/jbride/.djl.ai/pytorch/2.0.0-cpu-precxx11-linux-aarch64/libstdc++.so.6: version `CXXABI_1.3.8' not found (required by /tmp/opencv_openpnp10653577782654499938/nu/pattern/opencv/linux/ARMv8/libopencv_java470.so)
@@ -141,13 +152,17 @@ $ cp /usr/lib64/libstdc++.so.6.0.31 $HOME/.djl.ai/pytorch/2.0.1-20230709-cpu-pre
 	at org.acme.apps.LiveObjectDetectionResource.startResource(LiveObjectDetectionResource.java:116)
 -----
 
-An alternative might be to install link:https://docs.djl.ai/engines/pytorch/pytorch-engine/index.html#load-your-own-pytorch-native-library[pytorch on the host] and specify the _PYTORCH_LIBRARY_PATH_ environment variable.
+. Build `edge` app:
++
+-----
+$ mvn clean package -DskipTests -P onnx,pytorch-aarch64
+-----
 
 . Start `edge` app in JVM:
 +
 -----
 $ java \
-    -Djvm.args=-Djava.library.path=/usr/lib/java \ 
+    -Djava.library.path=/usr/lib/java \
     -jar target/quarkus-app/quarkus-run.jar
 -----
 
@@ -310,8 +325,10 @@ ie: `dnf install curl`
 
 . Build linux container image and push to quay.io:
 +
+NOTE:  execute the following from the root parent maven project dir.  ie: `flying-djl`
++
 -----
-$ mvn clean package \
+$ mvn clean package -pl web -am \
       -DskipTests \
       -Dquarkus.container-image.build=true \
       -Dquarkus.container-image.push=true
@@ -363,6 +380,54 @@ $ echo -en "\nhttps://$(oc get route djl-objectdetect-web -n user1-djl --templat
 
 == Model Diagnostics
 
+=== Generate onnx default models
+
+==== yolo5s
+
+. Model sizes:
+
+.. pytorch: 15MB
+.. onnx: 28MB
+
+. Clone `ultralytics` project and pull down all dependencies:
++
+-----
+(venv) $ git clone https://github.com/ultralytics/yolov5
+(venv) $ (cd yolov5; git checkout v7.0; pip install -r requirements.txt)
+-----
+
+. Detect and predict:
++
+-----
+(venv) $ python yolov5/detect.py \
+           --source https://github.com/redhat-na-ssa/flyingthings/blob/djl/flying-djl/docs/images/unAdulteredImage-1690148580.png
+-----
+
+. Export to onnx:
++
+-----
+$ python yolov5/export.py --weight=yolov5/yolov5s.pt --include=onnx
+-----
+
+==== yolo8n
+
+. Model sizes:
+
+.. pytorch:  6MB
+.. onnx:  13MB
+
+-----
+$ deactivate
+$ python3.9 -m venv ~/venv-yolo8
+$ source ~/venv-yolo8/bin/activate
+$ pip install -U ultralytics
+$ cd %HOME/Downloads/ultralytics/
+$ mkdir v8 && cd v8
+$ yolo predict model=yolov8n \
+    && yolo export model=yolov8n.pt format=onnx
+$ zip -r yolov8n-onnx.zip serving.properties synset.txt yolov8n.onnx
+-----
+
 === Prediction using Ultralytics Model Zoo
 
 . Initial setup:
@@ -407,31 +472,7 @@ Speed: 1.6ms preprocess, 36.9ms inference, 0.6ms postprocess per image at shape 
 
 === Detection using Ultralytics `detect.py`
 
-. Clone `ultralytics` project and pull down all dependencies:
-+
------
-(venv) $ git clone https://github.com/ultralytics/yolov5
-(venv) $ (cd yolov5; pip install -r requirements.txt)
 
-
------
-
-
-. Detect and predict:
-+
------
-(venv) $ python yolov5/detect.py \
-           --source https://github.com/redhat-na-ssa/flyingthings/blob/djl/flying-djl/docs/images/unAdulteredImage-1690148580.png
-
-detect: weights=yolov5/yolov5s.pt, source=https://github.com/redhat-na-ssa/flyingthings/blob/djl/flying-djl/docs/images/unAdulteredImage-1690148580.png, data=yolov5/data/coco128.yaml, imgsz=[640, 640], conf_thres=0.25, iou_thres=0.45, max_det=1000, device=, view_img=False, save_txt=False, save_conf=False, save_crop=False, nosave=False, classes=None, agnostic_nms=False, augment=False, visualize=False, update=False, project=yolov5/runs/detect, name=exp, exist_ok=False, line_thickness=3, hide_labels=False, hide_conf=False, half=False, dnn=False, vid_stride=1
-YOLOv5 🚀 v7.0-195-g7a70d09 Python-3.11.4 torch-2.0.1+cu117 CPU
-
-Fusing layers... 
-YOLOv5s summary: 213 layers, 7225885 parameters, 0 gradients
-image 1/1 /tmp/org.acme.objectdetection/unAdulteredImage-1690148580.png: 384x640 1 airplane, 52.7ms
-Speed: 0.2ms pre-process, 52.7ms inference, 0.6ms NMS per image at shape (1, 3, 640, 640)
-Results saved to yolov5/runs/detect/exp10
------
 
 
 

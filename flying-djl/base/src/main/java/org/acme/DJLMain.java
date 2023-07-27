@@ -1,10 +1,5 @@
 package org.acme;
 
-
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.event.Observes;
-import jakarta.enterprise.inject.Instance;
-import jakarta.inject.Inject;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
@@ -23,9 +18,9 @@ public abstract class DJLMain {
 
     Logger log = Logger.getLogger("DJLMain");
 
-    private Instance<IApp> djlApp;
+    private IApp djlApp;
 
-    public void setDjlApp(Instance<IApp> x){
+    public void setDjlApp(IApp x){
         this.djlApp = x;
     }
 
@@ -33,35 +28,35 @@ public abstract class DJLMain {
     @Path("/predict")
     @Produces(MediaType.APPLICATION_JSON)
     public Uni<Response> predict() {
-        return djlApp.get().predict();
+        return djlApp.predict();
     }
 
     @DELETE
     @Path("/stopPrediction")
     @Produces(MediaType.APPLICATION_JSON)
     public Uni<Response> stopPrediction() {
-        return djlApp.get().stopPrediction();
+        return djlApp.stopPrediction();
     }
 
     @GET
     @Path("/logGPUDebug")
     @Produces(MediaType.TEXT_PLAIN)
     public Uni<Response> logGPUDebug() {
-        return djlApp.get().logGPUDebug();
+        return djlApp.logGPUDebug();
     }
 
     @GET
     @Path("/gpucount")
     @Produces(MediaType.TEXT_PLAIN)
     public Uni<Response> getGpuCount() {
-        return djlApp.get().getGpuCount();
+        return djlApp.getGpuCount();
     }
 
     @GET
     @Path("/gpumemory")
     @Produces(MediaType.APPLICATION_JSON)
     public Uni<Response> getGpuMemory() {
-        return djlApp.get().getGpuMemory();
+        return djlApp.getGpuMemory();
     }
 
 
@@ -69,7 +64,7 @@ public abstract class DJLMain {
     @Path("/listDJLModelZooAppSignatures")
     @Produces(MediaType.APPLICATION_JSON)
     public Uni<Response> listDJLModelZooAppSignatures() {
-        return djlApp.get().listDJLModelZooAppSignatures();
+        return djlApp.listDJLModelZooAppSignatures();
     }
 
 
@@ -78,7 +73,7 @@ public abstract class DJLMain {
     @Produces(MediaType.APPLICATION_JSON)
     public Uni<Response> listAppModelInputsAndOutputs() {
         
-        return djlApp.get().listAppModelInputsAndOutputs(djlApp.get().getAppModel());
+        return djlApp.listAppModelInputsAndOutputs(djlApp.getAppModel());
     }
     
 }
