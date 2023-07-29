@@ -39,7 +39,7 @@ spec:
         - name: BASEDIR
           value: $(workspaces.source.path)/source/training
         - name: BASE_MODEL
-          value: yolov8n.pt
+          value: $(params.BASE_MODEL)
         - name: MINIO_BUCKET
           value: $(params.MINIO_BUCKET)
         - name: MINIO_ACCESSKEY

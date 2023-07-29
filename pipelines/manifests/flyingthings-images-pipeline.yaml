@@ -85,7 +85,7 @@ spec:
       default: "flyingthings.pt"
       type: string
     - name: BASE_MODEL
-      default: "model_pretrained.pt"
+      default: "yolov8n.pt"
       type: string
     - name: MINIO_ENDPOINT
       default: "http://minio:9000"
