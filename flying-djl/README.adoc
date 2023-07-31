@@ -266,6 +266,12 @@ $ (cd edge; java \
     -jar target/quarkus-app/quarkus-run.jar)
 -----
 
+. Refresh video and prediction:
++
+-----
+$ curl -X POST localhost:8080/djl/refreshVideoAndPrediction
+-----
+
 
 ==== JVM startup (aarch64)
 
@@ -328,6 +334,12 @@ $ ( cd edge; mvn clean package -DskipTests -P onnx,pytorch-aarch64 )
 $ (cd edge; java \
     -Djava.library.path=/usr/lib/java \
     -jar target/quarkus-app/quarkus-run.jar)
+-----
+
+. Refresh video and prediction:
++
+-----
+$ curl -X POST localhost:8080/djl/refreshVideoAndPrediction
 -----
 
 
