@@ -29,6 +29,9 @@ import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
+/* Related:  DJL Serving has an S3CacheEngine:
+ *      https://github.com/deepjavalibrary/djl-serving/blob/master/plugins/cache/src/main/java/ai/djl/serving/cache/S3CacheEngine.java
+ */
 @ApplicationScoped
 public class S3ModelLifecycle {
 

@@ -107,6 +107,9 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
     @ConfigProperty(name = "org.acme.djl.model.artifact.name", defaultValue = AppUtils.NA)
     String modelName;
 
+    @ConfigProperty(name = "org.acme.djl.model.synset.name", defaultValue = "synset.txt")
+    String synsetFileName;
+
     @Inject
     CriteriaFilter cFilters;
 
@@ -198,6 +201,7 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
                 .optEngine("OnnxRuntime")  // Specify OnnX explicitly because classpath also includes pytorch
                 .optTranslatorFactory(new YoloV5TranslatorFactory())
                 .optProgress(new ProgressBar())
+                .optArgument("synsetFileName", this.synsetFileName)
                 .optArgument("optApplyRatio", true)  // post process
                 .optArgument("rescale", true) // post process
                 .build();

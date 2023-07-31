@@ -505,8 +505,8 @@ $ python yolov5/export.py --weight=yolov5/yolov5s.pt --include=onnx
 
 -----
 $ deactivate
-$ python3.9 -m venv ~/venv-yolo8
-$ source ~/venv-yolo8/bin/activate
+$ python3.9 -m venv /u02/venv-yolo8
+$ source /u02/venv-yolo8/bin/activate
 $ pip install -U ultralytics
 $ cd %HOME/Downloads/ultralytics/
 $ mkdir v8 && cd v8
