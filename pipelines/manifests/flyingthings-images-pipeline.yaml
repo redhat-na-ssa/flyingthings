@@ -75,6 +75,10 @@ spec:
       default: --build-arg BASE_IMAGE=image-registry.openshift-image-registry.svc:5000/$(params.ocp-tablespace)/minimal-notebook:latest
       description: build arguments for custom notebook
       type: string
+    - name: YOLO_BUILD_ARGS
+      default: --build-arg env=YOLOv5_VERSION=7.0
+      description: build arguments for yolo
+      type: string
     - name: BATCH_SIZE
       default: "2"
       type: string
@@ -85,7 +89,7 @@ spec:
       default: "flyingthings.pt"
       type: string
     - name: BASE_MODEL
-      default: "model_pretrained.pt"
+      default: "yolov8n.pt"
       type: string
     - name: MINIO_ENDPOINT
       default: "http://minio:9000"
@@ -153,6 +157,8 @@ spec:
           value: $(params.YOLO_DOCKERFILE)          
         - name: DOCKERFILE
           value: $(workspaces.path)/$(params.YOLO_DOCKERFILE)/Dockerfile
+        - name: YOLO_BUILD_ARGS
+          value: "$(params.YOLO_BUILD_ARGS)"
       runAfter:
         - see-stuff
       taskRef:
@@ -419,6 +425,8 @@ spec:
         value: $(params.MINIO_ACCESSKEY)
       - name: MINIO_SECRETKEY
         value: $(params.MINIO_SECRETKEY)
+      - name: MINIO_CLIENT_URL
+        value: $(params.MINIO_CLIENT_URL)
       - name: BASE_MODEL
         value: $(params.BASE_MODEL)
       - name: SCRIPT
@@ -428,6 +436,7 @@ spec:
             --env=WEIGHTS=model_pretrained.pt \
             --env=SIMPLEVIS_DATA=/opt/app-root/src/simplevis-data \
             --env=MINIO_ENDPOINT=$(params.MINIO_ENDPOINT) \
+            --env=MINIO_CLIENT_URL=$(params.MINIO_CLIENT_URL) \
             --env=MINIO_BUCKET=$(params.MINIO_BUCKET) \
             --env=MINIO_ACCESSKEY=$(params.MINIO_ACCESSKEY) \
             --env=MINIO_SECRETKEY=$(params.MINIO_SECRETKEY) \

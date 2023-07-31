@@ -1,13 +1,14 @@
 #!/bin/bash
 set -x
 cd /opt/app-root/src/simplevis-data
-curl https://dl.min.io/client/mc/release/linux-amd64/mc -o mc
+curl $MINIO_CLIENT_URL/mc -o mc
 chmod +x mc
 MCONFIG=/opt/app-root/src/simplevis-data/mconfig
 ./mc --config-dir=$MCONFIG config host add myminio $MINIO_ENDPOINT $MINIO_ACCESSKEY $MINIO_SECRETKEY --insecure
 
 # If BASE_MODEL is pretrained, use the pretrained pytorch model file
-if [ "$BASE_MODEL" == "model_pretrained.pt" ]; then
+allowed_models=("yolov8n.pt" "yolov5su.pt")
+if [[ " ${allowed_models[@]} " =~ " ${BASE_MODEL} " ]]; then
   echo "Using pretrained model..."
   ./mc --config-dir=$MCONFIG cp  myminio/$MINIO_BUCKET/model_pretrained.pt $WEIGHTS --insecure
 else

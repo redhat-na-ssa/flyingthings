@@ -1,0 +1,10 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: deploy-labelstudio
+spec:
+  steps:
+    - name: oc-command
+      image: quay.io/openshift/origin-cli:latest
+      script: |
+        oc get is
