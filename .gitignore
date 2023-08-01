@@ -2,3 +2,4 @@
 deployment/model/app/__pycache__/
 bootstrap-local/
 pipelines-local/
+.vscode/
