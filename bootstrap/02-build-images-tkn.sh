@@ -29,7 +29,7 @@ tkn pipeline start flyingthings-images-pipeline \
   -p MINIO_BUCKET="flyingthings" \
   -p MINIO_ACCESSKEY="minioadmin" \
   -p MINIO_SECRETKEY="minioadmin" \
-  -p MINIO_CLIENT_URL="htt://util02.davenet.local" \
+  -p MINIO_CLIENT_URL="http://util02.davenet.local" \
   -p ocp-tablespace="$TABLESPACE" \
   -p DEPLOY_LABELSTUDIO="N" \
   --use-param-defaults --showlog
