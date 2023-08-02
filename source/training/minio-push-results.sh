@@ -51,8 +51,10 @@ echo "Current run: $CURRENT_RUN"
 ./mc --config-dir miniocfg cp $SIMPLEVIS_DATA/workspace/runs/exp/weights/best.pt myminio/$MINIO_BUCKET/models/model_custom_$CURRENT_RUN.pt --insecure
 ./mc --config-dir miniocfg cp $SIMPLEVIS_DATA/workspace/runs/exp/weights/best.onnx myminio/$MINIO_BUCKET/models/model_custom_$CURRENT_RUN.onnx --insecure
 ./mc --config-dir miniocfg cp $SIMPLEVIS_DATA/workspace/datasets/classes.txt myminio/$MINIO_BUCKET/models/classes_$CURRENT_RUN.txt --insecure
+./mc --config-dir miniocfg cp $SIMPLEVIS_DATA/workspace/classes.yaml myminio/$MINIO_BUCKET/models/classes_$CURRENT_RUN.yaml --insecure
 
 # Set the training run tag to latest
 ./mc --config-dir miniocfg tag set myminio/$MINIO_BUCKET/models/model_custom_$CURRENT_RUN.pt "training-run=latest" --insecure
 ./mc --config-dir miniocfg tag set myminio/$MINIO_BUCKET/models/model_custom_$CURRENT_RUN.onnx "training-run=latest" --insecure
 ./mc --config-dir miniocfg tag set myminio/$MINIO_BUCKET/models/classes_$CURRENT_RUN.txt "training-run=latest" --insecure
+./mc --config-dir miniocfg tag set myminio/$MINIO_BUCKET/models/classes_$CURRENT_RUN.yaml "training-run=latest" --insecure
