@@ -28,8 +28,8 @@ spec:
       script: |
         set -x \
         && cd $(params.SIMPLEVIS_DATA)/workspace \
-        && $(workspaces.source.path)/source/training/00-get-yolo-model.sh \
         && $(workspaces.source.path)/source/training/minio-setup-client.sh \
+        && $(workspaces.source.path)/source/training/00-get-yolo-model.sh \
         && $(workspaces.source.path)/source/training/00-push-yolo-model.sh
       env:
         - name: MINIO_ENDPOINT
