@@ -26,6 +26,10 @@ else
               echo "Using pytorch model file: $file"
               ./mc --config-dir=$MCONFIG cp $file $WEIGHTS --insecure
           fi
+          if [[ "$file" == *.yaml ]]; then
+              echo "Using pytorch model file: $file"
+              ./mc --config-dir=$MCONFIG cp $file data.yaml --insecure
+          fi
   done
 fi
 
