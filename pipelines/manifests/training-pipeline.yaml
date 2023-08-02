@@ -93,183 +93,183 @@ spec:
       workspaces:
         - name: output
           workspace: sourcecode
-    # - name: get-dataset
-    #   taskRef:
-    #     name: get-dataset
-    #   params:
-    #     - name: DATASET_ZIP
-    #       value: $(params.DATASET_ZIP)
-    #     - name: MINIO_ENDPOINT
-    #       value: $(params.MINIO_ENDPOINT)
-    #     - name: SIMPLEVIS_DATA
-    #       value: $(params.SIMPLEVIS_DATA)
-    #     - name: MINIO_BUCKET
-    #       value: $(params.MINIO_BUCKET)
-    #     - name: MINIO_ACCESSKEY
-    #       value: $(params.MINIO_ACCESSKEY)
-    #     - name: MINIO_SECRETKEY
-    #       value: $(params.MINIO_SECRETKEY)
-    #     - name: MINIO_CLIENT_URL
-    #       value: $(params.MINIO_CLIENT_URL)
-    #   runAfter:
-    #     - fetch-repository
-    #   workspaces:
-    #     - name: source
-    #       workspace: sourcecode
-    #     - name: workspace
-    #       workspace: shared-workspace
-    # - name: create-classfile
-    #   taskRef:
-    #     name: create-classfile
-    #   params:
-    #     - name: SIMPLEVIS_DATA
-    #       value: $(params.SIMPLEVIS_DATA)
-    #     - name: ocp-tablespace
-    #       value: $(params.ocp-tablespace)
-    #   runAfter:
-    #     - get-dataset
-    #   workspaces:
-    #     - name: source
-    #       workspace: sourcecode
-    #     - name: workspace
-    #       workspace: shared-workspace
-    # - name: image-resize
-    #   when:
-    #     - input: "$(params.IMG_RESIZE)"
-    #       operator: in
-    #       values: ["Y"]
-    #   taskRef:
-    #     name: image-resize
-    #   params:
-    #     - name: SIMPLEVIS_DATA
-    #       value: $(params.SIMPLEVIS_DATA)
-    #     - name: IMG_RESIZE
-    #       value: "$(params.IMG_RESIZE)"
-    #     - name: MAX_WIDTH
-    #       value: "$(params.MAX_WIDTH)"
-    #     - name: ocp-tablespace
-    #       value: $(params.ocp-tablespace)
-    #   runAfter:
-    #     - create-classfile
-    #   workspaces:
-    #     - name: source
-    #       workspace: sourcecode
-    #     - name: workspace
-    #       workspace: shared-workspace
-    # - name: distribute-dataset
-    #   taskRef:
-    #     name: distribute-data
-    #   params:
-    #     - name: SIMPLEVIS_DATA
-    #       value: $(params.SIMPLEVIS_DATA)
-    #   runAfter:
-    #     - image-resize
-    #   workspaces:
-    #     - name: source
-    #       workspace: sourcecode
-    #     - name: workspace
-    #       workspace: shared-workspace
-    # - name: train-model-gpu
-    #   when:
-    #     - input: "$(params.GPU)"
-    #       operator: in
-    #       values: ["Y"]
-    #   taskRef:
-    #     name: train-model-gpu
-    #   params:
-    #     - name: BATCH_SIZE
-    #       value: $(params.BATCH_SIZE)
-    #     - name: NUM_EPOCHS
-    #       value: $(params.NUM_EPOCHS)
-    #     - name: WEIGHTS
-    #       value: $(params.WEIGHTS)
-    #     - name: BASE_MODEL
-    #       value: $(params.BASE_MODEL)
-    #     - name: SIMPLEVIS_DATA
-    #       value: $(params.SIMPLEVIS_DATA)
-    #     - name: ocp-tablespace
-    #       value: $(params.ocp-tablespace)
-    #   runAfter:
-    #     - distribute-dataset
-    #   workspaces:
-    #     - name: source
-    #       workspace: sourcecode
-    #     - name: workspace
-    #       workspace: shared-workspace
-    # - name: train-model-cpu
-    #   when:
-    #     - input: "$(params.GPU)"
-    #       operator: in
-    #       values: ["N"]
-    #   taskRef:
-    #     name: train-model-cpu
-    #   params:
-    #     - name: BATCH_SIZE
-    #       value: $(params.BATCH_SIZE)
-    #     - name: NUM_EPOCHS
-    #       value: $(params.NUM_EPOCHS)
-    #     - name: WEIGHTS
-    #       value: $(params.WEIGHTS)
-    #     - name: BASE_MODEL
-    #       value: $(params.BASE_MODEL)
-    #     - name: SIMPLEVIS_DATA
-    #       value: $(params.SIMPLEVIS_DATA)
-    #     - name: ocp-tablespace
-    #       value: $(params.ocp-tablespace)
-    #   runAfter:
-    #     - distribute-dataset
-    #   workspaces:
-    #     - name: source
-    #       workspace: sourcecode
-    #     - name: workspace
-    #       workspace: shared-workspace
-    # - name: export-model
-    #   taskRef:
-    #     name: export-model
-    #   params:
-    #     - name: WEIGHTS
-    #       value: $(params.WEIGHTS)
-    #     - name: BASE_MODEL
-    #       value: $(params.BASE_MODEL)
-    #     - name: SIMPLEVIS_DATA
-    #       value: $(params.SIMPLEVIS_DATA)
-    #     - name: ocp-tablespace
-    #       value: $(params.ocp-tablespace)
-    #   runAfter:
-    #     - train-model-cpu
-    #     - train-model-gpu
-    #   workspaces:
-    #     - name: source
-    #       workspace: sourcecode
-    #     - name: workspace
-    #       workspace: shared-workspace
-    # - name: push-results
-    #   taskRef:
-    #     name: push-results
-    #   params:
-    #     - name: WEIGHTS
-    #       value: $(params.WEIGHTS)
-    #     - name: MINIO_ENDPOINT
-    #       value: $(params.MINIO_ENDPOINT)
-    #     - name: SIMPLEVIS_DATA
-    #       value: $(params.SIMPLEVIS_DATA)
-    #     - name: MINIO_BUCKET
-    #       value: $(params.MINIO_BUCKET)
-    #     - name: MINIO_ACCESSKEY
-    #       value: $(params.MINIO_ACCESSKEY)
-    #     - name: MINIO_SECRETKEY
-    #       value: $(params.MINIO_SECRETKEY)
-    #     - name: MINIO_CLIENT_URL
-    #       value: $(params.MINIO_CLIENT_URL)
-    #     - name: ocp-tablespace
-    #       value: $(params.ocp-tablespace)
-    #   runAfter:
-    #     - export-model
-    #   workspaces:
-    #     - name: source
-    #       workspace: sourcecode
-    #     - name: workspace
-    #       workspace: shared-workspace
+    - name: get-dataset
+      taskRef:
+        name: get-dataset
+      params:
+        - name: DATASET_ZIP
+          value: $(params.DATASET_ZIP)
+        - name: MINIO_ENDPOINT
+          value: $(params.MINIO_ENDPOINT)
+        - name: SIMPLEVIS_DATA
+          value: $(params.SIMPLEVIS_DATA)
+        - name: MINIO_BUCKET
+          value: $(params.MINIO_BUCKET)
+        - name: MINIO_ACCESSKEY
+          value: $(params.MINIO_ACCESSKEY)
+        - name: MINIO_SECRETKEY
+          value: $(params.MINIO_SECRETKEY)
+        - name: MINIO_CLIENT_URL
+          value: $(params.MINIO_CLIENT_URL)
+      runAfter:
+        - fetch-repository
+      workspaces:
+        - name: source
+          workspace: sourcecode
+        - name: workspace
+          workspace: shared-workspace
+    - name: create-classfile
+      taskRef:
+        name: create-classfile
+      params:
+        - name: SIMPLEVIS_DATA
+          value: $(params.SIMPLEVIS_DATA)
+        - name: ocp-tablespace
+          value: $(params.ocp-tablespace)
+      runAfter:
+        - get-dataset
+      workspaces:
+        - name: source
+          workspace: sourcecode
+        - name: workspace
+          workspace: shared-workspace
+    - name: image-resize
+      when:
+        - input: "$(params.IMG_RESIZE)"
+          operator: in
+          values: ["Y"]
+      taskRef:
+        name: image-resize
+      params:
+        - name: SIMPLEVIS_DATA
+          value: $(params.SIMPLEVIS_DATA)
+        - name: IMG_RESIZE
+          value: "$(params.IMG_RESIZE)"
+        - name: MAX_WIDTH
+          value: "$(params.MAX_WIDTH)"
+        - name: ocp-tablespace
+          value: $(params.ocp-tablespace)
+      runAfter:
+        - create-classfile
+      workspaces:
+        - name: source
+          workspace: sourcecode
+        - name: workspace
+          workspace: shared-workspace
+    - name: distribute-dataset
+      taskRef:
+        name: distribute-data
+      params:
+        - name: SIMPLEVIS_DATA
+          value: $(params.SIMPLEVIS_DATA)
+      runAfter:
+        - image-resize
+      workspaces:
+        - name: source
+          workspace: sourcecode
+        - name: workspace
+          workspace: shared-workspace
+    - name: train-model-gpu
+      when:
+        - input: "$(params.GPU)"
+          operator: in
+          values: ["Y"]
+      taskRef:
+        name: train-model-gpu
+      params:
+        - name: BATCH_SIZE
+          value: $(params.BATCH_SIZE)
+        - name: NUM_EPOCHS
+          value: $(params.NUM_EPOCHS)
+        - name: WEIGHTS
+          value: $(params.WEIGHTS)
+        - name: BASE_MODEL
+          value: $(params.BASE_MODEL)
+        - name: SIMPLEVIS_DATA
+          value: $(params.SIMPLEVIS_DATA)
+        - name: ocp-tablespace
+          value: $(params.ocp-tablespace)
+      runAfter:
+        - distribute-dataset
+      workspaces:
+        - name: source
+          workspace: sourcecode
+        - name: workspace
+          workspace: shared-workspace
+    - name: train-model-cpu
+      when:
+        - input: "$(params.GPU)"
+          operator: in
+          values: ["N"]
+      taskRef:
+        name: train-model-cpu
+      params:
+        - name: BATCH_SIZE
+          value: $(params.BATCH_SIZE)
+        - name: NUM_EPOCHS
+          value: $(params.NUM_EPOCHS)
+        - name: WEIGHTS
+          value: $(params.WEIGHTS)
+        - name: BASE_MODEL
+          value: $(params.BASE_MODEL)
+        - name: SIMPLEVIS_DATA
+          value: $(params.SIMPLEVIS_DATA)
+        - name: ocp-tablespace
+          value: $(params.ocp-tablespace)
+      runAfter:
+        - distribute-dataset
+      workspaces:
+        - name: source
+          workspace: sourcecode
+        - name: workspace
+          workspace: shared-workspace
+    - name: export-model
+      taskRef:
+        name: export-model
+      params:
+        - name: WEIGHTS
+          value: $(params.WEIGHTS)
+        - name: BASE_MODEL
+          value: $(params.BASE_MODEL)
+        - name: SIMPLEVIS_DATA
+          value: $(params.SIMPLEVIS_DATA)
+        - name: ocp-tablespace
+          value: $(params.ocp-tablespace)
+      runAfter:
+        - train-model-cpu
+        - train-model-gpu
+      workspaces:
+        - name: source
+          workspace: sourcecode
+        - name: workspace
+          workspace: shared-workspace
+    - name: push-results
+      taskRef:
+        name: push-results
+      params:
+        - name: WEIGHTS
+          value: $(params.WEIGHTS)
+        - name: MINIO_ENDPOINT
+          value: $(params.MINIO_ENDPOINT)
+        - name: SIMPLEVIS_DATA
+          value: $(params.SIMPLEVIS_DATA)
+        - name: MINIO_BUCKET
+          value: $(params.MINIO_BUCKET)
+        - name: MINIO_ACCESSKEY
+          value: $(params.MINIO_ACCESSKEY)
+        - name: MINIO_SECRETKEY
+          value: $(params.MINIO_SECRETKEY)
+        - name: MINIO_CLIENT_URL
+          value: $(params.MINIO_CLIENT_URL)
+        - name: ocp-tablespace
+          value: $(params.ocp-tablespace)
+      runAfter:
+        - export-model
+      workspaces:
+        - name: source
+          workspace: sourcecode
+        - name: workspace
+          workspace: shared-workspace
     - name: deploy-model-x
       when:
         - input: "$(params.DEPLOY)"
