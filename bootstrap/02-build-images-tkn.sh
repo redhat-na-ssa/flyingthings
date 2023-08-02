@@ -9,6 +9,8 @@ fi
 TABLESPACE=$1
 
 # Execute your code here using the TABLESPACE variable
+# Hosted Copy  -p MINIO_CLIENT_URL="https://dl.min.io/client/mc/release/linux-amd64" \
+# Local Copy  -p MINIO_CLIENT_URL="htt://util02.davenet.local" \
 echo "Deploying project to $TABLESPACE"
 tkn pipeline start flyingthings-images-pipeline \
   -w name=source,volumeClaimTemplateFile=code-pvc.yaml \
@@ -20,7 +22,7 @@ tkn pipeline start flyingthings-images-pipeline \
   -p MINIMAL_IMAGE="image-registry.openshift-image-registry.svc:5000/$TABLESPACE/minimal-notebook:latest" \
   -p CUSTOM_NOTEBOOK_IMAGE="image-registry.openshift-image-registry.svc:5000/$TABLESPACE/yolo-notebook:latest" \
   -p MODEL_IMAGE="image-registry.openshift-image-registry.svc:5000/$TABLESPACE/custom-model:latest" \
-  -p BASE_MODEL="yolov5su.pt" \
+  -p BASE_MODEL="yolov5s.pt" \
   -p MINIMAL_BUILD_ARGS="--build-arg BASE_IMAGE=image-registry.openshift-image-registry.svc:5000/$TABLESPACE/base-ubi9:latest" \
   -p MODEL_BUILD_ARGS="--build-arg WEIGHTS=flyingthings.pt --build-arg BASE_IMAGE=image-registry.openshift-image-registry.svc:5000/$TABLESPACE/yolo:latest" \
   -p CUSTOM_BUILD_ARGS="--build-arg BASE_IMAGE=image-registry.openshift-image-registry.svc:5000/$TABLESPACE/minimal-notebook:latest" \

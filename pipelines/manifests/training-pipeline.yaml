@@ -37,7 +37,7 @@ spec:
       type: string
     - name: BASE_MODEL
       description: base model used to begin training
-      default: yolov8n.pt
+      default: yolov5s.pt
       type: string
     - name: MINIO_ENDPOINT
       description: endpoint of minio api

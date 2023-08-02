@@ -5,7 +5,7 @@ import subprocess
 import yaml
 from fastapi import FastAPI, HTTPException, UploadFile
 from fastapi.responses import FileResponse
-from ultralytics import YOLO
+from yolov5.detect import run as yolov5_detect
 import cv2
 import os
 import shutil
@@ -16,6 +16,12 @@ SIMPLEVIS_DATA = Path(
     os.environ.get(
         'SIMPLEVIS_DATA',
         Path(__file__).parent.resolve()
+    )
+)
+YOLO_DIR = Path(
+    os.environ.get(
+        'YOLOv5_DIR',
+        Path('/usr/local/lib/python3.9/site-packages/yolov5')
     )
 )
 BASE_DIR = Path(
@@ -39,15 +45,15 @@ SAFE_2_PROCESS = [".JPG", ".JPEG", ".PNG", ".M4V", ".MOV", ".MP4"]
 VIDEO_EXTS = [".M4V", ".MOV", ".MP4"]
 
 
-# # Load the classes
-# with open(BASE_DIR.joinpath(MODEL_CLASSES), 'r') as f:
-#     try:
-#         parsed_yaml = yaml.safe_load(f)
-#         OBJECT_CLASSES = parsed_yaml['names']
-#     except yaml.YAMLError as exc:
-#         raise RuntimeError(f"Unable to load classes from yaml: {str(exc)}")
-#     except Exception as exc:
-#         raise RuntimeError(f"Unable to identify class names: {str(exc)}")
+# Load the classes
+with open(SIMPLEVIS_DATA.joinpath('data.yaml'), 'r') as f:
+    try:
+        parsed_yaml = yaml.safe_load(f)
+        OBJECT_CLASSES = parsed_yaml['names']
+    except yaml.YAMLError as exc:
+        raise RuntimeError(f"Unable to load classes from yaml: {str(exc)}")
+    except Exception as exc:
+        raise RuntimeError(f"Unable to identify class names: {str(exc)}")
 
 app = FastAPI()
 
@@ -67,7 +73,7 @@ async def main(fname):
     try:
         my_ext = Path(fname).suffix.upper()
         if my_ext not in VIDEO_EXTS:
-            return FileResponse(DETECT_DIR.joinpath(fname))
+            return FileResponse(DETECT_DIR.joinpath('exp').joinpath(fname))
         else:
             return FileResponse(VIDEO_DIR.joinpath(fname))
     except RuntimeError as exc:
@@ -116,6 +122,7 @@ def detect(file: UploadFile):
                 f"Supported types: {SAFE_2_PROCESS}"
             )
         )
+
     my_ext = Path(file.filename).suffix.upper()
     try:
         contents = file.file.read()
@@ -135,128 +142,65 @@ def detect(file: UploadFile):
         'project': DETECT_DIR,
         'exist_ok': True,
     }
-
     if my_ext not in VIDEO_EXTS:
         detect_args['save_txt'] = True
 
     # Actually run the inference
-    source = UPLOAD_DIR.joinpath(file.filename)
-    model = YOLO(WEIGHTS_FILE)
-    results = model(source)
-    res_plotted = results[0].plot()
-    detected_stuff = []
-
-    for result in results:
-        boxes = result.boxes.cpu().numpy()
-        for box in boxes:
-            oname = result.names[int(box.cls[0])]
-            detected_stuff.append(oname)
-    cv2.imwrite(str(DETECT_DIR.joinpath(file.filename)), res_plotted)
-
-    counts = {}
-    for string in detected_stuff:
-        if string in counts:
-            counts[string] += 1
-        else:
-            counts[string] = 1
+    yolov5_detect(**detect_args)
 
     if my_ext not in VIDEO_EXTS:
-        # labels = get_labels(file.filename)
+        labels = get_labels(file.filename)
         return {
             "filename": file.filename,
             "contentType": file.content_type,
-            "detectedObj": counts,
+            "detectedObj": labels,
+            "save_path": UPLOAD_DIR.joinpath(file.filename),
+            "data": {}
+        }
+    else:
+        try:
+            # ffmpeg to transcode the video file
+            newext = os.path.splitext(file.filename)
+            newfile = newext[0] + '.mp4'            
+            video_file = DETECT_DIR.joinpath('exp').joinpath(newfile)
+            temp_video_file = video_file.with_stem('temp')
+            video_file.rename(temp_video_file)
+            _ = subprocess.run([
+                'ffmpeg',
+                '-i',
+                str(temp_video_file),
+                '-c:v',
+                'libx264',
+                '-preset',
+                'slow',
+                '-crf',
+                '20',
+                '-c:a',
+                'aac',
+                '-b:a',
+                '160k',
+                '-vf',
+                'format=yuv420p',
+                '-movflags',
+                '+faststart',
+                str(video_file)
+            ], stdout=subprocess.PIPE)
+            os.remove(temp_video_file)
+            os.remove(UPLOAD_DIR.joinpath(file.filename))
+            video_file.rename(VIDEO_DIR.joinpath(newfile))
+        except Exception as err:
+            raise HTTPException(
+                status_code=500,
+                detail=str(err)
+            )
+        return {
+            "filename": file.filename,
+            "contentType": file.content_type,
             "save_path": UPLOAD_DIR.joinpath(file.filename),
             "data": {}
         }
 
 
-
-
-
-
-#     else:
-#         try:
-#             # ffmpeg to transcode the video file
-#             newext = os.path.splitext(file.filename)
-#             newfile = newext[0] + '.mp4'            
-#             video_file = DETECT_DIR.joinpath('exp').joinpath(newfile)
-#             temp_video_file = video_file.with_stem('temp')
-#             video_file.rename(temp_video_file)
-#             _ = subprocess.run([
-#                 'ffmpeg',
-#                 '-i',
-#                 str(temp_video_file),
-#                 '-c:v',
-#                 'libx264',
-#                 '-preset',
-#                 'slow',
-#                 '-crf',
-#                 '20',
-#                 '-c:a',
-#                 'aac',
-#                 '-b:a',
-#                 '160k',
-#                 '-vf',
-#                 'format=yuv420p',
-#                 '-movflags',
-#                 '+faststart',
-#                 str(video_file)
-#             ], stdout=subprocess.PIPE)
-#             os.remove(temp_video_file)
-#             os.remove(UPLOAD_DIR.joinpath(file.filename))
-#             video_file.rename(VIDEO_DIR.joinpath(newfile))
-#         except Exception as err:
-#             raise HTTPException(
-#                 status_code=500,
-#                 detail=str(err)
-#             )
-#         return {
-#             "filename": file.filename,
-#             "contentType": file.content_type,
-#             "save_path": UPLOAD_DIR.joinpath(file.filename),
-#             "data": {}
-#         }
-
-
-# @app.post("/detect/camera")
-# def detect():
-#     now = datetime.now()
-#     date_time = now.strftime("%Y%m%d-%H%M%S")
-#     webcam_filename = 'webcam' + date_time + '.jpg'
-#     _ = subprocess.run([
-#         'ffmpeg',
-#         '-y',
-#         '-f',
-#         'v4l2',
-#         '-video_size',
-#         '640x480',
-#         '-i',
-#         '/dev/video0',
-#         '-frames:v',
-#         '1',
-#         str(UPLOAD_DIR.joinpath(webcam_filename))
-#     ], stdout=subprocess.PIPE)
-
-#     detect_args = {
-#         'weights': WEIGHTS_FILE,
-#         'source': str(UPLOAD_DIR.joinpath(webcam_filename)),
-#         'project': DETECT_DIR,
-#         'exist_ok': True,
-#     }
-#     detect_args['save_txt'] = True
-
-#     # Actually run the inference
-#     yolov5_detect(**detect_args)
-
-#     labels = get_labels(webcam_filename)
-#     return {
-#         "filename": webcam_filename,
-#         # "contentType": file.content_type,
-#         "detectedObj": labels,
-#         "save_path": UPLOAD_DIR.joinpath(webcam_filename),
-#         "data": {}
-#     }
 
 def countX(lst, x):
     count = 0
