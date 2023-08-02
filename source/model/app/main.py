@@ -46,7 +46,7 @@ VIDEO_EXTS = [".M4V", ".MOV", ".MP4"]
 
 
 # Load the classes
-with open(YOLO_DIR.joinpath('data').joinpath('data.yaml'), 'r') as f:
+with open(SIMPLEVIS_DATA.joinpath('data.yaml'), 'r') as f:
     try:
         parsed_yaml = yaml.safe_load(f)
         OBJECT_CLASSES = parsed_yaml['names']
