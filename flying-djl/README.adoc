@@ -245,7 +245,7 @@ The application can be run locally in quarkus `dev mode` (which enables live cod
 . Run the application in quarkus `dev mode``:
 +
 -----
-(cd edge; ./mvn quarkus:dev -Djvm.args=-Djava.library.path=/usr/lib/java -P onnx,pytorch)
+(cd edge; mvn quarkus:dev -Djvm.args=-Djava.library.path=/usr/lib/java -P onnx,pytorch)
 -----
 
 . View RESTful API exposed by edge app:

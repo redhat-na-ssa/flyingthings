@@ -2,15 +2,12 @@ package org.acme.apps.s3;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-
 import org.acme.AppUtils;
+import org.acme.apps.ModelStorageLifecycle;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
@@ -41,11 +38,17 @@ public class S3ModelLifecycle {
     @MinioQualifier("rht")
     MinioClient mClient;
 
+    @Inject
+    ModelStorageLifecycle modelSL;
+
     @ConfigProperty(name = "com.rht.na.gtm.s3.bucket.name", defaultValue = AppUtils.NA)
     String bucketName;
 
     @ConfigProperty(name = "org.acme.djl.model.zip.path")
-    String modelZipPath;    
+    String modelZipPath;
+
+    @ConfigProperty(name = "org.acme.djl.model.temp.unzip.path", defaultValue="/tmp/unzippedModels")
+    String tempUnzippedModelPath;
 
     @PostConstruct
     public void start() {
@@ -75,7 +78,11 @@ public class S3ModelLifecycle {
             // Get input stream to have content of 'my-objectname' from 'my-bucketname'
             InputStream stream =
                 mClient.getObject(GetObjectArgs.builder().bucket(bucketName).object(modelName).build());
-                FileUtils.copyInputStreamToFile(stream, targetModelZipFile);
+            FileUtils.copyInputStreamToFile(stream, targetModelZipFile);
+
+            String tempUnzippedModelPath = ""+modelName;
+            boolean success = modelSL.unzipModel(stream, tempUnzippedModelPath);
+            log.infov("pullAndSaveModelZip() successfully unzipped model to {0} = {1}", tempUnzippedModelPath, success);
 
         } catch (IOException | InvalidKeyException | ErrorResponseException | InsufficientDataException | InternalException | InvalidResponseException | NoSuchAlgorithmException | ServerException | XmlParserException | IllegalArgumentException e) {
             log.errorv("pullAndSaveModelZip() unable to write zip to: {0}", targetModelZipFile.getAbsolutePath());
@@ -98,67 +105,17 @@ public class S3ModelLifecycle {
      */
     public boolean pullAndUnzipModel(String modelName){
 
-        ZipInputStream zis = null;
+        // Get input stream to have content of 'my-objectname' from 'my-bucketname'
+        InputStream stream;
         try {
-            // Get input stream to have content of 'my-objectname' from 'my-bucketname'
-            InputStream stream =
-                mClient.getObject(GetObjectArgs.builder().bucket(bucketName).object(modelName).build());
-      
-            // Read the input stream and print to the console till EOF.
-            // https://www.baeldung.com/java-compress-and-uncompress
-            byte[] buffer = new byte[1024];
-            zis = new ZipInputStream(stream);
-            ZipEntry zipEntry = zis.getNextEntry();
-            File destDir = new File(this.modelZipPath);
-            while(zipEntry != null){
-                File newFile = newFile(destDir, zipEntry);
-                if (zipEntry.isDirectory()) {
-                    if (!newFile.isDirectory() && !newFile.mkdirs()) {
-                        throw new IOException("Failed to create directory " + newFile);
-                    }
-                } else {
-                    // fix for Windows-created archives
-                    File parent = newFile.getParentFile();
-                    if (!parent.isDirectory() && !parent.mkdirs()) {
-                        throw new IOException("Failed to create directory " + parent);
-                    }
-            
-                    // write file content
-                    FileOutputStream fos = new FileOutputStream(newFile);
-                    int len;
-                    while ((len = zis.read(buffer)) > 0) {
-                        fos.write(buffer, 0, len);
-                    }
-                    fos.close();
-                }
-                zipEntry = zis.getNextEntry();
-            }
-            log.infov("pullAndSaveModel() just refreshed model in {0}", this.modelZipPath);
-            return true;
-        }catch(Exception x){
-            x.printStackTrace();
+            stream = mClient.getObject(GetObjectArgs.builder().bucket(bucketName).object(modelName).build());
+            return modelSL.unzipModel(stream, null);
+        } catch (InvalidKeyException | ErrorResponseException | InsufficientDataException | InternalException
+                | InvalidResponseException | NoSuchAlgorithmException | ServerException | XmlParserException
+                | IllegalArgumentException | IOException e) {
+            e.printStackTrace();
             return false;
-        }finally{
-            if(zis != null)
-                try {
-                    zis.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
         }
-    }
-
-    public static File newFile(File destinationDir, ZipEntry zipEntry) throws IOException {
-        File destFile = new File(destinationDir, zipEntry.getName());
-    
-        String destDirPath = destinationDir.getCanonicalPath();
-        String destFilePath = destFile.getCanonicalPath();
-    
-        if (!destFilePath.startsWith(destDirPath + File.separator)) {
-            throw new IOException("Entry is outside of the target dir: " + zipEntry.getName());
-        }
-    
-        return destFile;
-    }   
+    }  
     
 }

@@ -98,10 +98,13 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
     @ConfigProperty(name = "org.acme.objectdetection.video.capture.interval.millis", defaultValue = "50")
     int videoCaptureIntevalMillis;
 
-    @ConfigProperty(name = "org.acme.djl.model.zip.path", defaultValue=AppUtils.NA)
+    @ConfigProperty(name = "org.acme.djl.model.zip.path")
     String modelZipPath;
 
-    @ConfigProperty(name = "org.acme.djl.model.zip.name", defaultValue=AppUtils.NA)
+    @ConfigProperty(name = "org.acme.djl.model.temp.unzip.path", defaultValue="/tmp/unzippedModels")
+    String tempUnzippedModelPath;
+
+    @ConfigProperty(name = "org.acme.djl.model.zip.name")
     String modelZipName;
 
     @ConfigProperty(name = "org.acme.djl.model.artifact.name", defaultValue = AppUtils.NA)
@@ -117,7 +120,10 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
     EventBus bus;
 
     @Inject
-    S3ModelLifecycle modelLifecycle;
+    S3ModelLifecycle s3ModelLifecycle;
+
+    @Inject
+    ModelStorageLifecycle modelSL;
 
     ZooModel<Image, DetectedObjects> model;
     File rawAndBoxedImageFileDir;
@@ -155,8 +161,10 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
             // 3) Instantiate a single OpenCV Mat class to store raw image data
             unboxedMat = new Mat();
 
-            // 4)  Load model
+            // 4)  Load model and unzip
             loadModel(this.modelZipPath, this.modelZipName);
+            boolean success = modelSL.unzipModel(this.tempUnzippedModelPath);
+            log.infov("startResource() successfully unzipped model to {0} = {1}", tempUnzippedModelPath, success);
 
             // 5)  Keep pace with video buffer by reading frames from it at a configurable number of millis
             //     On a different thread, this app will periodically evaluate the latest captured frame at that instant in time
@@ -465,7 +473,7 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
             org.acme.apps.s3.Record record = modelN.records.get(0);
             String fileName = record.s3.object.key;
             String fileSize = record.s3.object.size;
-            boolean success = modelLifecycle.pullAndSaveModelZip(fileName);
+            boolean success = s3ModelLifecycle.pullAndSaveModelZip(fileName);
             if(success){
                 loadModel(this.modelZipPath, fileName);
                 this.continueToPredict = true;
