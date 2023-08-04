@@ -12,6 +12,12 @@
   <artifactId>flying-web</artifactId>
   <version>0.0.1</version>
   <dependencies>
+
+    <dependency>
+        <groupId>io.quarkiverse.minio</groupId>
+        <artifactId>quarkus-minio</artifactId>
+        <version>3.1.0.Final</version>
+    </dependency>
    
     <dependency>
       <groupId>com.redhat.na.ssa</groupId>

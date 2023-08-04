@@ -10,6 +10,7 @@ public class AppUtils {
     public static final String NA="NA";
 
     public static final String LIVE_OBJECT_DETECTION = "liveObjectDetection";
+    public static final String MODEL_CORRECTIVE_CANDIDATES = "modelCorrectiveCandidates";
     public static final String LIVE_OBJECT_DETECTION_INCOMING = "liveObjectDetectionIncoming";
     public static final String ID = "id";
     public static final String UNADULTERED_IMAGE_FILE_PATH = "unadultered_image_file_path";
@@ -28,5 +29,6 @@ public class AppUtils {
     public static final String S3_OBJECT_CREATED = "s3:ObjectCreated:Put";
     public static final String S3_OBJECT_DELETED = "s3:ObjectRemoved:Delete";
     public static final String SYNSET_FILE_NAME = "synsetFileName";
-    
+    public static final String MODELS_CORRECTIVE_CANDIDATES = "models-correctivecandidates";
+    public static final String CORRECTION_REASONS="CORRECTION_REASONS";
 }

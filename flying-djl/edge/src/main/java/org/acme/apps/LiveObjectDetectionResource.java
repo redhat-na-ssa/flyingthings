@@ -89,9 +89,6 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
     @ConfigProperty(name = "org.acme.objectdetection.write.modified.image.to.disk", defaultValue = "True")
     boolean writeModifiedImageToDisk;
 
-    @ConfigProperty(name = "org.acme.objectdetection.continuousPublish", defaultValue = "False")
-    boolean continuousPublish;
-
     @ConfigProperty(name = "org.acme.objectdetection.prediction.change.threshold", defaultValue = "0.1")
     double predictionThreshold;
 
@@ -101,9 +98,6 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
     @ConfigProperty(name = "org.acme.djl.model.zip.path")
     String modelZipPath;
 
-    @ConfigProperty(name = "org.acme.djl.model.temp.unzip.path", defaultValue="/tmp/unzippedModels")
-    String tempUnzippedModelPath;
-
     @ConfigProperty(name = "org.acme.djl.model.zip.name")
     String modelZipName;
 
@@ -112,6 +106,18 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
 
     @ConfigProperty(name = "org.acme.djl.model.synset.name", defaultValue = "synset.txt")
     String synsetFileName;
+
+    @ConfigProperty(name = "org.acme.objectdetection.correction.candidate.best.probability.threshold", defaultValue = "0.80")
+    double correctionCandidateBestProbabilityThreshold;
+
+    @ConfigProperty(name = "org.acme.objectdetection.correction.candidate.minimum.probability.threshold", defaultValue = "0.50")
+    double correctionCandidateMinimumProbabilityThreshold;
+
+    @ConfigProperty(name = "org.acme.objectdetection.correction.candidate.minimum.detections", defaultValue = "1")
+    int correctionCandidateMinimumDetections;
+
+    @ConfigProperty(name = "org.acme.objectdetection.correction.candidate.maximum.detections", defaultValue = "10")
+    int correctionCandidateMaximumDetections;
 
     @Inject
     CriteriaFilter cFilters;
@@ -163,10 +169,11 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
 
             // 4)  Load model and unzip
             loadModel(this.modelZipPath, this.modelZipName);
-            boolean success = modelSL.unzipModel(this.tempUnzippedModelPath);
-            log.infov("startResource() successfully unzipped model to {0} = {1}", tempUnzippedModelPath, success);
 
-            // 5)  Keep pace with video buffer by reading frames from it at a configurable number of millis
+            // 5)  Populate List of classes so as to assist with identifying models that need correction
+            modelSL.unzipModelAndRefreshModelClassList();
+
+            // 6)  Keep pace with video buffer by reading frames from it at a configurable number of millis
             //     On a different thread, this app will periodically evaluate the latest captured frame at that instant in time
             refreshVideoCaptureStreamer();
 
@@ -215,6 +222,9 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
                 .build();
 
             ZooModel<Image, DetectedObjects> newModel = criteria.loadModel();
+
+            testModel(newModel);
+
             this.model = newModel;
             this.modelZipPath = newModelZipPath;
             this.modelZipName = newModelZipName;
@@ -250,6 +260,10 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
         }
     }
 
+    private void testModel(ZooModel<Image, DetectedObjects> newModel){
+
+    }
+
     // Consume raw video snapshots and apply prediction analysis
     @ConsumeEvent(AppUtils.CAPTURED_IMAGE)
     public void processCapturedEvent(VideoCapturePayload capturePayload){
@@ -277,13 +291,30 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
            
             try {
                 Classifications.Classification dClass = detections.best();
+                List<Double> probabilities = detections.getProbabilities();
+                capturePayload.setProbabilities(probabilities);
                 capturePayload.setDetectedObjectClassification(dClass.getClassName());
                 capturePayload.setDetected_object_probability(dClass.getProbability());
+
+                // Determine whether this VideoCapture is a candidate to correct the model and/or there is a state change
+                boolean isCorrectionCandidate = correctionCandidate(capturePayload);
+                boolean isDifferent = isDifferent(capturePayload);
                 
-                // Depending if there is an object detection state change, generate an event
-                if(continuousPublish || (isDifferent(capturePayload))){
+                // generate an event
+                if(isCorrectionCandidate || isDifferent){
                     ObjectMapper oMapper = super.getObjectMapper();
                     ObjectNode rNode = oMapper.createObjectNode();
+
+                    if(isCorrectionCandidate){
+                        String correctionReasons = capturePayload.getCorrectionCandidateReasonList().toString();
+                        rNode.put(AppUtils.CORRECTION_REASONS, correctionReasons);
+                        log.warnv("correction candidate! reasons = {0}", correctionReasons);
+                    }
+
+                    rNode.put(AppUtils.ID, capturePayload.getStartCaptureTime().getEpochSecond());
+                    rNode.put(AppUtils.DEVICE_ID, System.getenv(AppUtils.HOSTNAME));
+                    rNode.put(AppUtils.CAPTURE_COUNT, captureCount);
+                    rNode.put(AppUtils.CAPTURE_TIMESTAMP, formatter.format(startCaptureTime));
 
                     if(writeUnAdulateredImageToDisk){
                         // Write un-boxed image to local file system
@@ -315,15 +346,12 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
                         ImageIO.write(bBoxedImage, "png", boxedImageFile);
                         rNode.put(AppUtils.DETECTED_IMAGE_FILE_PATH, boxedImageFile.getAbsolutePath());
                     }
-                    
-                    rNode.put(AppUtils.ID, capturePayload.getStartCaptureTime().getEpochSecond());
-                    rNode.put(AppUtils.DEVICE_ID, System.getenv(AppUtils.HOSTNAME));
-                    rNode.put(AppUtils.CAPTURE_COUNT, captureCount);
-                    rNode.put(AppUtils.CAPTURE_TIMESTAMP, formatter.format(startCaptureTime));
+
                     bus.publish(AppUtils.LIVE_OBJECT_DETECTION, rNode.toPrettyString());
+
                     this.previousCapture = capturePayload;
                 }else {
-                    log.debug("no change");
+                    log.debug("not a correction candidate nor is there a state change");
                 }
             }catch(NoSuchElementException x) {
                 log.warn("Caught NoSuchElementException when attempting to classify objects in image");
@@ -337,6 +365,38 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
         }
         Duration timeElapsed = Duration.between(startCaptureTime, Instant.now());
         log.info("processCapturedEvent() "+captureCount + " : "+ timeElapsed); 
+    }
+
+    private boolean correctionCandidate(VideoCapturePayload latest){
+        boolean isCorrectionCandidate = false;
+        List<String> candidateReasons = new ArrayList<String>();
+        if(!this.modelSL.modelClassesContains(latest.getDetectedObjectClassification())){
+            candidateReasons.add(VideoCapturePayload.CORRECTION_REASONS.NOT_VALID_CLASS.name());
+            isCorrectionCandidate=true;
+        }
+        if(latest.getDetected_object_probability() < this.correctionCandidateBestProbabilityThreshold) {
+            candidateReasons.add(VideoCapturePayload.CORRECTION_REASONS.BEST_OBJECT_BELOW_PROBABILITY_THRESHOLD.name());
+            isCorrectionCandidate=true;
+        }
+        for(Double probability: latest.getProbabilities()){
+            if(probability < this.correctionCandidateMinimumProbabilityThreshold){
+                candidateReasons.add(VideoCapturePayload.CORRECTION_REASONS.BELOW_MINIMAL_PROBABILITY_THRESHOLD.name());
+                isCorrectionCandidate=true;
+                break;
+            }
+
+        }
+        if(latest.getDetectionCount() < this.correctionCandidateMinimumDetections){
+            candidateReasons.add(VideoCapturePayload.CORRECTION_REASONS.TOO_LITTLE_OBJECTS_DETECTEDe.name());
+            isCorrectionCandidate=true;
+        }
+        if(latest.getDetectionCount() > this.correctionCandidateMaximumDetections){
+            candidateReasons.add(VideoCapturePayload.CORRECTION_REASONS.TOO_MANY_OBJECTS_DETECTED.name());
+            isCorrectionCandidate=true;
+        }
+
+        latest.setCorrectionCandidateReasonList(candidateReasons);
+        return isCorrectionCandidate;
     }
 
     private boolean isDifferent(VideoCapturePayload latest) {
@@ -476,6 +536,7 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
             boolean success = s3ModelLifecycle.pullAndSaveModelZip(fileName);
             if(success){
                 loadModel(this.modelZipPath, fileName);
+                modelSL.unzipModelAndRefreshModelClassList();
                 this.continueToPredict = true;
             }
 

@@ -132,6 +132,12 @@ $ echo -en "\nhttps://$(oc get route djl-objectdetect-web -n user1-djl --templat
 
 == Development
 
+=== Base
+
+-----
+$ mvn clean install -pl base -am -DskipTests
+-----
+
 === Web app
 
 ==== Pre-reqs
@@ -152,7 +158,7 @@ Plan for 500Mb RAM
 +
 ie: `dnf install curl`
 
-=== Build
+==== Build
 
 . Build linux container image and push to quay.io:
 +
@@ -343,9 +349,9 @@ $ curl -X POST localhost:8080/djl/refreshVideoAndPrediction
 -----
 
 
-=== Linux Containers
+==== Linux Containers
 
-==== Pre-reqs:
+===== Pre-reqs:
 
 . *podman*
 +
@@ -382,7 +388,7 @@ $ sudo restorecon -R $DJL_CACHE_DIR_OCI
 $ podman unshare chown -R 185:185 $DJL_CACHE_DIR_OCI
 -----
 
-==== Create Linux Container
+===== Create Linux Container
 
 . Change directory into:  `djl-objectdetect`
 
@@ -405,7 +411,7 @@ $ ./mvnw clean package \
             -Dquarkus.container-image.push=true
 -----
 
-==== Execution
+===== Execution
 
 . Set an environment variable that specifies one of the possible deep learning engines:
 +

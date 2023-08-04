@@ -9,4 +9,7 @@ mc event add  rht/flyingthings-models arn:minio:sqs::MLNOTIFY:mqtt --event "put,
 mc event add  rht/flyingthings-models arn:minio:sqs::MLNOTIFY:mqtt --event "put,delete" --suffix ".zip"
 mc event add  rht/flyingthings-models arn:minio:sqs::MLNOTIFY:mqtt --event "put,delete" --suffix ".pt"
 
+mc mb rht/models-correctivecandidates
+mc policy set public rht/models-correctivecandidates
+
 mc admin service restart rht

@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+
 import org.acme.AppUtils;
 import org.acme.apps.ModelStorageLifecycle;
 import org.apache.commons.io.FileUtils;
@@ -80,10 +81,6 @@ public class S3ModelLifecycle {
                 mClient.getObject(GetObjectArgs.builder().bucket(bucketName).object(modelName).build());
             FileUtils.copyInputStreamToFile(stream, targetModelZipFile);
 
-            String tempUnzippedModelPath = ""+modelName;
-            boolean success = modelSL.unzipModel(stream, tempUnzippedModelPath);
-            log.infov("pullAndSaveModelZip() successfully unzipped model to {0} = {1}", tempUnzippedModelPath, success);
-
         } catch (IOException | InvalidKeyException | ErrorResponseException | InsufficientDataException | InternalException | InvalidResponseException | NoSuchAlgorithmException | ServerException | XmlParserException | IllegalArgumentException e) {
             log.errorv("pullAndSaveModelZip() unable to write zip to: {0}", targetModelZipFile.getAbsolutePath());
             e.printStackTrace();
@@ -98,24 +95,5 @@ public class S3ModelLifecycle {
         }
         return true;
     }
-
-    /*
-     * given a modelName, retrieves a model zip file and unpacks onto file system.
-     * returns boolean success or failure
-     */
-    public boolean pullAndUnzipModel(String modelName){
-
-        // Get input stream to have content of 'my-objectname' from 'my-bucketname'
-        InputStream stream;
-        try {
-            stream = mClient.getObject(GetObjectArgs.builder().bucket(bucketName).object(modelName).build());
-            return modelSL.unzipModel(stream, null);
-        } catch (InvalidKeyException | ErrorResponseException | InsufficientDataException | InternalException
-                | InvalidResponseException | NoSuchAlgorithmException | ServerException | XmlParserException
-                | IllegalArgumentException | IOException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }  
     
 }

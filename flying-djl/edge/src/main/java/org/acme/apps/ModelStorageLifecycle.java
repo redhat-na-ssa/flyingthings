@@ -6,9 +6,13 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import org.apache.commons.io.FileUtils;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 
@@ -18,32 +22,59 @@ import jakarta.enterprise.context.ApplicationScoped;
 @ApplicationScoped
 public class ModelStorageLifecycle {
 
+    private static final String ZIP_SUFFIX=".zip";
+    private static final String RETURN_CHAR="\n";
     private static Logger log = Logger.getLogger(ModelStorageLifecycle.class);
 
     @ConfigProperty(name = "org.acme.djl.model.zip.path")
     String modelZipPath;
 
+    @ConfigProperty(name = "org.acme.djl.model.temp.unzip.path", defaultValue="/tmp/unzippedModels")
+    String targetBaseDirToUnzipTo;
+
     @ConfigProperty(name = "org.acme.djl.model.zip.name")
     String modelZipName;
 
+    @ConfigProperty(name = "org.acme.djl.model.synset.name", defaultValue = "synset.txt")
+    String synsetFileName;
+
+    List<String> modelClassesList = new ArrayList<String>();
+
     @PostConstruct
     public void start() {
-
     }
 
-    public boolean unzipModel(String targetDirToUnzipTo ){
+    public boolean unzipModelAndRefreshModelClassList(){
         InputStream fStream = null;
         try {
+            String zipFilePrefix = modelZipName.substring(0, modelZipName.indexOf(ZIP_SUFFIX));
+            String targetDirToUnzipTo = targetBaseDirToUnzipTo+"/"+zipFilePrefix;
+
             File modelZipFile = new File(this.modelZipPath, this.modelZipName);
             fStream = new FileInputStream(modelZipFile);
-            return unzipModel(fStream, targetDirToUnzipTo);
-        } catch (FileNotFoundException e) {
+            boolean success = unzipModel(fStream, targetDirToUnzipTo );
+            
+            File classesFile = new File(targetDirToUnzipTo, synsetFileName);
+            String classesContent = FileUtils.readFileToString(classesFile, StandardCharsets.UTF_8);
+            String[] strSplit = classesContent.split(RETURN_CHAR);
+            modelClassesList.clear();
+            for(int x= 0; x < strSplit.length; x++){
+                modelClassesList.add(strSplit[x]);
+            }
+            log.infov("unzipModelAndRefreshModelClassList() successfully unzipped model to {0}; # of model classes = {1}", targetDirToUnzipTo, modelClassesList.size());
+
+            return success;
+        } catch (IOException e) {
             e.printStackTrace();
             return false;
         }
     }
 
-    public boolean unzipModel(InputStream stream, String targetDirToUnzipTo){
+    public boolean modelClassesContains(String className){
+        return modelClassesList.contains(className);
+    }
+
+    private boolean unzipModel(InputStream stream, String targetDirToUnzipTo){
         ZipInputStream zis = null;
         try {
       
