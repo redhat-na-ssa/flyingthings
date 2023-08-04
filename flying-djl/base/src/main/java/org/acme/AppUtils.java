@@ -12,14 +12,14 @@ public class AppUtils {
     public static final String LIVE_OBJECT_DETECTION = "liveObjectDetection";
     public static final String MODEL_CORRECTIVE_CANDIDATES = "modelCorrectiveCandidates";
     public static final String LIVE_OBJECT_DETECTION_INCOMING = "liveObjectDetectionIncoming";
-    public static final String ID = "id";
-    public static final String UNADULTERED_IMAGE_FILE_PATH = "unadultered_image_file_path";
-    public static final String DETECTED_OBJECT_CLASSIFICATION = "detected_object_classification";
-    public static final String DETECTED_OBJECT_PROBABILITY = "detected_object_probability";
-    public static final String DETECTED_IMAGE_FILE_PATH = "detected_image_file_path";
+    public static final String ID = "ID";
+    public static final String UNADULTERED_IMAGE_FILE_PATH = "UNADULTERED_IMAGE_FILE_PATH";
+    public static final String BEST_OBJECT_CLASSIFICATION = "BEST_OBJECT_CLASSIFICATION";
+    public static final String BEST_OBJECT_PROBABILITY = "BEST_OBJECT_PROBABILITY";
+    public static final String DETECTED_IMAGE_FILE_PATH = "DETECTED_IMAGE_FILE_PATH";
     public static final String CAPTURED_IMAGE = "captured_image";
-    public static final String DETECTION_COUNT = "detection_count";
-    public static final String DEVICE_ID = "device_id";
+    public static final String DETECTION_COUNT = "DETECTION_COUNT";
+    public static final String DEVICE_ID = "DEVICE_ID";
     public static final String HOSTNAME = "HOSTNAME";
     public static final String BASE64_DETECTED_IMAGE = "base64DetectedImage";
     public static final String CAPTURE_TIMESTAMP = "CAPTURE_TIMESTAMP";
@@ -31,4 +31,5 @@ public class AppUtils {
     public static final String SYNSET_FILE_NAME = "synsetFileName";
     public static final String MODELS_CORRECTIVE_CANDIDATES = "models-correctivecandidates";
     public static final String CORRECTION_REASONS="CORRECTION_REASONS";
+    public static final String DETECTION_PROBABILITIES = "DETECTION_PROBABILITIES";
 }

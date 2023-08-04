@@ -42,7 +42,9 @@ import org.opencv.videoio.Videoio;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import nu.pattern.OpenCV;
@@ -118,6 +120,9 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
 
     @ConfigProperty(name = "org.acme.objectdetection.correction.candidate.maximum.detections", defaultValue = "10")
     int correctionCandidateMaximumDetections;
+
+    @ConfigProperty(name = "org.acme.objectdetection.include.prediction.dump.in.corrections.message", defaultValue = "True")
+    boolean includePredictionDumpInCorrectionsMessage;
 
     @Inject
     CriteriaFilter cFilters;
@@ -286,7 +291,7 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
 
             predictor = model.newPredictor();
             DetectedObjects detections = predictor.predict(img);
-            log.debugv("{0}", detections);
+            log.infov("{0}", detections);
             capturePayload.setDetectionCount(detections.getNumberOfObjects());
            
             try {
@@ -308,6 +313,10 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
                     if(isCorrectionCandidate){
                         String correctionReasons = capturePayload.getCorrectionCandidateReasonList().toString();
                         rNode.put(AppUtils.CORRECTION_REASONS, correctionReasons);
+                        if(includePredictionDumpInCorrectionsMessage){
+                            JsonNode detectionsJSON = oMapper.readTree(detections.toJson());
+                            rNode.set(AppUtils.DETECTION_PROBABILITIES, detectionsJSON);
+                        }
                         log.warnv("correction candidate! reasons = {0}", correctionReasons);
                     }
 
@@ -325,8 +334,8 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
                     }
 
                     rNode.put(AppUtils.DETECTION_COUNT, capturePayload.getDetectionCount());
-                    rNode.put(AppUtils.DETECTED_OBJECT_CLASSIFICATION, capturePayload.getDetectedObjectClassification());
-                    rNode.put(AppUtils.DETECTED_OBJECT_PROBABILITY, capturePayload.getDetected_object_probability());
+                    rNode.put(AppUtils.BEST_OBJECT_CLASSIFICATION, capturePayload.getDetectedObjectClassification());
+                    rNode.put(AppUtils.BEST_OBJECT_PROBABILITY, capturePayload.getDetected_object_probability());
                     
                     // Annotate video capture image w/ any detected objects
                     img.drawBoundingBoxes(detections);
