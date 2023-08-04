@@ -2,6 +2,10 @@ package org.acme.apps;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -44,7 +48,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import nu.pattern.OpenCV;
@@ -60,6 +63,8 @@ import ai.djl.modality.cv.translator.YoloV5TranslatorFactory;
 import ai.djl.repository.zoo.Criteria;
 import ai.djl.repository.zoo.ZooModel;
 import ai.djl.training.util.ProgressBar;
+import ai.djl.translate.TranslateException;
+
 import java.awt.image.BufferedImage;
 
 import com.sun.security.auth.module.UnixSystem;
@@ -70,7 +75,7 @@ import com.sun.security.auth.module.UnixSystem;
 public class LiveObjectDetectionResource extends BaseResource implements ILiveObjectDetection {
 
     private static final String PATTERN_FORMAT = "yyyy.MM.dd HH:mm:ss";
-    private static final String NO_TEST_FILE="NO_TEST_FILE";
+    private static final String NO_VIDEO_FILE="NO_VIDEO_FILE";
 
     private static Logger log = Logger.getLogger("LiveObjectDetectionResource");
 
@@ -82,8 +87,11 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
     @ConfigProperty(name = "org.acme.objectdetection.video.capture.device.id", defaultValue = "-1")
     int videoCaptureDevice;
 
-    @ConfigProperty(name = "org.acme.objectdetection.test.video.file", defaultValue = NO_TEST_FILE)
-    String testVideoFile;
+    @ConfigProperty(name = "org.acme.objectdetection.video.file", defaultValue = NO_VIDEO_FILE)
+    String videoFile;
+
+    @ConfigProperty(name = "org.acme.objectdetection.test.video.frame.path", defaultValue = AppUtils.NA)
+    String testVideoFramePath;
 
     @ConfigProperty(name = "org.acme.objectdetection.write.unadultered.image.to.disk", defaultValue = "True")
     boolean writeUnAdulateredImageToDisk;
@@ -165,18 +173,17 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
             if(!(rawAndBoxedImageFileDir).canWrite())
                 throw new RuntimeException("Can not write in the following directory: "+rawAndBoxedImageFileDir.getAbsolutePath());
 
-            
             // 2) Enable web cam  (but don't start capturing images and executing object detection predictions on those images just yet)
             refreshVideoCapture();
 
             // 3) Instantiate a single OpenCV Mat class to store raw image data
             unboxedMat = new Mat();
 
-            // 4)  Load model and unzip
-            loadModel(this.modelZipPath, this.modelZipName);
-
-            // 5)  Populate List of classes so as to assist with identifying models that need correction
+            // 4)  Populate List of classes so as to assist with identifying models that need correction
             modelSL.unzipModelAndRefreshModelClassList();
+
+            // 5)  Load model and unzip
+            loadModel(this.modelZipPath, this.modelZipName);
 
             // 6)  Keep pace with video buffer by reading frames from it at a configurable number of millis
             //     On a different thread, this app will periodically evaluate the latest captured frame at that instant in time
@@ -265,8 +272,40 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
         }
     }
 
-    private void testModel(ZooModel<Image, DetectedObjects> newModel){
+    private void testModel(ZooModel<Image, DetectedObjects> newModel) throws TranslateException, IOException, ValidationException{
 
+        File testVideoFrameFile = new File(this.testVideoFramePath);
+        if(!testVideoFrameFile.exists()){
+            log.warnv("Unable to locate test video from at {0}.  Will not test model", this.testVideoFramePath);
+            return;
+        }
+        InputStream fis = null;
+        Predictor<Image, DetectedObjects> predictor = null;
+        try{
+            fis = new FileInputStream(testVideoFrameFile);
+            predictor = newModel.newPredictor();
+            ImageFactory factory = ImageFactory.getInstance();
+            DetectedObjects detections = predictor.predict(factory.fromInputStream(fis));
+
+            // Create VideoCapturePayload object and populate with detections
+            VideoCapturePayload cPayload = new VideoCapturePayload();
+            cPayload.setCaptureCount(1);
+            Instant startCaptureTime = Instant.now();
+            cPayload.setStartCaptureTime(startCaptureTime);
+            this.populateVideoCaptureWithDetections(cPayload, detections);
+
+            boolean isCorrectionCandidate = correctionCandidate(cPayload);
+            if(!isCorrectionCandidate)
+                log.infov("testModel() model {0} is good to go!", newModel.getName());
+            else{
+                log.errorv("testModel() model failed due to: {0}", cPayload.getCorrectionCandidateReasonList().toString());
+                log.errorv("{0}", detections);
+                throw new ValidationException(newModel.getName()+" did not pass tests");
+            }
+        }finally{
+            if(predictor!=null)predictor.close();
+            if(fis!=null){try{fis.close();}catch(Exception x){x.printStackTrace();}}
+        }
     }
 
     // Consume raw video snapshots and apply prediction analysis
@@ -291,15 +330,10 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
 
             predictor = model.newPredictor();
             DetectedObjects detections = predictor.predict(img);
-            log.infov("{0}", detections);
-            capturePayload.setDetectionCount(detections.getNumberOfObjects());
-           
+            log.debugv("{0}", detections);
+            
             try {
-                Classifications.Classification dClass = detections.best();
-                List<Double> probabilities = detections.getProbabilities();
-                capturePayload.setProbabilities(probabilities);
-                capturePayload.setDetectedObjectClassification(dClass.getClassName());
-                capturePayload.setDetected_object_probability(dClass.getProbability());
+                this.populateVideoCaptureWithDetections(capturePayload, detections);
 
                 // Determine whether this VideoCapture is a candidate to correct the model and/or there is a state change
                 boolean isCorrectionCandidate = correctionCandidate(capturePayload);
@@ -374,6 +408,15 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
         }
         Duration timeElapsed = Duration.between(startCaptureTime, Instant.now());
         log.info("processCapturedEvent() "+captureCount + " : "+ timeElapsed); 
+    }
+
+    private void populateVideoCaptureWithDetections(VideoCapturePayload cPayload, DetectedObjects detections){
+        cPayload.setDetectionCount(detections.getNumberOfObjects());
+        Classifications.Classification dClass = detections.best();
+        List<Double> probabilities = detections.getProbabilities();
+        cPayload.setProbabilities(probabilities);
+        cPayload.setDetectedObjectClassification(dClass.getClassName());
+        cPayload.setDetected_object_probability(dClass.getProbability());
     }
 
     private boolean correctionCandidate(VideoCapturePayload latest){
@@ -498,7 +541,7 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
                 this.videoCaptureDevice, 
                 vCapture.isOpened());
 
-        }else if(!StringUtils.isNullOrEmpty(this.testVideoFile)){
+        }else if(!StringUtils.isNullOrEmpty(this.videoFile)){
 
             log.info("Working Directory = " + System.getProperty("user.dir"));
 
@@ -508,7 +551,7 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
 
             OpenCV.loadShared();
 
-            vCapture = new VideoCapture(this.testVideoFile, Videoio.CAP_ANY);
+            vCapture = new VideoCapture(this.videoFile, Videoio.CAP_ANY);
             log.infov("vCapture props: {0} {1} [2] [3]",
                 vCapture.get(Videoio.CAP_PROP_FOURCC),
                 vCapture.get(Videoio.CAP_PROP_FPS),
@@ -516,11 +559,11 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
                 vCapture.get(Videoio.CAP_PROP_FRAME_HEIGHT) );
             if(!vCapture.isOpened()) {
                 log.errorv("value of java.library.path = {0}", System.getProperty("java.library.path"));
-                throw new RuntimeException("Unable to access test video = " + this.testVideoFile+" .  Do you have the following set correctly? :\n\t\t1) opencv-java & gstreamer packages installed (ie: dnf install opencv-java gstreamer1-plugin-libav)\n\t\t2) java.library.path includes path to shared libraries of opencv-java");
+                throw new RuntimeException("Unable to access test video = " + this.videoFile+" .  Do you have the following set correctly? :\n\t\t1) opencv-java & gstreamer packages installed (ie: dnf install opencv-java gstreamer1-plugin-libav)\n\t\t2) java.library.path includes path to shared libraries of opencv-java");
             }
 
             log.infov("start() video streaming on file = {0} is open =  {1}. Using NDManager {2}", 
-                this.testVideoFile, 
+                this.videoFile, 
                 vCapture.isOpened());
         }else {
             throw new RuntimeException("need to specify either a video capture device or a video file");

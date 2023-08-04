@@ -9,7 +9,7 @@ mc --config-dir /data event add  rht/flyingthings-models arn:minio:sqs::MLNOTIFY
 mc --config-dir /data event add  rht/flyingthings-models arn:minio:sqs::MLNOTIFY:mqtt --event "put,delete" --suffix ".zip"
 mc --config-dir /data event add  rht/flyingthings-models arn:minio:sqs::MLNOTIFY:mqtt --event "put,delete" --suffix ".pt"
 
-mc mb rht/flyingthings-correctiveCandidates
-mc policy set public rht/flyingthings-correctiveCandidates
+mc mb rht/flyingthings-correctivecandidates
+mc policy set public rht/flyingthings-correctivecandidates
 
 mc --config-dir /data admin service restart rht
