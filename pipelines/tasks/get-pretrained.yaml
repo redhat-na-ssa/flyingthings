@@ -1,14 +1,16 @@
 apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
-  name: push-results
+  name: get-pretrained
 spec:
   params:
     - name: WEIGHTS
       type: string
-    - name: MINIO_ENDPOINT
+    - name: BASE_MODEL
       type: string
     - name: SIMPLEVIS_DATA
+      type: string
+    - name: MINIO_ENDPOINT
       type: string
     - name: MINIO_BUCKET
       type: string
@@ -18,20 +20,26 @@ spec:
       type: string
     - name: MINIO_CLIENT_URL
       type: string
+    - name: ocp-tablespace
+      type: string
   steps:
-    - name: push-results
-      image: registry.access.redhat.com/ubi9/python-39
+    - name: get-pretrained-model
+      image: image-registry.openshift-image-registry.svc:5000/$(params.ocp-tablespace)/yolo:latest
       script: |
-        $(workspaces.source.path)/source/training/04-push-results.sh
+        set -x \
+        && cd $(params.SIMPLEVIS_DATA)/workspace \
+        && $(workspaces.source.path)/source/training/minio-setup-client.sh \
+        && $(workspaces.source.path)/source/training/00-get-yolo-model.sh \
+        && $(workspaces.source.path)/source/training/00-push-yolo-model.sh
       env:
-        - name: WEIGHTS
-          value: $(params.WEIGHTS)
         - name: MINIO_ENDPOINT
           value: $(params.MINIO_ENDPOINT)
         - name: SIMPLEVIS_DATA
           value: $(params.SIMPLEVIS_DATA)
         - name: BASEDIR
           value: $(workspaces.source.path)/source/training
+        - name: BASE_MODEL
+          value: $(params.BASE_MODEL)
         - name: MINIO_BUCKET
           value: $(params.MINIO_BUCKET)
         - name: MINIO_ACCESSKEY

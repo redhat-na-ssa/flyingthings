@@ -37,7 +37,7 @@ spec:
       type: string
     - name: BASE_MODEL
       description: base model used to begin training
-      default: yolov8n.pt
+      default: yolov5s.pt
       type: string
     - name: MINIO_ENDPOINT
       description: endpoint of minio api
@@ -72,6 +72,9 @@ spec:
       type: string
     - name: MODEL_NAME
       description: name used to deploy the model and model server
+      type: string
+    - name: GPU
+      description: flag for use of GPU for training
       type: string
   tasks: 
     - name: fetch-repository
@@ -166,9 +169,13 @@ spec:
           workspace: sourcecode
         - name: workspace
           workspace: shared-workspace
-    - name: train-model
+    - name: train-model-gpu
+      when:
+        - input: "$(params.GPU)"
+          operator: in
+          values: ["Y"]
       taskRef:
-        name: train-model
+        name: train-model-gpu
       params:
         - name: BATCH_SIZE
           value: $(params.BATCH_SIZE)
@@ -184,6 +191,53 @@ spec:
           value: $(params.ocp-tablespace)
       runAfter:
         - distribute-dataset
+      workspaces:
+        - name: source
+          workspace: sourcecode
+        - name: workspace
+          workspace: shared-workspace
+    - name: train-model-cpu
+      when:
+        - input: "$(params.GPU)"
+          operator: in
+          values: ["N"]
+      taskRef:
+        name: train-model-cpu
+      params:
+        - name: BATCH_SIZE
+          value: $(params.BATCH_SIZE)
+        - name: NUM_EPOCHS
+          value: $(params.NUM_EPOCHS)
+        - name: WEIGHTS
+          value: $(params.WEIGHTS)
+        - name: BASE_MODEL
+          value: $(params.BASE_MODEL)
+        - name: SIMPLEVIS_DATA
+          value: $(params.SIMPLEVIS_DATA)
+        - name: ocp-tablespace
+          value: $(params.ocp-tablespace)
+      runAfter:
+        - distribute-dataset
+      workspaces:
+        - name: source
+          workspace: sourcecode
+        - name: workspace
+          workspace: shared-workspace
+    - name: export-model
+      taskRef:
+        name: export-model
+      params:
+        - name: WEIGHTS
+          value: $(params.WEIGHTS)
+        - name: BASE_MODEL
+          value: $(params.BASE_MODEL)
+        - name: SIMPLEVIS_DATA
+          value: $(params.SIMPLEVIS_DATA)
+        - name: ocp-tablespace
+          value: $(params.ocp-tablespace)
+      runAfter:
+        - train-model-cpu
+        - train-model-gpu
       workspaces:
         - name: source
           workspace: sourcecode
@@ -207,8 +261,10 @@ spec:
           value: $(params.MINIO_SECRETKEY)
         - name: MINIO_CLIENT_URL
           value: $(params.MINIO_CLIENT_URL)
+        - name: ocp-tablespace
+          value: $(params.ocp-tablespace)
       runAfter:
-        - train-model
+        - export-model
       workspaces:
         - name: source
           workspace: sourcecode
@@ -321,6 +377,54 @@ spec:
               termination: edge
               insecureEdgeTerminationPolicy: Allow
           EOF
+  finally:
+    - name: summary
+      taskRef:
+        name: training-summary
+      params:
+        - name: git-url
+          value: $(params.git-url)
+        - name: git-revision
+          value: $(params.git-revision)
+        - name: ocp-tablespace
+          value: $(params.ocp-tablespace)
+        - name: BATCH_SIZE
+          value: $(params.BATCH_SIZE)
+        - name: NUM_EPOCHS
+          value: $(params.NUM_EPOCHS)
+        - name: IMG_RESIZE
+          value: $(params.IMG_RESIZE)
+        - name: MAX_WIDTH
+          value: $(params.MAX_WIDTH)
+        - name: WEIGHTS
+          value: $(params.WEIGHTS)
+        - name: BASE_MODEL
+          value: $(params.BASE_MODEL)
+        - name: MINIO_ENDPOINT
+          value: $(params.MINIO_ENDPOINT)
+        - name: DATASET_ZIP
+          value: $(params.DATASET_ZIP)
+        - name: SIMPLEVIS_DATA
+          value: $(params.SIMPLEVIS_DATA)
+        - name: MINIO_BUCKET
+          value: $(params.MINIO_BUCKET)
+        - name: MINIO_ACCESSKEY
+          value: $(params.MINIO_ACCESSKEY)
+        - name: MINIO_SECRETKEY
+          value: $(params.MINIO_SECRETKEY)
+        - name: MINIO_CLIENT_URL
+          value: $(params.MINIO_CLIENT_URL)
+        - name: DEPLOY
+          value: $(params.DEPLOY)
+        - name: MODEL_NAME
+          value: $(params.MODEL_NAME)
+        - name: GPU
+          value: $(params.GPU)
+      workspaces:
+        - name: source
+          workspace: sourcecode
+        - name: workspace
+          workspace: shared-workspace
   workspaces:
     - name: shared-workspace
     - name: sourcecode

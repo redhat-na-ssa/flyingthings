@@ -10,6 +10,7 @@ TABLESPACE=$1
 
 # Execute your code here using the TABLESPACE variable
 # NOTE: if not hosting the minio client binary ommit MINIO_CLIENT_URL to use the hosted file
+# Official minio client https://dl.min.io/client/mc/release/linux-amd64
 echo "Run model training"
 tkn pipeline start training-x-pipeline \
   -w name=sourcecode,volumeClaimTemplateFile=code-pvc.yaml \
@@ -17,6 +18,8 @@ tkn pipeline start training-x-pipeline \
   -p ocp-tablespace="$TABLESPACE" \
   -p git-url=https://github.com/redhat-na-ssa/flyingthings.git \
   -p git-revision=main \
+  -p GPU="Y" \
+  -p BASE_MODEL="yolov5s.pt" \
   -p BATCH_SIZE="-1" \
   -p NUM_EPOCHS="100" \
   -p IMG_RESIZE="Y" \

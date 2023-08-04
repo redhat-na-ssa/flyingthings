@@ -22,7 +22,8 @@ spec:
     - name: pull-dataset
       image: registry.access.redhat.com/ubi9/python-39
       script: |
-        $(workspaces.source.path)/source/training/01-dataprep.sh
+        set -x \
+        && $(workspaces.source.path)/source/training/get-dataset.sh
       env:
         - name: DATASET_ZIP
           value: $(params.DATASET_ZIP)

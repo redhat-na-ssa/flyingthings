@@ -9,7 +9,7 @@ spec:
     - name: ocp-tablespace
       type: string
   steps:
-    - name: distribute-data
+    - name: create-classfile
       image: image-registry.openshift-image-registry.svc:5000/$(params.ocp-tablespace)/base-ubi9:latest
       script: |
         cp $(workspaces.source.path)/source/training/classes.yaml.j2 $(params.SIMPLEVIS_DATA)/workspace/datasets \

@@ -1,7 +1,7 @@
 apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
-  name: train-model
+  name: train-model-gpu
 spec:
   params:
     - name: BATCH_SIZE
@@ -17,12 +17,11 @@ spec:
     - name: ocp-tablespace
       type: string
   steps:
-    - name: train-model
+    - name: train-model-using-gpu
       image: image-registry.openshift-image-registry.svc:5000/$(params.ocp-tablespace)/yolo:latest
       script: |
         set -x \
         && $(workspaces.source.path)/source/training/03-run-training.sh \
-        && $(workspaces.source.path)/source/training/export-model.sh \
         && ls -l $(params.SIMPLEVIS_DATA)/workspace
       env:
         - name: BATCH_SIZE
@@ -43,10 +42,14 @@ spec:
       volumeMounts:
         - mountPath: /dev/shm
           name: dshm
+        - mountPath: /usr/local/lib/python3.9/site-packages/yolov5/training
+          name: training
   volumes:
     - name: dshm
       emptyDir:
           medium: Memory
+    - name: training
+      emptyDir: {}
   workspaces:
     - name: workspace
       mountPath: /opt/app-root/src/simplevis-data/workspace
