@@ -22,6 +22,12 @@ Periodically sends events via MQTT when state changes occur (ie:  DJL detects pr
 +
 MQTT broker deployed in OpenShift.  Broker has default MQTT port exposed via a _LoadBalancer_ service.  Also deployed to OpenShift is a Quarkus based app that subscribes to the MQTT broker topic and forwards those MQTT events to a web browser (as `Server Sent Events` (SSE)).
 
+== Model Calibrating
+
+image::docs/images/minio_model_corrective_candidates.png[]
+
+image::docs/images/ml_locomotive_false_positive.png[]
+
 == OpenShift
 
 === Pre-Reqs
