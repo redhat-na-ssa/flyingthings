@@ -8,7 +8,25 @@
 
 :numbered:
 
+== Demo Highlights
+
+. *Intelligence at the Edge*
++
+Yolo5s based model executes in an _Onnx_ engine at edge co-located with data-ingestion (ie: video camera).
+_Onnx_ engine feeds inference prediction results in real-time to application.
+Application sends MQTT events (with boxed video capture frame and corresponding detection meta-data) only when a state-change is identified.
+
+. *Model Correction Candidate Notifications*
++
+Edge application has ability to detect if/when the model may be in need of correction.  When these events occur, the edge application will produce an MQTT message that notifies remote ML flow services.
+
+. *Automated & Validated Model Refresh*
++
+Edge application consumes MQTT messages indicating an updated model version available in a remote S3/Minio bucket.  Prior to loading updated model, the application has the ability to test the validity of the model.  If the model fails one or more tests, the app will reject the model and roll-back to the previous known-working version of the model.
+
 == Architecture
+
+=== Runtime model inference
 
 image::docs/images/djl-object-detect-architecture.png[]
 
@@ -18,11 +36,20 @@ As depicted in the above diagram, the demo functionality is split into the follo
 +
 Containerized Quarkus/DJL app that runs on a edge device enabled with a webcam.
 Periodically sends events via MQTT when state changes occur (ie:  DJL detects probability that # of detected objects has increased from 2 to 3).
+
+. *AMQ Broker*
++
+Deployed to OpenShift.
+Enabled with MQTT protocol and exposed via a _LoadBalancer_ service.
+_Edge_ component pushes state change events to an AMQ Broker queue.  _Web_ component consumes those event messages.
+
 . *Web*
 +
-MQTT broker deployed in OpenShift.  Broker has default MQTT port exposed via a _LoadBalancer_ service.  Also deployed to OpenShift is a Quarkus based app that subscribes to the MQTT broker topic and forwards those MQTT events to a web browser (as `Server Sent Events` (SSE)).
+Also deployed to OpenShift is a Quarkus based app that subscribes to the MQTT broker topic and forwards those MQTT events to a web browser (as `Server Sent Events` (SSE)).
 
-== Model Calibrating
+
+
+=== Model Calibration / Round-Trip
 
 image::docs/images/minio_model_corrective_candidates.png[]
 
