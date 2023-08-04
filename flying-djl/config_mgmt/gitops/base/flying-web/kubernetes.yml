@@ -62,7 +62,7 @@ spec:
                   fieldPath: metadata.namespace
             - name: JAVA_OPTIONS
               value: -Dvertx.metrics.options.enabled=true -Dvertx.metrics.options.registryName=prometheus
-          image: quay.io/redhat_naps_da/flying-web:0.0.1
+          image: quay.io/redhat_naps_da/flying-web:0.0.2
           imagePullPolicy: Always
           name: flying-web
           ports:
