@@ -294,7 +294,7 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
             cPayload.setStartCaptureTime(startCaptureTime);
             this.populateVideoCaptureWithDetections(cPayload, detections);
 
-            boolean isCorrectionCandidate = correctionCandidate(cPayload);
+            boolean isCorrectionCandidate = isCorrectionCandidate(cPayload);
             if(!isCorrectionCandidate)
                 log.infov("testModel() model {0} is good to go!", newModel.getName());
             else{
@@ -336,7 +336,7 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
                 this.populateVideoCaptureWithDetections(capturePayload, detections);
 
                 // Determine whether this VideoCapture is a candidate to correct the model and/or there is a state change
-                boolean isCorrectionCandidate = correctionCandidate(capturePayload);
+                boolean isCorrectionCandidate = isCorrectionCandidate(capturePayload);
                 boolean isDifferent = isDifferent(capturePayload);
                 
                 // generate an event
@@ -419,7 +419,7 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
         cPayload.setDetected_object_probability(dClass.getProbability());
     }
 
-    private boolean correctionCandidate(VideoCapturePayload latest){
+    private boolean isCorrectionCandidate(VideoCapturePayload latest){
         boolean isCorrectionCandidate = false;
         List<String> candidateReasons = new ArrayList<String>();
         if(!this.modelSL.modelClassesContains(latest.getDetectedObjectClassification())){

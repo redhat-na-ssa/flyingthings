@@ -12,17 +12,17 @@
 
 . *Intelligence at the Edge*
 +
-Yolo5s based model executes in an _Onnx_ engine at edge co-located with data-ingestion (ie: video camera).
-_Onnx_ engine feeds inference prediction results in real-time to application.
-Application sends MQTT events (with boxed video capture frame and corresponding detection meta-data) only when a state-change is identified.
+Edge application embeds an _Onnx_ engine to run a YOLO5s model for _Live Object Detection_ use case. Edge application is co-located with data-ingestion (ie: video camera).
+_Onnx_ engine feeds inference prediction results in real-time to edge application.
+Edge application sends MQTT events (with boxed video capture frame and corresponding detection meta-data) only when a state-change (from the previous frame) is identified.
 
 . *Model Correction Candidate Notifications*
 +
-Edge application has ability to detect if/when the model may be in need of correction.  When these events occur, the edge application will produce an MQTT message that notifies remote ML flow services.
+Edge application has ability to detect if/when the model may be in need of correction.  When these events occur, the edge application will produce an MQTT message containing the problematic image frame and corresponding meta-data.  This MQTT message can subsequently be consumed by a remote business process that re-trains and calibrates the model.
 
 . *Automated & Validated Model Refresh*
 +
-Edge application consumes MQTT messages indicating an updated model version available in a remote S3/Minio bucket.  Prior to loading updated model, the application has the ability to test the validity of the model.  If the model fails one or more tests, the app will reject the model and roll-back to the previous known-working version of the model.
+Edge application can consume an MQTT messages indicating an availability of an updated model version in a remote S3/Minio bucket.  Subsequently, the edge application download that new model.  Prior to loading the updated model, the edge application has the ability to test the validity of this new model.  If the model fails one or more tests, the app will reject the model and roll-back to the previous known-working version of the model.
 
 == Architecture
 
@@ -47,13 +47,20 @@ _Edge_ component pushes state change events to an AMQ Broker queue.  _Web_ compo
 +
 Also deployed to OpenShift is a Quarkus based app that subscribes to the MQTT broker topic and forwards those MQTT events to a web browser (as `Server Sent Events` (SSE)).
 
-
-
 === Model Calibration / Round-Trip
 
+. Edge application has ability to detect if/when the model may be in need of correction.  When these events occur, the edge application will produce an MQTT message.  Web application consumes the MQTT message and POSTs the message to an S3 bucket
++
 image::docs/images/minio_model_corrective_candidates.png[]
 
+. The MQTT message contains the problematic image frame and corresponding meta-data.
++
 image::docs/images/ml_locomotive_false_positive.png[]
+
+. Based on the content of the MQTT message, a remote business process can re-train and calibrate the model.
+. An updated model is pushed to a Minio bucket.  Minio is configured to trigger an MQTT message with details pertaining to this new model.
+
+. Edge application consumes this MQTT message.  Subsequently, the edge application download that new model.  Prior to loading the updated model, the edge application has the ability to test the validity of this new model.  If the model fails one or more tests, the app will reject the model and roll-back to the previous known-working version of the model.
 
 == OpenShift
 
