@@ -31,7 +31,7 @@ tkn pipeline start flyingthings-images-pipeline \
   -p MINIO_SECRETKEY="minioadmin" \
   -p MINIO_CLIENT_URL="https://dl.min.io/client/mc/release/linux-amd64" \
   -p ocp-tablespace="$TABLESPACE" \
-  -p DEPLOY_LABELSTUDIO="N" \
+  -p DEPLOY_LABELSTUDIO="Y" \
   --use-param-defaults --showlog
 
 # Exit the script gracefully
