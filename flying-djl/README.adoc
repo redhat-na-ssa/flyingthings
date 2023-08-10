@@ -170,72 +170,10 @@ image::docs/images/djl-object-detect-mqtt-artemis-web-admin.png[]
 $ echo -en "\nhttps://$(oc get route djl-objectdetect-web -n user1-djl --template='{{ .spec.host }}')/liveObject.html\n"
 -----
 
-== Development
-
-=== Base
-
------
-$ mvn clean install -pl base -am -DskipTests
------
-
-=== Web app
-
-==== Pre-reqs
-
-. *OpenShift Container Platform*
-.. Tested on OCP 4.13  (but earlier versions should also work fine as well)
-.. CPU:
-+
-Plan for 500 millis
-
-.. RAM:
-+
-Plan for 500Mb RAM
-
-.. Storage:  no PVs needed
-
-. *cURL* (or similar http test utility)
-+
-ie: `dnf install curl`
-
-==== Build
-
-. Build linux container image and push to quay.io:
-+
-NOTE:  execute the following from the root parent maven project dir.  ie: `flying-djl`
-+
------
-$ mvn clean package -pl web -am \
-      -DskipTests \
-      -Dquarkus.container-image.build=true \
-      -Dquarkus.container-image.push=true
------
-
-==== Deploy
-
-. Create a ConfigMap from the project's _application.properties_:
-+
------
-$ oc create cm djl-iclassification --from-file=config/application.properties
------
-
-
-. Determine node that pod landed on:
-+
------
-$ oc get pod \
-    -l deploymentconfig=djl-iclassification-pytorch \
-    -o json \
-    -n user1-services \
-    | jq -r .items[0].spec.nodeName
------
-+
-NOTE: The result should return the id of your GPU enabled node.
-
-=== Edge app
+== Edge app
 This application can run in your local environment.
 
-==== Pre-reqs
+=== Pre-reqs
 
 . *Webcam*
 +
@@ -290,7 +228,7 @@ DJL engines link:https://djl.ai/docs/development/cache_management.html[download 
 You are encouraged to set this environment variable in your shell.  
 Otherwise, DJL will write these files to: `$HOME/.djl.ai`
 
-==== Git project
+=== Edge app project
 
 . On the edge device, clone this project
 +
@@ -312,13 +250,15 @@ $ cd flyingthings \
 $ mvn clean install -pl base -am -DskipTests
 -----
 
-==== Quarkus Dev mode / JVM startup
+. Review the properties found in:  `edge/config/application.properties`
+
+=== JVM startup
 
 In this section, you will start the edge app in `quarkus:dev` mode (for smoke-test purposes) and then build/run the edge app as a jar executable.
 
 Depending on the CPU architecture (x86_64 or aarch64) of your edge device, execute steps fouund in one or the other following sections:
 
-===== x86_64
+==== x86_64
 
 The application can be run locally in quarkus `dev mode` (which enables live coding).
 
@@ -352,15 +292,15 @@ $ (cd edge; java \
 $ curl -X POST localhost:8080/djl/refreshVideoAndPrediction
 -----
 
-===== aarch64
+==== aarch64
 
-====== Reference
+===== Reference
 
 * link:https://github.com/deepjavalibrary/djl/issues/375[DJL Arm Support]
 
 * link:https://github.com/deepjavalibrary/djl/issues/375#issuecomment-1200471807[DJL ARM support] is currently only offered for PyTorch and OnnxRuntime engines.
 
-====== Procedure
+===== Procedure
 . Run `edge` app in `quarkus:dev` mode:
 +
 -----
@@ -422,9 +362,9 @@ $ curl -X POST localhost:8080/djl/refreshVideoAndPrediction
 -----
 
 
-==== Linux Containers
+=== (Optional) Linux Containers
 
-===== Pre-reqs:
+==== Pre-reqs:
 
 . *podman*
 +
@@ -461,7 +401,7 @@ $ sudo restorecon -R $DJL_CACHE_DIR_OCI
 $ podman unshare chown -R 185:185 $DJL_CACHE_DIR_OCI
 -----
 
-===== Create Linux Container
+==== Create Linux Container
 
 . Change directory into:  `djl-objectdetect`
 
@@ -484,7 +424,7 @@ $ mvn clean package \
             -Dquarkus.container-image.push=true
 -----
 
-===== Execution
+==== Execution
 
 . Set an environment variable that specifies one of the possible deep learning engines:
 +
@@ -554,6 +494,99 @@ $ podman run \
 . View RESTful API exposed by app:
 +
 Open a browser tab and navigate to:  `localhost:8080/q/swagger-ui`
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+== Development
+
+=== Base
+
+-----
+$ mvn clean install -pl base -am -DskipTests
+-----
+
+=== Web app
+
+==== Pre-reqs
+
+. *OpenShift Container Platform*
+.. Tested on OCP 4.13  (but earlier versions should also work fine as well)
+.. CPU:
++
+Plan for 500 millis
+
+.. RAM:
++
+Plan for 500Mb RAM
+
+.. Storage:  no PVs needed
+
+. *cURL* (or similar http test utility)
++
+ie: `dnf install curl`
+
+==== Build
+
+. Build linux container image and push to quay.io:
++
+NOTE:  execute the following from the root parent maven project dir.  ie: `flying-djl`
++
+-----
+$ mvn clean package -pl web -am \
+      -DskipTests \
+      -Dquarkus.container-image.build=true \
+      -Dquarkus.container-image.push=true
+-----
+
+==== Deploy
+
+. Create a ConfigMap from the project's _application.properties_:
++
+-----
+$ oc create cm djl-iclassification --from-file=config/application.properties
+-----
+
+
+. Determine node that pod landed on:
++
+-----
+$ oc get pod \
+    -l deploymentconfig=djl-iclassification-pytorch \
+    -o json \
+    -n user1-services \
+    | jq -r .items[0].spec.nodeName
+-----
++
+NOTE: The result should return the id of your GPU enabled node.
 
 
 == Model Diagnostics
