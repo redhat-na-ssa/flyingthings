@@ -260,15 +260,13 @@ ie: `sudo dnf install java-latest-openjdk-devel`
 +
 ie: `sudo dnf install maven`
 
-. *cURL* (or similar http test utility)
+. *cURL*
 +
 ie: `sudo dnf install curl`
 
-. *DJL_CACHE_DIR*
+. *git*
 +
-DJL engines link:https://djl.ai/docs/development/cache_management.html[download models] and any needed C++ shared object files to a directory specified by the environment variable: `DJL_CACHE_DIR` .  
-You are encouraged to set this environment variable in your shell.  
-Otherwise, DJL will write these files to: `$HOME/.djl.ai`
+ie: `sudo dnf install git`
 
 . *opencv-java*
 +
@@ -284,7 +282,43 @@ ie: `sudo dnf install gstreamer1-plugin-libav gstreamer1-plugins-bad-free gstrea
 +
 NOTE RPM packages for `gstreamer1-plugin-libav` appear to link:https://packages.fedoraproject.org/pkgs/gstreamer1-plugin-libav/gstreamer1-plugin-libav/[only exist] for F37 (or more recent)
 
-==== JVM startup (x86_64)
+==== Optional
+
+. *DJL_CACHE_DIR*
++
+DJL engines link:https://djl.ai/docs/development/cache_management.html[download models] and any needed C++ shared object files to a directory specified by the environment variable: `DJL_CACHE_DIR` .  
+You are encouraged to set this environment variable in your shell.  
+Otherwise, DJL will write these files to: `$HOME/.djl.ai`
+
+==== Git project
+
+. On the edge device, clone this project
++
+-----
+$ git clone https://github.com/redhat-na-ssa/flyingthings
+-----
+
+. Switch to `djl` branch:
++
+-----
+$ cd flyingthings \
+    && git checkout djl \
+    && cd flying-djl
+-----
+
+. Built the `base` sub-project:
++
+-----
+$ mvn clean install -pl base -am -DskipTests
+-----
+
+==== Quarkus Dev mode / JVM startup
+
+In this section, you will start the edge app in `quarkus:dev` mode (for smoke-test purposes) and then build/run the edge app as a jar executable.
+
+Depending on the CPU architecture (x86_64 or aarch64) of your edge device, execute steps fouund in one or the other following sections:
+
+===== x86_64
 
 The application can be run locally in quarkus `dev mode` (which enables live coding).
 
@@ -318,16 +352,15 @@ $ (cd edge; java \
 $ curl -X POST localhost:8080/djl/refreshVideoAndPrediction
 -----
 
+===== aarch64
 
-==== JVM startup (aarch64)
-
-===== Reference
+====== Reference
 
 * link:https://github.com/deepjavalibrary/djl/issues/375[DJL Arm Support]
 
 * link:https://github.com/deepjavalibrary/djl/issues/375#issuecomment-1200471807[DJL ARM support] is currently only offered for PyTorch and OnnxRuntime engines.
 
-===== Procedure
+====== Procedure
 . Run `edge` app in `quarkus:dev` mode:
 +
 -----
@@ -443,7 +476,7 @@ NOTE:  Possible options are:  *pytorch*, *mxnet*, or *tensorflow*
 . Build container and generate openshift/helm configs:
 +
 -----
-$ ./mvnw clean package \
+$ mvn clean package \
             -P$djl_engine \
             -Dquarkus.application.name=djl-objectdetect-$djl_engine \
             -DskipTests \
@@ -661,7 +694,7 @@ KeyError: 1994
 . DJL JNI wrappers for triplet (DJL version, aarch64 cpu, pytorch version) doesn't exist
 
 -----
-$ ./mvnw clean quarkus:dev -Djvm.args=-Djava.library.path=/usr/lib/java -P onnx,pytorch-aarch64
+$ mvn clean quarkus:dev -Djvm.args=-Djava.library.path=/usr/lib/java -P onnx,pytorch-aarch64
 
 Caused by: java.lang.UnsatisfiedLinkError: /usr/lib/java/libopencv_java470.so: /home/jbride/.djl.ai/pytorch/2.0.1-20230709-cpu-precxx11-linux-aarch64/libstdc++.so.6: version `GLIBCXX_3.4.29' not found (required by /usr/lib/java/libopencv_java470.so)
 	at java.base/jdk.internal.loader.NativeLibraries.load(Native Method)
@@ -698,7 +731,7 @@ $ python3.9 -m pip show -f torch | grep Version
 $ export PYTORCH_LIBRARY_PATH=/home/jbride/.local/lib/python3.9/site-packages/torch/lib \
     && export PYTORCH_VERSION=2.0.1 \
     && export PYTORCH_FLAVOR=cpu
-$ (cd edge; ./mvnw clean quarkus:dev -Djvm.args=-Djava.library.path=/usr/lib/java -Ponnx)
+$ (cd edge; mvn clean quarkus:dev -Djvm.args=-Djava.library.path=/usr/lib/java -Ponnx)
 
 Caused by: java.io.FileNotFoundException: https://publish.djl.ai/pytorch/2.0.1/jnilib/0.23.0/linux-aarch64/cpu/libdjl_torch.so
 	at java.base/sun.net.www.protocol.http.HttpURLConnection.getInputStream0(HttpURLConnection.java:1993)

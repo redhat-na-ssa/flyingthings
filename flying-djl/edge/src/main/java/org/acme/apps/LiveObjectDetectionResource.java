@@ -372,6 +372,8 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
                     rNode.put(AppUtils.BEST_OBJECT_PROBABILITY, capturePayload.getDetected_object_probability());
                     
                     // Annotate video capture image w/ any detected objects
+                    // Consider over-riding the following function so as to include the predictions for each detected object:
+                    //   https://github.com/deepjavalibrary/djl/blob/master/extensions/opencv/src/main/java/ai/djl/opencv/OpenCVImage.java#L158-L200
                     img.drawBoundingBoxes(detections);
                     //drawBoundingBoxWithCustomizedDetections(img, detections);
 
