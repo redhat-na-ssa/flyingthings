@@ -421,17 +421,32 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
         cPayload.setDetected_object_probability(dClass.getProbability());
     }
 
+    /*
+     * Business rules to determine if predictive inference results on a specific video frame could be used as a candidate to improve the model.
+     * NOTE:  more than 1 business rule can be triggered
+     * 
+     * Potential improvements:
+     *   1)  Don't hard-code these business rules here in Java.
+     *         Instead, make use of a business rules engine (ie:  drools) and implement these business rules in the DSL (ie: Drools Rules Language (DRL)) of that rule engine
+     *   2)  Generate grafana dashboard displaying metrics of these 'corrective candidates'
+     */
     private boolean isCorrectionCandidate(VideoCapturePayload latest){
         boolean isCorrectionCandidate = false;
         List<String> candidateReasons = new ArrayList<String>();
+
+        // Rule #1:  Is class of best detected object included in list of classes for model (typically listed in classes.txt or synset.txt) ?
         if(!this.modelSL.modelClassesContains(latest.getDetectedObjectClassification())){
             candidateReasons.add(VideoCapturePayload.CORRECTION_REASONS.NOT_VALID_CLASS.name());
             isCorrectionCandidate=true;
         }
+
+        // Rule #2:  Does best detected object have a probability of less than a configurable probability threshold (default 80%) ?
         if(latest.getDetected_object_probability() < this.correctionCandidateBestProbabilityThreshold) {
             candidateReasons.add(VideoCapturePayload.CORRECTION_REASONS.BEST_OBJECT_BELOW_PROBABILITY_THRESHOLD.name());
             isCorrectionCandidate=true;
         }
+
+        // Rule #3:  Is the probability of any detected object less than a configurable probability threshold (default 90%) ? 
         for(Double probability: latest.getProbabilities()){
             if(probability < this.correctionCandidateMinimumProbabilityThreshold){
                 candidateReasons.add(VideoCapturePayload.CORRECTION_REASONS.BELOW_MINIMAL_PROBABILITY_THRESHOLD.name());
@@ -440,14 +455,19 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
             }
 
         }
+
+        // Rule #4:  Are the # of detected objects less than a configurable threshold (default 1) ?
         if(latest.getDetectionCount() < this.correctionCandidateMinimumDetections){
             candidateReasons.add(VideoCapturePayload.CORRECTION_REASONS.TOO_LITTLE_OBJECTS_DETECTEDe.name());
             isCorrectionCandidate=true;
         }
+
+        // Rule #5:  Are the # of detected objects more than a configurable threshold (default 5) ?
         if(latest.getDetectionCount() > this.correctionCandidateMaximumDetections){
             candidateReasons.add(VideoCapturePayload.CORRECTION_REASONS.TOO_MANY_OBJECTS_DETECTED.name());
             isCorrectionCandidate=true;
         }
+
 
         latest.setCorrectionCandidateReasonList(candidateReasons);
         return isCorrectionCandidate;
