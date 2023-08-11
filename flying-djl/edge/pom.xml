@@ -49,6 +49,17 @@
       <artifactId>quarkus-smallrye-reactive-messaging-mqtt</artifactId>
     </dependency>
 
+    <!-- drools / quarkus functionality 
+        Reference:
+            1) https://github.com/kiegroup/drools/blob/main/drools-drl-quarkus-extension/drools-drl-quarkus-quickstart-test/guide.adoc#drools-quarkus-extension
+            2) https://blog.kie.org/2023/05/integrate-excel-with-drools-on-openshift-with-knative-and-quarkus.html 
+    <dependency>
+        <groupId>org.drools</groupId>
+        <artifactId>drools-drl-quarkus</artifactId>
+        <version>8.42.0.Final</version>
+    </dependency>
+    -->
+
     <dependency>
         <groupId>io.quarkiverse.minio</groupId>
         <artifactId>quarkus-minio</artifactId>
