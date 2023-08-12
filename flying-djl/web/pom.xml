@@ -6,24 +6,21 @@
     <groupId>com.redhat.na.ssa</groupId>
     <artifactId>flying-parent</artifactId>
     <version>0.0.1</version>
-    <relativePath>../pom.xml</relativePath>
   </parent>
   <groupId>com.redhat.na.ssa</groupId>
   <artifactId>flying-web</artifactId>
   <version>0.0.2</version>
   <dependencies>
-
     <dependency>
-        <groupId>io.quarkiverse.minio</groupId>
-        <artifactId>quarkus-minio</artifactId>
-        <version>3.1.0.Final</version>
+      <groupId>io.quarkiverse.minio</groupId>
+      <artifactId>quarkus-minio</artifactId>
+      <version>3.1.0.Final</version>
     </dependency>
-   
     <dependency>
       <groupId>com.redhat.na.ssa</groupId>
       <artifactId>flying-base</artifactId>
       <version>0.0.1</version>
-    </dependency> 
+    </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-arc</artifactId>
@@ -40,26 +37,28 @@
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-resteasy-reactive</artifactId>
     </dependency>
-
     <dependency>
       <groupId>io.quarkiverse.quinoa</groupId>
       <artifactId>quarkus-quinoa</artifactId>
       <version>2.0.3</version>
     </dependency>
-
     <dependency>
-        <groupId>io.quarkus</groupId>
-        <artifactId>quarkus-container-image-docker</artifactId>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-container-image-docker</artifactId>
     </dependency>
     <dependency>
-        <groupId>io.quarkus</groupId>
-        <artifactId>quarkus-kubernetes</artifactId>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-kubernetes</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-kubernetes-client</artifactId>
     </dependency>
 
-    <!-- Auto generate a "view" enabled Kubernetes RoleBinding and corresponding Service Account -->
+    <!-- metrics    -->
     <dependency>
-        <groupId>io.quarkus</groupId>
-        <artifactId>quarkus-kubernetes-client</artifactId>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-micrometer-registry-prometheus</artifactId>
     </dependency>
 
   </dependencies>

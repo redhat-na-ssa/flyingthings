@@ -3,7 +3,6 @@ package org.acme.apps;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.Duration;
@@ -46,10 +45,7 @@ import org.opencv.videoio.Videoio;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import nu.pattern.OpenCV;
 
 import ai.djl.inference.Predictor;
@@ -96,7 +92,7 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
     @ConfigProperty(name = "org.acme.objectdetection.write.unadultered.image.to.disk", defaultValue = "True")
     boolean writeUnAdulateredImageToDisk;
 
-    @ConfigProperty(name = "org.acme.objectdetection.write.modified.image.to.disk", defaultValue = "True")
+    @ConfigProperty(name = "org.acme.objectdetection.write.modified.image.to.disk", defaultValue = "False")
     boolean writeModifiedImageToDisk;
 
     @ConfigProperty(name = "org.acme.objectdetection.prediction.change.threshold", defaultValue = "0.1")
@@ -147,7 +143,7 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
     ZooModel<Image, DetectedObjects> model;
     File rawAndBoxedImageFileDir;
     VideoCapture vCapture = null;
-    private VideoCapturePayload previousCapture;
+    VideoCapturePayload previousCapture;
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern(PATTERN_FORMAT).withZone(ZoneId.systemDefault());
     Cancellable multiCancellable = null;
     Multi<Long> vCaptureStreamer = null;
@@ -298,7 +294,7 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
             if(!isCorrectionCandidate)
                 log.infov("testModel() model {0} is good to go!", newModel.getName());
             else{
-                log.errorv("testModel() model failed due to: {0}", cPayload.getCorrectionCandidateReasonList().toString());
+                log.errorv("testModel() model failed due to: {0}", cPayload.getCorrectionReasons().toString());
                 log.errorv("{0}", detections);
                 throw new ValidationException(newModel.getName()+" did not pass tests");
             }
@@ -339,60 +335,51 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
                 boolean isCorrectionCandidate = isCorrectionCandidate(capturePayload);
                 boolean isDifferent = isDifferent(capturePayload);
                 
-                // generate an event
+                // generate an event if either correctionCandidate or if there is a state change
                 if(isCorrectionCandidate || isDifferent){
-                    ObjectMapper oMapper = super.getObjectMapper();
-                    ObjectNode rNode = oMapper.createObjectNode();
-
+                    
                     if(isCorrectionCandidate){
-                        String correctionReasons = capturePayload.getCorrectionCandidateReasonList().toString();
-                        rNode.put(AppUtils.CORRECTION_REASONS, correctionReasons);
+                        String correctionReasons = capturePayload.getCorrectionReasons().toString();
                         if(includePredictionDumpInCorrectionsMessage){
-                            JsonNode detectionsJSON = oMapper.readTree(detections.toJson());
-                            rNode.set(AppUtils.DETECTION_PROBABILITIES, detectionsJSON);
+                            capturePayload.setProbabilitiesJSON(detections.toJson());
                         }
                         log.warnv("correction candidate! reasons = {0}", correctionReasons);
                     }
-
-                    rNode.put(AppUtils.ID, capturePayload.getStartCaptureTime().getEpochSecond());
-                    rNode.put(AppUtils.DEVICE_ID, System.getenv(AppUtils.HOSTNAME));
-                    rNode.put(AppUtils.CAPTURE_COUNT, captureCount);
-                    rNode.put(AppUtils.CAPTURE_TIMESTAMP, formatter.format(startCaptureTime));
-
+                    
+                    capturePayload.setDeviceId(System.getenv(AppUtils.HOSTNAME));
+                    
                     if(writeUnAdulateredImageToDisk){
                         // Write un-boxed image to local file system
                         File uBoxedImageFile = new File(rawAndBoxedImageFileDir,  "unAdulteredImage-"+startCaptureTime.getEpochSecond() +".png");
                         BufferedImage uBoxedImage = toBufferedImage(unboxedMat);
                         ImageIO.write(uBoxedImage, "png", uBoxedImageFile);
-                        rNode.put(AppUtils.UNADULTERED_IMAGE_FILE_PATH, uBoxedImageFile.getAbsolutePath());
+                        capturePayload.setUnadulteredImageFilePath(uBoxedImageFile.getAbsolutePath());
                     }
-
-                    rNode.put(AppUtils.DETECTION_COUNT, capturePayload.getDetectionCount());
-                    rNode.put(AppUtils.BEST_OBJECT_CLASSIFICATION, capturePayload.getDetectedObjectClassification());
-                    rNode.put(AppUtils.BEST_OBJECT_PROBABILITY, capturePayload.getDetected_object_probability());
                     
                     // Annotate video capture image w/ any detected objects
                     // Consider over-riding the following function so as to include the predictions for each detected object:
                     //   https://github.com/deepjavalibrary/djl/blob/master/extensions/opencv/src/main/java/ai/djl/opencv/OpenCVImage.java#L158-L200
                     img.drawBoundingBoxes(detections);
-                    //drawBoundingBoxWithCustomizedDetections(img, detections);
-
-                     // Encode binary image to Base64 string and add to payload
+                    
+                    // Encode binary image to Base64 string and add to payload
                     Mat boxedImage = (Mat)img.getWrappedImage();
                     BufferedImage bBoxedImage = toBufferedImage(boxedImage);
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
                     ImageIO.write(bBoxedImage, "png", baos);
                     byte[] bytes = baos.toByteArray();
                     String stringEncodedImage = Base64.getEncoder().encodeToString(bytes);
-                    rNode.put(AppUtils.BASE64_DETECTED_IMAGE, stringEncodedImage);
+                    capturePayload.setBase64EncodedImage(stringEncodedImage);
                     
                     if(writeModifiedImageToDisk) {
                         File boxedImageFile = new File(rawAndBoxedImageFileDir,  "boxedImage-"+ startCaptureTime.getEpochSecond()+".png");
                         ImageIO.write(bBoxedImage, "png", boxedImageFile);
-                        rNode.put(AppUtils.DETECTED_IMAGE_FILE_PATH, boxedImageFile.getAbsolutePath());
+                        log.infov("Path to boxedImageFile = {0}", boxedImageFile.getAbsolutePath());
                     }
 
-                    bus.publish(AppUtils.LIVE_OBJECT_DETECTION, rNode.toPrettyString());
+                    ObjectMapper oMapper = super.getObjectMapper();
+                    String payloadString = oMapper.writeValueAsString(capturePayload);
+
+                    bus.publish(AppUtils.LIVE_OBJECT_DETECTION, payloadString);
 
                     this.previousCapture = capturePayload;
                 }else {
@@ -417,8 +404,8 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
         Classifications.Classification dClass = detections.best();
         List<Double> probabilities = detections.getProbabilities();
         cPayload.setProbabilities(probabilities);
-        cPayload.setDetectedObjectClassification(dClass.getClassName());
-        cPayload.setDetected_object_probability(dClass.getProbability());
+        cPayload.setBestObjectClassification(dClass.getClassName());
+        cPayload.setBestObjectProbability(dClass.getProbability());
     }
 
     /*
@@ -430,26 +417,26 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
      *         Instead, make use of a business rules engine (ie:  drools) and implement these business rules in the DSL (ie: Drools Rules Language (DRL)) of that rule engine
      *   2)  Generate grafana dashboard displaying metrics of these 'corrective candidates'
      */
-    private boolean isCorrectionCandidate(VideoCapturePayload latest){
+    public boolean isCorrectionCandidate(VideoCapturePayload vcPayload){
         boolean isCorrectionCandidate = false;
         List<String> candidateReasons = new ArrayList<String>();
 
         // Rule #1:  Is class of best detected object included in list of classes for model (typically listed in classes.txt or synset.txt) ?
-        if(!this.modelSL.modelClassesContains(latest.getDetectedObjectClassification())){
-            candidateReasons.add(VideoCapturePayload.CORRECTION_REASONS.NOT_VALID_CLASS.name());
+        if(!this.modelSL.modelClassesContains(vcPayload.getBestObjectClassification())){
+            candidateReasons.add(VideoCapturePayload.CORRECTION_REASONS_ENUM.NOT_VALID_CLASS.name());
             isCorrectionCandidate=true;
         }
 
         // Rule #2:  Does best detected object have a probability of less than a configurable probability threshold (default 80%) ?
-        if(latest.getDetected_object_probability() < this.correctionCandidateBestProbabilityThreshold) {
-            candidateReasons.add(VideoCapturePayload.CORRECTION_REASONS.BEST_OBJECT_BELOW_PROBABILITY_THRESHOLD.name());
+        if(vcPayload.getBestObjectProbability() < this.correctionCandidateBestProbabilityThreshold) {
+            candidateReasons.add(VideoCapturePayload.CORRECTION_REASONS_ENUM.BEST_OBJECT_BELOW_PROBABILITY_THRESHOLD.name());
             isCorrectionCandidate=true;
         }
 
         // Rule #3:  Is the probability of any detected object less than a configurable probability threshold (default 90%) ? 
-        for(Double probability: latest.getProbabilities()){
+        for(Double probability: vcPayload.getProbabilities()){
             if(probability < this.correctionCandidateMinimumProbabilityThreshold){
-                candidateReasons.add(VideoCapturePayload.CORRECTION_REASONS.BELOW_MINIMAL_PROBABILITY_THRESHOLD.name());
+                candidateReasons.add(VideoCapturePayload.CORRECTION_REASONS_ENUM.BELOW_MINIMAL_PROBABILITY_THRESHOLD.name());
                 isCorrectionCandidate=true;
                 break;
             }
@@ -457,19 +444,19 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
         }
 
         // Rule #4:  Are the # of detected objects less than a configurable threshold (default 1) ?
-        if(latest.getDetectionCount() < this.correctionCandidateMinimumDetections){
-            candidateReasons.add(VideoCapturePayload.CORRECTION_REASONS.TOO_LITTLE_OBJECTS_DETECTEDe.name());
+        if(vcPayload.getDetectionCount() < this.correctionCandidateMinimumDetections){
+            candidateReasons.add(VideoCapturePayload.CORRECTION_REASONS_ENUM.TOO_LITTLE_OBJECTS_DETECTEDe.name());
             isCorrectionCandidate=true;
         }
 
         // Rule #5:  Are the # of detected objects more than a configurable threshold (default 5) ?
-        if(latest.getDetectionCount() > this.correctionCandidateMaximumDetections){
-            candidateReasons.add(VideoCapturePayload.CORRECTION_REASONS.TOO_MANY_OBJECTS_DETECTED.name());
+        if(vcPayload.getDetectionCount() > this.correctionCandidateMaximumDetections){
+            candidateReasons.add(VideoCapturePayload.CORRECTION_REASONS_ENUM.TOO_MANY_OBJECTS_DETECTED.name());
             isCorrectionCandidate=true;
         }
 
 
-        latest.setCorrectionCandidateReasonList(candidateReasons);
+        vcPayload.setCorrectionReasons(candidateReasons);
         return isCorrectionCandidate;
     }
 
@@ -482,11 +469,11 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
             log.debug("capture count different: "+previousCapture.getDetectionCount()+" : "+latest.getDetectionCount());
             return true;
         }
-        if(!previousCapture.getDetectedObjectClassification().equals(latest.getDetectedObjectClassification()))
+        if(!previousCapture.getBestObjectClassification().equals(latest.getBestObjectClassification()))
             return true;
         
-        double pProb = previousCapture.getDetected_object_probability();
-        double cProb = latest.getDetected_object_probability();
+        double pProb = previousCapture.getBestObjectProbability();
+        double cProb = latest.getBestObjectProbability();
         double diff = cProb - pProb;
         double positiveDiff = Math.abs(diff);
         if(positiveDiff > this.predictionThreshold){

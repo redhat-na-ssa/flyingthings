@@ -5,9 +5,9 @@ evtSource.onmessage = (e) => {
   var rawMessage = `${e.data}`;
   
   const jsonMessage = JSON.parse(rawMessage);
-  const imageBinaryBytes = jsonMessage.base64DetectedImage;
+  const imageBinaryBytes = jsonMessage.base64EncodedImage;
   
-  var dResult = delete jsonMessage['base64DetectedImage'];
+  var dResult = delete jsonMessage['base64EncodedImage'];
   console.log("# of keys in json: "+Object.keys(jsonMessage).length);
 
   document.getElementById("payload_metadata").innerHTML = "<pre>"+JSON.stringify(jsonMessage, null, 2)+"<pre>";
