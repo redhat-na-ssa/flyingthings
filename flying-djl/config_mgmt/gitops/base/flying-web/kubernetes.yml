@@ -22,6 +22,11 @@ subjects:
 apiVersion: v1
 kind: Service
 metadata:
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/path: /q/metrics
+    prometheus.io/port: "8080"
+    prometheus.io/scheme: http
   labels:
     app.kubernetes.io/name: flying-web
     app.kubernetes.io/managed-by: quarkus
@@ -39,6 +44,11 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/path: /q/metrics
+    prometheus.io/port: "8080"
+    prometheus.io/scheme: http
   labels:
     app.kubernetes.io/managed-by: quarkus
     app.kubernetes.io/name: flying-web
@@ -50,6 +60,11 @@ spec:
       app.kubernetes.io/name: flying-web
   template:
     metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: /q/metrics
+        prometheus.io/port: "8080"
+        prometheus.io/scheme: http
       labels:
         app.kubernetes.io/managed-by: quarkus
         app.kubernetes.io/name: flying-web
@@ -62,7 +77,7 @@ spec:
                   fieldPath: metadata.namespace
             - name: JAVA_OPTIONS
               value: -Dvertx.metrics.options.enabled=true -Dvertx.metrics.options.registryName=prometheus
-          image: quay.io/redhat_naps_da/flying-web:0.0.2
+          image: quay.io/redhat_naps_da/flying-web:0.0.3
           imagePullPolicy: Always
           name: flying-web
           ports:
