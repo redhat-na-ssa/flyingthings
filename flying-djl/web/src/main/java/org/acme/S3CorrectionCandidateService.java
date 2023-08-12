@@ -102,10 +102,10 @@ public class S3CorrectionCandidateService {
                     String[] pair = pairs.split(":");
                     tags.put(pair[0], pair[1]);
                 }
-                log.infov("uploading object to S3 bucket {0} with following # of tags: {1}", correctiveCandidateBucketName, tags.size());
+                log.infov("uploading {0} to S3 bucket {1} with # of tags: {2}", objectName, correctiveCandidateBucketName, tags.size());
                 pOArgs = (PutObjectArgs) bObj.tags(tags).build();
             } else {
-                log.infov("uploading object to S3 bucket {0} with zero tags", correctiveCandidateBucketName);
+                log.infov("uploading {0} object to S3 bucket {1} with zero tags", objectName, correctiveCandidateBucketName);
                 pOArgs = (PutObjectArgs) bObj.build();
             }
 

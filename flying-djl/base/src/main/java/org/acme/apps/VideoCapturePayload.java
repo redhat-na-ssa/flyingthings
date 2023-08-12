@@ -1,5 +1,6 @@
 package org.acme.apps;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
 
@@ -10,6 +11,12 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonRawValue;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import com.fasterxml.jackson.databind.deser.std.StdKeyDeserializer;
 
 import io.quarkus.runtime.util.StringUtil;
 
@@ -44,8 +51,9 @@ public class VideoCapturePayload {
     private String payloadId;
 
     @JsonRawValue
+    @JsonDeserialize(using = ProbabilitiesJSONDeserializer.class)
     private String probabilitiesJSON;
-    
+
     private String deviceId;
     private int detectionCount;
     private String bestObjectClassification;
@@ -64,8 +72,6 @@ public class VideoCapturePayload {
 
     @JsonIgnore
     private Mat mat;
-
-    
 
     public String getProbabilitiesJSON() {
         return probabilitiesJSON;
@@ -150,4 +156,27 @@ public class VideoCapturePayload {
         this.captureCount = captureCount;
     }
     
+}
+
+
+/* Avoids throwing the following exception:
+        com.fasterxml.jackson.databind.exc.MismatchedInputException: Cannot deserialize value of type `java.lang.String` from Array value (token `JsonToken.START_ARRAY`)
+ at [Source: (String)"{"correctionReasons":["BEST_OBJECT_BELOW_PROBABILITY_THRESHOLD","BELOW_MINIMAL_PROBABILITY_THRESHOLD"],"payloadId":"x1-1691857007","probabilitiesJSON":
+        ...
+        (through reference chain: org.acme.apps.VideoCapturePayload["probabilitiesJSON"])
+ * 
+ */
+class ProbabilitiesJSONDeserializer extends StdDeserializer<String> {
+    public ProbabilitiesJSONDeserializer() {
+        this(null);
+    }
+    public ProbabilitiesJSONDeserializer(Class<?> c){
+        super(c);
+    }
+
+    @Override
+    public String deserialize(JsonParser jsonParser, DeserializationContext dContext) throws IOException, JsonProcessingException {
+        return jsonParser.getText();
+    }
+
 }
