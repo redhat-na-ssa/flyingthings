@@ -139,6 +139,40 @@ services:
     networks:
       - rht-ml
 
+  prometheus:
+    container_name: prometheus
+
+    image: docker.io/prom/prometheus:v2.37.9
+    # image: registry.redhat.io/openshift4/ose-prometheus:v4.13.0
+
+    restart: always
+    ports:
+      - "9090:9090"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    volumes:
+    - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:bind
+    extra_hosts:
+      - "quarkus-dev-host:192.168.1.7"
+    networks:
+      - rht-ml
+
+  # https://github.com/cirocosta/sample-grafana
+  grafana:
+    container_name: grafana
+    image: registry.redhat.io/openshift4/ose-grafana:v4.11.0
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+    - ./grafana/datasources/all.yaml:/etc/grafana/provisioning/datasources/all.yaml:bind
+    - ./grafana/dashboards/all.yml:/etc/grafana/provisioning/dashboards/all.yml:bind
+    networks:
+      - rht-ml
+
 networks:
   rht-ml:
     name: rht-ml
