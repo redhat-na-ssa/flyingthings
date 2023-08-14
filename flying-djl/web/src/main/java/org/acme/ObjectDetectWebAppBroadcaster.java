@@ -1,17 +1,20 @@
 package org.acme;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.quarkus.runtime.StartupEvent;
 import io.quarkus.vertx.ConsumeEvent;
 import io.smallrye.mutiny.Multi;
 import io.vertx.mutiny.core.eventbus.EventBus;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.acme.apps.VideoCapturePayload;
 import org.eclipse.microprofile.reactive.messaging.Channel;
@@ -27,7 +30,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Path("djl-object-detect-web")
 public class ObjectDetectWebAppBroadcaster {
 
-    Logger log = Logger.getLogger("ObjectDetectWeAppBroadcaster");
+    private static final String CORRECTION_REASON="correctionReason";
+    private static final String TYPE="type";
+    private static final String ALL="all";
+    Logger log = Logger.getLogger(ObjectDetectWebAppBroadcaster.class);
 
     @Inject
     S3CorrectionCandidateService s3CCService;
@@ -42,12 +48,28 @@ public class ObjectDetectWebAppBroadcaster {
     JsonFactory jFactory;
     ObjectMapper oMapper;
 
-    @PostConstruct
-    public void start() {
+    private final MeterRegistry mRegistry;
+
+    ObjectDetectWebAppBroadcaster(MeterRegistry x) {
+        this.mRegistry = x;
+    }
+
+    void start(@Observes StartupEvent event) {
         jFactory = new JsonFactory();
         s3CCService.doesBucketExist();
 
         oMapper = new ObjectMapper();
+
+        this.sseStream
+        .onSubscription().invoke(onItem -> {
+            log.infov("Just subscribed to incoming stream at {0}", AppUtils.LIVE_OBJECT_DETECTION);
+        })
+        .subscribe()
+            .with(onItem -> {
+                if(isCorrectiveCandidate(onItem)){
+                    bus.publish(AppUtils.MODEL_CORRECTIVE_CANDIDATES, onItem);
+                }
+            });
     }
 
 
@@ -58,11 +80,7 @@ public class ObjectDetectWebAppBroadcaster {
     @RestStreamElementType(MediaType.TEXT_PLAIN)
     public Multi<String> consumeSSE () {
         log.info("consumeSSE()");
-        this.sseStream.subscribe().with(onItem -> {
-            if(isCorrectiveCandidate(onItem)){
-                bus.publish(AppUtils.MODEL_CORRECTIVE_CANDIDATES, onItem);
-            }
-        });
+
         return this.sseStream;
     }
     
@@ -72,11 +90,21 @@ public class ObjectDetectWebAppBroadcaster {
         try {
             VideoCapturePayload vcPayload = oMapper.readValue(sPayload, VideoCapturePayload.class);
             s3CCService.postToBucket(sPayload, vcPayload.getPayloadId());
+
+            // Create metrics based on corrective candidates
+            // curl -X GET localhost:9080/q/metrics | grep modelCorrectiveCandidates_total
+            mRegistry.counter(AppUtils.MODEL_CORRECTIVE_CANDIDATES, TYPE, ALL).increment();
+
+
+            // curl -X GET localhost:9080/q/metrics | grep correctionReason_total
+            List<String> cArray = vcPayload.getCorrectionReasons();
+            for(String reason : cArray){
+                mRegistry.counter(CORRECTION_REASON, TYPE, reason).increment();
+            }
             
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
-
     }
 
     private boolean isCorrectiveCandidate(String message){
