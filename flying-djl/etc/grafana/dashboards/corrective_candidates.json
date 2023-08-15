@@ -55,7 +55,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 4,
+        "h": 8,
         "w": 12,
         "x": 0,
         "y": 0
@@ -97,7 +97,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 4
+        "y": 8
       },
       "id": 6,
       "title": "Model Corrective Candidates",
@@ -112,8 +112,7 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "fixedColor": "dark-red",
-            "mode": "fixed"
+            "mode": "continuous-GrYlRd"
           },
           "mappings": [],
           "thresholds": {
@@ -122,6 +121,10 @@
               {
                 "color": "transparent",
                 "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
               }
             ]
           },
@@ -130,10 +133,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 4,
+        "h": 8,
         "w": 12,
         "x": 0,
-        "y": 5
+        "y": 9
       },
       "id": 8,
       "options": {
@@ -199,7 +202,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 9
+        "y": 17
       },
       "id": 4,
       "options": {
@@ -271,7 +274,7 @@
         "h": 9,
         "w": 12,
         "x": 0,
-        "y": 17
+        "y": 25
       },
       "id": 2,
       "options": {
@@ -320,7 +323,7 @@
     "list": []
   },
   "time": {
-    "from": "now-30m",
+    "from": "now-6h",
     "to": "now"
   },
   "timepicker": {},

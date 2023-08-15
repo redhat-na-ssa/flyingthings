@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
 
+import org.acme.AppUtils;
 import org.opencv.core.Mat;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -43,7 +44,7 @@ public class VideoCapturePayload {
         BEST_OBJECT_BELOW_PROBABILITY_THRESHOLD,
         ANY_OBJECT_BELOW_PROBABILITY_THRESHOLD,
         TOO_MANY_OBJECTS_DETECTED,
-        TOO_LITTLE_OBJECTS_DETECTEDe,
+        TOO_FEW_OBJECTS_DETECTED,
         NOT_VALID_CLASS
     }
 
@@ -56,7 +57,7 @@ public class VideoCapturePayload {
 
     private String deviceId;
     private int detectionCount;
-    private String bestObjectClassification;
+    private String bestObjectClassification = AppUtils.NA;
     private double bestObjectProbability;
     private String unadulteredImageFilePath=NOT_STORED;
     private String base64EncodedImage;
