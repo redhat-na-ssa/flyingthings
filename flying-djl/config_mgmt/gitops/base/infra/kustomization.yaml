@@ -3,3 +3,5 @@ kind: Kustomization
 resources:
 - ../app-namespace
 - ../amq-broker-infra
+- ../prometheus-infra
+- ../grafana-infra

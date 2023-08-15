@@ -1,0 +1,19 @@
+
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  labels:
+    operators.coreos.com/amq-streams.openshift-operators: ""
+  name: rhods-prometheus-operator
+  namespace: user1-flying-djl
+
+spec:
+  name: rhods-prometheus-operator
+
+  # OCP 4.12 / 4.13
+  #   oc get packagemanifests rhods-prometheus-operator -n openshift-marketplace -o json | jq -r .status.channels[].name
+  channel: beta
+
+  installPlanApproval: Automatic
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace

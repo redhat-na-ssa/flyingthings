@@ -3,6 +3,7 @@
   "kind" : "ServiceAccount",
   "metadata" : {
     "labels" : {
+      "monitoring" : "prometheus",
       "app.kubernetes.io/managed-by" : "quarkus",
       "app.kubernetes.io/name" : "flying-web"
     },
@@ -35,6 +36,7 @@
     },
     "labels" : {
       "app.kubernetes.io/name" : "flying-web",
+      "monitoring" : "prometheus",
       "app.kubernetes.io/managed-by" : "quarkus"
     },
     "name" : "flying-web"
@@ -62,6 +64,7 @@
       "prometheus.io/scheme" : "http"
     },
     "labels" : {
+      "monitoring" : "prometheus",
       "app.kubernetes.io/managed-by" : "quarkus",
       "app.kubernetes.io/name" : "flying-web"
     },
@@ -83,6 +86,7 @@
           "prometheus.io/scheme" : "http"
         },
         "labels" : {
+          "monitoring" : "prometheus",
           "app.kubernetes.io/managed-by" : "quarkus",
           "app.kubernetes.io/name" : "flying-web"
         }
@@ -100,7 +104,7 @@
             "name" : "JAVA_OPTIONS",
             "value" : "-Dvertx.metrics.options.enabled=true -Dvertx.metrics.options.registryName=prometheus"
           } ],
-          "image" : "quay.io/redhat_naps_da/flying-web:0.0.3",
+          "image" : "quay.io/redhat_naps_da/flying-web:0.0.4",
           "imagePullPolicy" : "Always",
           "name" : "flying-web",
           "ports" : [ {
