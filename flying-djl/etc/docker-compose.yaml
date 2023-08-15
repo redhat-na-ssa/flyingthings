@@ -15,70 +15,6 @@ version: '3.7'
 
 services:
 
-  ftools:
-    container_name: ftools
-    image: quay.io/jbride/ftools:0.0.6
-    networks:
-      - rht-ml
-
-  zookeeper:
-    container_name: zookeeper
-    image: quay.io/strimzi/kafka:latest-kafka-3.1.2
-    command: [
-      "sh", "-c",
-      "bin/zookeeper-server-start.sh config/zookeeper.properties"
-    ]
-    ports:
-      - "2181:2181"
-    environment:
-      LOG_DIR: /tmp/logs
-    networks:
-      - rht-ml
-
-
-      # "bin/kafka-server-start.sh config/server.properties --override listeners=INSIDE://:9092,OUTSIDE://:9094 --override listener.security.protocol.map=INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT --override advertised.listeners=INSIDE://:9092,OUTSIDE://localhost:9094 --override zookeeper.connect=rht:2181 --override inter.broker.listener.name=INSIDE"
-      
-# https://github.com/pubnub/kafka-bridge/blob/master/kafka/plain/docker-compose.yaml
-#   Allows for kafka client that is external to the container network (ie: on the host) to connect to this Kafka broker and consume messages
-#   NOTE: via this configuration, kafka is available to external clients on host at: "rht:9094"
-  kafka:
-    container_name: kafka
-    image: quay.io/strimzi/kafka:latest-kafka-3.1.2
-    command: [
-      # Test using the following:
-      #   $ podman run -it --rm --entrypoint /bin/bash  quay.io/jbride/ftools:0.0.3 -c "kcat -b rht:9092 -L"
-      "sh", "-c",
-      "bin/kafka-server-start.sh config/server.properties \
-          --override zookeeper.connect=rht:2181 \
-          --override listeners=INSIDE://:9092,OUTSIDE://:9094 --override listener.security.protocol.map=INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT \
-          --override advertised.listeners=INSIDE://rht:9092,OUTSIDE://rht:9094 \
-          --override inter.broker.listener.name=INSIDE"
-    ]
-    depends_on:
-      - zookeeper
-    ports:
-      - "9092:9092"
-      - "9094:9094"
-    environment:
-      LOG_DIR: "/tmp/logs"
-    networks:
-      - rht-ml
-
-  kafdrop:
-    container_name: kafdrop
-    image: docker.io/obsidiandynamics/kafdrop:3.30.0
-    restart: always
-    ports:
-      - "9900:9000"
-    environment:
-      KAFKA_BROKERCONNECT: "rht:9092"
-      JVM_OPTS: "-Xms32M -Xmx64M"
-      SERVER_SERVLET_CONTEXTPATH: "/"
-    depends_on:
-      - kafka
-    networks:
-      - rht-ml
-
   artemis:
     container_name: artemis
     image: quay.io/artemiscloud/activemq-artemis-broker-init:artemis.2.28.0
@@ -170,6 +106,7 @@ services:
     volumes:
     - ./grafana/datasources/all.yaml:/etc/grafana/provisioning/datasources/all.yaml:bind
     - ./grafana/dashboards/all.yml:/etc/grafana/provisioning/dashboards/all.yml:bind
+    - ./grafana/dashboards/corrective_candidates.json:/var/lib/grafana/dashboards/corrective_candidates.json:bind
     networks:
       - rht-ml
 

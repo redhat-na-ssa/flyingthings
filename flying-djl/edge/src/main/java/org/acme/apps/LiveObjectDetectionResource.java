@@ -436,7 +436,7 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
         // Rule #3:  Is the probability of any detected object less than a configurable probability threshold (default 90%) ? 
         for(Double probability: vcPayload.getProbabilities()){
             if(probability < this.correctionCandidateMinimumProbabilityThreshold){
-                candidateReasons.add(VideoCapturePayload.CORRECTION_REASONS_ENUM.BELOW_MINIMAL_PROBABILITY_THRESHOLD.name());
+                candidateReasons.add(VideoCapturePayload.CORRECTION_REASONS_ENUM.ANY_OBJECT_BELOW_PROBABILITY_THRESHOLD.name());
                 isCorrectionCandidate=true;
                 break;
             }

@@ -62,6 +62,10 @@ image::docs/images/ml_locomotive_false_positive.png[]
 
 . Edge application consumes this MQTT message.  Subsequently, the edge application download that new model.  Prior to loading the updated model, the edge application has the ability to test the validity of this new model.  If the model fails one or more tests, the app will reject the model and roll-back to the previous known-working version of the model.
 
+. Metrics regarding the model corrective candidates are provided via a Grafana dashboard:
++
+image::docs/images/corrective_candidates_grafana.png[]
+
 == OpenShift
 
 === Pre-Reqs

@@ -33,6 +33,7 @@ public class ObjectDetectWebAppBroadcaster {
     private static final String CORRECTION_REASON="correctionReason";
     private static final String TYPE="type";
     private static final String ALL="all";
+    private static final String NO_CORRECTIVE_CANDIDATES = "noCorrectiveCandidates";
     Logger log = Logger.getLogger(ObjectDetectWebAppBroadcaster.class);
 
     @Inject
@@ -68,6 +69,8 @@ public class ObjectDetectWebAppBroadcaster {
             .with(onItem -> {
                 if(isCorrectiveCandidate(onItem)){
                     bus.publish(AppUtils.MODEL_CORRECTIVE_CANDIDATES, onItem);
+                }else{
+                    mRegistry.counter(NO_CORRECTIVE_CANDIDATES, TYPE, ALL).increment();
                 }
             });
     }

@@ -12,34 +12,3 @@ datasources:
    is_default: false
    version: 1
    editable: true
- - name: PostgreSQL
-   # <string, required> datasource type. Required
-   type: postgres
-   # <string, required> access mode. direct or proxy. Required
-   access: proxy
-   # <int> org id. will default to orgId 1 if not specified
-   orgId: 1
-   # <string> url
-   url: psql-scm:5432
-   # <string> database password, if used
-   password: scm
-   # <string> database user, if used
-   user: scm
-   # <string> database name, if used
-   database: scm
-   # <bool> enable/disable basic auth
-   basicAuth: false
-   # <bool> mark as default datasource. Max one per org
-   isDefault: true
-   # <map> fields that will be converted to json and stored in json_data
-   jsonData:
-      postgresVersion: "903"
-      tlsAuth: false
-      tlsAuthWithCACert: false
-      sslmode: disable
-   # <string> json object of data that will be encrypted.
-   version: 1
-   # <bool> allow users to edit datasources from the UI.
-   editable: true
-   readOnly: false
-   typeLogoUrl: public/app/plugins/datasource/postgres/img/postgresql_logo.svg
