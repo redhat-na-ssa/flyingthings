@@ -64,6 +64,32 @@ spec:
               value: minio
             - name: MINIO_ROOT_PASSWORD
               value: minio123
+          image: quay.io/jbride/mc:RELEASE.2023-07-11T23-30-44Z
+          command: ["/bin/sh"]
+          args:
+            [
+              "-c",
+              "while true; do echo echo $(date -u) 'Written by sidecar container' >> /tmp/sidecar.log; sleep 30;done",
+            ]
+          name: mc
+          resources: {}
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                - /bin/sh
+                - /opt/initialize.sh
+          volumeMounts:
+            - mountPath: /opt/initialize.sh
+              name: config
+              readOnly: true
+              subPath: initialize.sh
+
+        - env:
+            - name: MINIO_ROOT_USER
+              value: minio
+            - name: MINIO_ROOT_PASSWORD
+              value: minio123
             - name: MINIO_NOTIFY_MQTT_ENABLE_MLNOTIFY
               value: on
             - name: MINIO_NOTIFY_MQTT_BROKER_MLNOTIFY
@@ -84,12 +110,6 @@ spec:
           - -c
           args: 
           - minio server /data --console-address :9090
-          lifecycle:
-            postStart:
-              exec:
-                command:
-                - /bin/sh
-                - /opt/initialize.sh
           livenessProbe:
             failureThreshold: 3
             httpGet:
@@ -126,10 +146,6 @@ spec:
               cpu: 100m
               memory: 128Mi
           volumeMounts:
-            - mountPath: /opt/initialize.sh
-              name: config
-              readOnly: true
-              subPath: initialize.sh
             - mountPath: /data
               name: appdata
               readOnly: false
