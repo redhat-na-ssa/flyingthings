@@ -26,12 +26,21 @@ spec:
   console:
     expose: true
   acceptors:
+
+    # https://artemiscloud.io/docs/tutorials/external_mqtt_clients/
+
     - name: mqtt
       port: 1883
       protocols: mqtt
+      expose: true
+      sslEnabled: true
+      sslSecret: artemis-sni-secret
     - name: amqp
       port: 5672
       protocols: amqp
+  env:
+    - name: JAVA_ARGS_APPEND
+      value: -Djavax.net.debug=all
   adminPassword: admin
   adminUser: admin
   deploymentPlan:

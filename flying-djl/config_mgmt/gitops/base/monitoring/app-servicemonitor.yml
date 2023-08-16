@@ -9,7 +9,7 @@ spec:
   endpoints:
     - interval: 5s
       port: http
-      path: /metrics
+      path: /q/metrics
   namespaceSelector:
     matchNames:
       - user1-flying-djl

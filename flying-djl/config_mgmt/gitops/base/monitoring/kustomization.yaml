@@ -3,6 +3,7 @@ kind: Kustomization
 commonAnnotations:
   argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 resources:
+- prometheus-cr.yml
 - app-servicemonitor.yml
 - grafanadatasources.yml
 - model-dashboard.yml

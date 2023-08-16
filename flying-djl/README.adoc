@@ -806,3 +806,20 @@ $ ls -lt ~/.djl.ai/pytorch/2.0.1-20230709-cpu-precxx11-linux-aarch64/
 libarm_compute-23619548.so        libarm_compute_graph-ebe58799.so  libgomp-d22c30c5.so.1.0.0         libstdc++.so.6                    libtorch.so
 
 -----
+
+== Artemis SNI
+
+-----
+$ wget -O server-keystore.jks https://github.com/apache/activemq-artemis/raw/main/tests/security-resources/server-keystore.jks \
+    && wget -O client-ca-truststore.jks https://github.com/apache/activemq-artemis/raw/main/tests/security-resources/client-ca-truststore.jks \
+    && wget -O server-ca-keystore.p12 https://github.com/apache/activemq-artemis/raw/main/tests/security-resources/server-ca-keystore.p12 \
+    && keytool -storetype pkcs12 -keystore server-ca-keystore.p12 -storepass securepass -alias server-ca -exportcert -rfc > server-ca.crt
+
+$ kubectl create secret generic artemis-sni-secret \
+    --from-file=broker.ks=server-keystore.jks \
+    --from-file=client.ts=client-ca-truststore.jks \
+    --from-literal=keyStorePassword=securepass \
+    --from-literal=trustStorePassword=securepass
+
+$ export ARTEMIS_MQTT_URL=https://$(oc get route artemis-mqtt-0-svc-rte -n user1-flying-djl --template='{{ .spec.host }}')
+-----
