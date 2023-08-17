@@ -8,3 +8,4 @@ dependency-reduced-pom.xml
 .mvn
 .vscode
 **/*generated.*
+.artemis_certs/

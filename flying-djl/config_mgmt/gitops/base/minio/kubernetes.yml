@@ -95,7 +95,7 @@ spec:
             - name: MINIO_NOTIFY_MQTT_BROKER_MLNOTIFY
               value: tcp://artemis-mqtt-0-svc:1883
             - name: MINIO_NOTIFY_MQTT_TOPIC_MLNOTIFY
-              value: djl-model-notify
+              value: model-update-notify
             - name: MINIO_NOTIFY_MQTT_USERNAME_MLNOTIFY
               value: djl
             - name: MINIO_NOTIFY_MQTT_PASSWORD_MLNOTIFY

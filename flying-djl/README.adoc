@@ -102,6 +102,79 @@ Accessible without a RHN subscription
 
 === Deployment
 
+==== Artemis MQTT Remote Access
+
+In this demo, the MQTT acceptor of Red Hat AMQ Artemis needs to be accessed remotely (from outside the OpenShift cluster) by the 'edge' application.  This can be accomplished via either of the following mechanisms:
+
+===== LoadBalancer service
+This is the default approach.
+If MQTT client(s) OpenShift are on the same LAN, the a _LoadBalancer_ implementation such as MetalLB can be used.
+
+===== SNI enabled TLS
+
+. Reference:
+
+.. link:https://artemiscloud.io/docs/tutorials/external_mqtt_clients/[Artemis Cloud: external clients]
+.. link:https://smallrye.io/smallrye-reactive-messaging/smallrye-reactive-messaging/3.4/mqtt/mqtt.html[SmallRye Reactive Messaging: MQTT]
+
+. Review/modift configuration of the Artemis broker to be deployed in OpenShift:
+
+.. In a text editor, open the following config file in this project: `config_mgmt/gitops/base/amq-broker-app/kubernetes.yml`
+
+.. Review the following section of the config:
++
+-----
+    # https://artemiscloud.io/docs/tutorials/external_mqtt_clients/
+    - name: mqtt-sni
+      port: 1884     # de-conflict port with default mqtt address
+      protocols: mqtt
+      expose: true
+      sslEnabled: true
+      sslSecret: artemis-sni-secret
+-----
++
+If not intending to use SNI enabled TLS for remote access, comment this entire section out.
+
+. Acquire test server and client certificates:
++
+-----
+$ A_CERTS_DIR=.artemis_certs && mkdir -p $A_CERTS_DIR
+
+$ wget -O $A_CERTS_DIR/server-keystore.jks https://github.com/apache/activemq-artemis/raw/main/tests/security-resources/server-keystore.jks \
+    && wget -O $A_CERTS_DIR/client-ca-truststore.jks https://github.com/apache/activemq-artemis/raw/main/tests/security-resources/client-ca-truststore.jks
+-----
+
+
+. Create a kubernetes secret with both server and client certificates:
++
+-----
+$ kubectl create secret generic artemis-sni-secret \
+    --from-file=broker.ks=$A_CERTS_DIR/server-keystore.jks \
+    --from-file=client.ts=$A_CERTS_DIR/client-ca-truststore.jks \
+    --from-literal=keyStorePassword=securepass \
+    --from-literal=trustStorePassword=securepass
+-----
+
+. Test using _mosquitto_pub_ client:
+.. Create a X509 certificate:
++
+-----
+$ wget -O $A_CERTS_DIR/server-ca-keystore.p12 https://github.com/apache/activemq-artemis/raw/main/tests/security-resources/server-ca-keystore.p12
+$ keytool -storetype pkcs12 -keystore server-ca-keystore.p12 -storepass securepass -alias server-ca -exportcert -rfc > $A_CERTS_DIR/server-ca.crt
+$ openssl x509 -in $CERTS_DIR/server-ca.crt -text
+-----
+
+.. Invoke the remote Artemis broker using an mqtt client:
++
+-----
+$ export ARTEMIS_MQTT_HOST=$(oc get route artemis-mqtt-sni-0-svc-rte -n user1-flying-djl --template='{{ .spec.host }}')
+$ mosquitto_pub -d --insecure -t "ExpiryQueue" -m "test" -u admin -P admin  -h $ARTEMIS_MQTT_HOST -p 443 --cafile $A_CERTS_DIR/server-ca.crt
+-----
+
+
+
+==== Kustomize
+
 
 . Deployment of Red Hat AMQ Broker operator and creation of `user1-flying-djl` namespace:
 +
@@ -134,11 +207,12 @@ $ oc apply -k config_mgmt/gitops/base/apps -n user1-flying-djl
 
 === Admin Consoles
 
-Environment variables:
+. Environment variables:
 +
 ----- 
 $ export MINIO_CONSOLE__URL=https://$(oc get route minio-console -n user1-flying-djl --template='{{ .spec.host }}') \
-  && export ARTEMIS_ADMIN_URL=https://$(oc get route artemis-wconsj-0-svc-rte -n user1-flying-djl --template='{{ .spec.host }}')
+  && export ARTEMIS_ADMIN_URL=https://$(oc get route artemis-wconsj-0-svc-rte -n user1-flying-djl --template='{{ .spec.host }}') \
+  && export LIVE_OBJECT_CONSOLE_URL=https://$(oc get route flying-web -n user1-flying-djl --template='{{ .spec.host }}')/liveObject.html
 -----
 
 ==== Minio
@@ -171,7 +245,7 @@ image::docs/images/djl-object-detect-mqtt-artemis-web-admin.png[]
 .. Point your browser to the output of the following:
 +
 -----
-$ echo -en "\nhttps://$(oc get route djl-objectdetect-web -n user1-djl --template='{{ .spec.host }}')/liveObject.html\n"
+$ echo -en $LIVE_OBJECT_CONSOLE
 -----
 
 == Edge app
@@ -807,19 +881,3 @@ libarm_compute-23619548.so        libarm_compute_graph-ebe58799.so  libgomp-d22c
 
 -----
 
-== Artemis SNI
-
------
-$ wget -O server-keystore.jks https://github.com/apache/activemq-artemis/raw/main/tests/security-resources/server-keystore.jks \
-    && wget -O client-ca-truststore.jks https://github.com/apache/activemq-artemis/raw/main/tests/security-resources/client-ca-truststore.jks \
-    && wget -O server-ca-keystore.p12 https://github.com/apache/activemq-artemis/raw/main/tests/security-resources/server-ca-keystore.p12 \
-    && keytool -storetype pkcs12 -keystore server-ca-keystore.p12 -storepass securepass -alias server-ca -exportcert -rfc > server-ca.crt
-
-$ kubectl create secret generic artemis-sni-secret \
-    --from-file=broker.ks=server-keystore.jks \
-    --from-file=client.ts=client-ca-truststore.jks \
-    --from-literal=keyStorePassword=securepass \
-    --from-literal=trustStorePassword=securepass
-
-$ export ARTEMIS_MQTT_URL=https://$(oc get route artemis-mqtt-0-svc-rte -n user1-flying-djl --template='{{ .spec.host }}')
------

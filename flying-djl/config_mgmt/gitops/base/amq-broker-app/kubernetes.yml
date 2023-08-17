@@ -1,3 +1,6 @@
+# Reference:
+#   https://artemiscloud.io/
+
 ---
 apiVersion: v1
 kind: Service
@@ -26,15 +29,18 @@ spec:
   console:
     expose: true
   acceptors:
-
-    # https://artemiscloud.io/docs/tutorials/external_mqtt_clients/
-
     - name: mqtt
       port: 1883
+      protocols: mqtt
+
+    # https://artemiscloud.io/docs/tutorials/external_mqtt_clients/
+    - name: mqtt-sni
+      port: 1884     # de-conflict port with default mqtt address
       protocols: mqtt
       expose: true
       sslEnabled: true
       sslSecret: artemis-sni-secret
+
     - name: amqp
       port: 5672
       protocols: amqp
@@ -52,3 +58,27 @@ spec:
     persistenceEnabled: false
     requireLogin: false
     size: 1
+---
+apiVersion: broker.amq.io/v1beta1
+kind: ActiveMQArtemisAddress
+metadata:
+  name: live-object-detection
+spec:
+  addressName: liveObjectDetection
+
+  # MQTT is a multicast topic
+  routingType: multicast
+
+  removeFromBrokerOnDelete: true
+---
+apiVersion: broker.amq.io/v1beta1
+kind: ActiveMQArtemisAddress
+metadata:
+  name: model-update-notify
+spec:
+  addressName: model-update-notify
+
+  # MQTT is a multicast topic
+  routingType: multicast
+
+  removeFromBrokerOnDelete: true
