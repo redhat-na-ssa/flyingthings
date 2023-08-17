@@ -34,12 +34,12 @@ spec:
       protocols: mqtt
 
     # https://artemiscloud.io/docs/tutorials/external_mqtt_clients/
-    - name: mqtt-sni
+    - name: mqtt-tls
       port: 1884     # de-conflict port with default mqtt address
       protocols: mqtt
       expose: true
       sslEnabled: true
-      sslSecret: artemis-sni-secret
+      sslSecret: artemis-tls-secret
 
     - name: amqp
       port: 5672
