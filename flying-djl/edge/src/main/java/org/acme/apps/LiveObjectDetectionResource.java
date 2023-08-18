@@ -415,7 +415,6 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
      * Potential improvements:
      *   1)  Don't hard-code these business rules here in Java.
      *         Instead, make use of a business rules engine (ie:  drools) and implement these business rules in the DSL (ie: Drools Rules Language (DRL)) of that rule engine
-     *   2)  Generate grafana dashboard displaying metrics of these 'corrective candidates'
      */
     public boolean isCorrectionCandidate(VideoCapturePayload vcPayload){
         boolean isCorrectionCandidate = false;

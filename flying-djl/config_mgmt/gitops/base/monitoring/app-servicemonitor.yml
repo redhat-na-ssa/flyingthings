@@ -2,8 +2,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   labels:
-    k8s-app: prometheus
-    monitoring-key: djl-grafana
+    monitoring-key: app-services
   name: app-services
 spec:
   endpoints:

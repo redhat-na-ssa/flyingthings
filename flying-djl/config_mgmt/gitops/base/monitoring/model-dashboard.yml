@@ -38,8 +38,7 @@ spec:
       "panels": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "type": "prometheus"
           },
           "fieldConfig": {
             "defaults": {
@@ -90,8 +89,7 @@ spec:
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
+                "type": "prometheus"
               },
               "exemplar": true,
               "expr": "noCorrectiveCandidates_total{}",
@@ -116,8 +114,7 @@ spec:
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "type": "prometheus"
           },
           "description": "",
           "fieldConfig": {
@@ -168,8 +165,7 @@ spec:
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
+                "type": "prometheus"
               },
               "exemplar": true,
               "expr": "modelCorrectiveCandidates_total{}",
@@ -184,8 +180,7 @@ spec:
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "type": "prometheus"
           },
           "fieldConfig": {
             "defaults": {
@@ -232,8 +227,7 @@ spec:
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
+                "type": "prometheus"
               },
               "exemplar": true,
               "expr": "correctionReason_total{}",

@@ -26,7 +26,7 @@ rules:
   resources:
   - ingresses
   verbs: ["get", "list", "watch"]
-- nonResourceURLs: ["/metrics"]
+- nonResourceURLs: ["/q/metrics"]
   verbs: ["get"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -40,7 +40,7 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: prometheus
-  namespace: default
+  namespace: user1-flying-djl
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: Prometheus
@@ -51,7 +51,7 @@ metadata:
 spec:
 
   # https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/user-guides/getting-started.md#expose-the-prometheus-admin-api
-  enableAdminAPI: false
+  enableAdminAPI: true
   resources:
     requests:
       cpu: '250m'
@@ -59,4 +59,4 @@ spec:
   serviceAccountName: prometheus
   serviceMonitorSelector:
     matchLabels:
-      monitoring: prometheus
+      monitoring-key: app-services
