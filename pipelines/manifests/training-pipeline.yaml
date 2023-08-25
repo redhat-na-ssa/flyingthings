@@ -203,6 +203,7 @@ spec:
           values: ["N"]
       taskRef:
         name: train-model-cpu
+      timeout: "2h"
       params:
         - name: BATCH_SIZE
           value: $(params.BATCH_SIZE)
