@@ -3,7 +3,7 @@
 This workshop is designed to showcase OpenShift as a platform for developing and operationalizing AI/ML applications. It uses many tools in the Red Hat ecosystem as well as 3rd party applications and services. This particular workshop features a computer vision implementation and covers a workflow for custom training and serving for integration with other applications and services.
 
 I've created a video series explaining the workshop and a runthrough of the setup and use cases here.
-[![WorkshopSeries](docs/images/youtube-thm-sml.png)](https://www.youtube.com/watch?v=9581dLfNlLM)
+[![WorkshopSeries](docs/images/youtube-thm-sml.png)](https://www.youtube.com/playlist?list=PLWGcJxV1EWOCQWd1aRss4zUT4zgZCSQ19)
 
 
 # Workshop Components
@@ -177,7 +177,7 @@ As the job kicks off we can monitor it from the console. Here we see all the tra
 
 ![alt text](docs/images/pipeline-train.png "Training Pipeline")
 
-We see that our model was deployed to model-flying things. Let’s click on its route and launch the app.
+We see that our model was deployed to model-flying things. Let’s click on its route and launch the app.`
 
 ![alt text](docs/images/route-flying.png "Flyingthings")
 
@@ -193,7 +193,7 @@ Now, let’s review what we’ve done so far.
 - Deployed pre-annotated images to object storage for input into pipeline
 - Instantiated pipeline to build custom Yolo model where the pipeline:
     - ingested images, labels, and class files
-    - preprocessed images by resizing them to a maximum width
+    - preprocessed images by resizing them to a maximum width``
     - distributed images to “train”, “test”, and “valid” groups for Yolo training
     - trained a custom yolo model
     - exported our custom model to “onnx” format
