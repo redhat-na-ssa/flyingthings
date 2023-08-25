@@ -3,7 +3,7 @@
 This workshop is designed to showcase OpenShift as a platform for developing and operationalizing AI/ML applications. It uses many tools in the Red Hat ecosystem as well as 3rd party applications and services. This particular workshop features a computer vision implementation and covers a workflow for custom training and serving for integration with other applications and services.
 
 I've created a video series explaining the workshop and a runthrough of the setup and use cases here.
-[![WorkshopSeries](docs/images/youtube-thm-sml.png)](https://www.youtube.com/playlist?list=PLWGcJxV1EWOCQWd1aRss4zUT4zgZCSQ19)
+[![WorkshopSeries](docs/images/youtube-channel.png)](https://www.youtube.com/playlist?list=PLWGcJxV1EWOCQWd1aRss4zUT4zgZCSQ19)
 
 
 # Workshop Components
