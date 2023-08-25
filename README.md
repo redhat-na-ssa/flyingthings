@@ -2,6 +2,9 @@
 ## Computer vision demo
 This workshop is designed to showcase OpenShift as a platform for developing and operationalizing AI/ML applications. It uses many tools in the Red Hat ecosystem as well as 3rd party applications and services. This particular workshop features a computer vision implementation and covers a workflow for custom training and serving for integration with other applications and services.
 
+I've created a video series explaining the workshop and a runthrough of the setup and use cases here.
+[![WorkshopSeries](docs/images/youtube-thm-sml.png)](https://www.youtube.com/watch?v=9581dLfNlLM)
+
 
 # Workshop Components
 ![alt text](docs/images/workshopcomponents.png "Workshop Components")
@@ -49,8 +52,21 @@ We can collect all the missed images and add them to LabelStudio where they will
 ## Repeat
 We then annotate, as before, and repeat the process until we have acceptable confidence levels in our predictions.
 
+# The Pipeline
+![alt text](docs/images/workshoppipeline.png "Pipeline")
+- Fetch repo pulls our git repo code into the pipeline workspace.
+- Get Dataset pulls our zip file into the workspace and unzips it.
+- Create Classfile picks up the classes.txt file and converts it to a YAML file that can be - consumed by YOLO. This is a template which also identifies the folder structure for the - training.
+- If the image resize flag is set, the images will be resized to a maximum width. This module - can be used in the future for other image pre-processing that help improve accuracy.
+- Distribute Dataset groups the files into 3 groups. 70% go to training, 30% go to test, and - 30% go to validation. The groups are then moved to their respective directories for training. - This grouping is done randomly each run.
+- If the GPU flag is set the training requests a node with GPU and runs the actual training on - that node. If GPU is not set, the training is done with CPUs.
+- Once training is complete the resulting model is exported to onnx format for consumption by - other model serving solutions.
+- Now, all the artifacts from the training including the reports, model, class file, and - exports are written to object storage where they are tagged and propagated to appropriate - folders.
+- If the Deploy flag is set, the FastAPI app is deployed with the latest model. 
+- Finally a summary of the pipeline run is presented with parameter information.
 
-# Prerequisites
+# Getting Started
+## Prerequisites
 - An OpenShift cluster at version 4.13 or greater.
     - Single Node Openshift with at least 32GB RAM will be adequate
     - GPU Enabled Node (Optional)
@@ -65,7 +81,7 @@ We then annotate, as before, and repeat the process until we have acceptable con
     - Still camera
     - Webcam
 
-# Getting Started
+# Building the workshop
 1. Login to your cluster from your workstation.
 2. Clone the repository to your workstation. 
 ```
@@ -83,3 +99,104 @@ cd flyingthings/bootstrap
 
 This process will take some time as the images for the workshop are created. Allow 10 to 30 minutes to complete.
 
+Let’s take a look at what actually got created and deployed. 
+
+In Deployments, we see three apps. LabelStudio, Minio, and model-yolo.  Let’s start with Minio. We can use the route to connect to the Minio console. The username and password is minioadmin.  We can see that there is a bucket already created called “flyingthings”.  In this bucket the main thing to notice is the zip file called “flyingthings-yolo”.  This is the main artifact used in training our custom model. More on that in a bit.
+
+![alt text](docs/images/minio-flyingthings.png "Minio Bucket")
+
+We’ll come back to LabelStudio later, but let’s take a look at model-yolo. As part of the workshop startup, we deploy a default yolo model. This is useful as a baseline for what yolo can do out of the box and it’s a good introduction for the SWAGGER interface. After clicking on its route, simply append /docs to the url to access swagger. 
+
+![alt text](docs/images/fastapi.png "FastAPI")
+
+All of the endpoints are listed here with some basic documentation and the ability to actually send and receive data. This comes in handy as you don’t need to bother with a client that supports POST requests when you need to do simple testing. So let’s do a quick test. Expand the Detect function and click “Try It Out” to activate the panel. Now we can pick an image file to upload and have our model make a prediction. Let’s pick something good.  Perfect! Our model has predicted 20 donuts in our image. There’s also an endpoint to show the image marked up with bounding boxes and confidence scores, so let’s try that one. And, yes. We see 20 predictably delicious donuts. 
+
+![alt text](docs/images/mmmm-donuts.png "mmmm donuts")
+
+Our pipeline has the option to deploy this same model server for any custom model we create. This will come in handy for the workshop.
+
+
+# Workshop Use Case 1
+## Overview
+We’re going to make a custom model that can detect helicopters and airplanes. For this model, I’ve downloaded hundreds of images of planes and helicopters from Kaggle and already created annotations for the set. You will see it in the flyingthings-yolo.zip file in the bucket. 
+
+If we unzip the file you will find the class file and folders containing the images and the labels. 
+
+```
+flyingthings-yolo $ ls -al
+total 92
+drwxrwsrwx. 4 user 1000820000  4096 Aug 25 13:43 .
+drwxrwsrwx. 3 user 1000820000  4096 Aug 25 13:42 ..
+-rw-r--r--. 1 user 1000820000    23 Jun 11 08:00 classes.txt
+drwxr-sr-x. 2 user 1000820000 40960 Jun 11 08:00 images
+drwxr-sr-x. 2 user 1000820000 36864 Jun 11 08:00 labels
+-rw-r--r--. 1 user 1000820000   226 Jun 11 08:00 notes.json
+flyingthings-yolo $ 
+```
+
+You can see the class file contains the two classes we care about, fixed wing and rotor aircraft. The images folder has over 300 pictures of all kinds of planes and helicopters. The labels folder contains all the labels for the images. In the file is the class id and coordinates of the bounding boxes. As a general rule, the more representations of objects in the dataset the more accurate the predictions. There are exceptions, but you should always try to get the most instances of the cleanest data possible. 
+
+Alright, now it’s time to run the pipeline and get our first custom model.
+
+## Launch the pipeline
+Go to the same directory as before, flyingthings/bootstrap and edit the file 10-run-model-flyingthings-training.sh to change any parameters for this run. 
+```
+cd flyingthings/bootstrap
+vi 10-run-model-flyingthings-training.sh
+```
+All the supplied params should be fine, but we will want to change a few if we’re not running a GPU.  If your system has no available GPUs then set *GPU* to *N*. Also, since there is no GPU we’ll need to change the *BATCH_SIZE* as it is set to maximize if there are GPUs. You should set it to 2 to avoid any memory issues.  
+```
+tkn pipeline start training-x-pipeline \
+  -w name=sourcecode,volumeClaimTemplateFile=code-pvc.yaml \
+  -w name=shared-workspace,volumeClaimTemplateFile=work-pvc.yaml \
+  -p ocp-tablespace="$TABLESPACE" \
+  -p git-url=https://github.com/redhat-na-ssa/flyingthings.git \
+  -p git-revision=main \
+  -p GPU="Y" \
+  -p BASE_MODEL="yolov5s.pt" \
+  -p BATCH_SIZE="-1" \
+  -p NUM_EPOCHS="100" \
+  -p IMG_RESIZE="Y" \
+  -p MAX_WIDTH="200" \
+  -p WEIGHTS=flyingthings.pt \
+  -p DATASET_ZIP=flyingthings-yolo.zip \
+  -p MINIO_ENDPOINT=http://minio:9000 \
+  -p MINIO_ACCESSKEY=minioadmin \
+  -p MINIO_SECRETKEY=minioadmin \
+  -p MINIO_BUCKET=flyingthings \
+  -p MODEL_NAME=model-flyingthings \
+  -p MINIO_CLIENT_URL=https://dl.min.io/client/mc/release/linux-amd64 \
+  -p DEPLOY="Y" \
+  --use-param-defaults --showlog
+```
+Now execute the script on the project we’ve been using.
+```
+./10-run-model-flyingthings-training.sh <your-project>
+```
+As the job kicks off we can monitor it from the console. Here we see all the training tasks displayed for the pipeline. With GPUs it should take around 5 or 6 minutes to run. CPUs will take significantly longer. 
+
+![alt text](docs/images/pipeline-train.png "Training Pipeline")
+
+We see that our model was deployed to model-flying things. Let’s click on its route and launch the app.
+
+![alt text](docs/images/route-flying.png "Flyingthings")
+
+As before, add /docs to the URL to bring up the swagger interface.  Let’s send an image of a plane and see how well it inferences. 
+
+Success! We have successfully identified something not in the original yolo model.
+
+![alt text](docs/images/flying-wing.png "Flyingthings")
+
+## Review
+Now, let’s review what we’ve done so far.
+- Deployed pipeline and supporting tools/images to OpenShift
+- Deployed pre-annotated images to object storage for input into pipeline
+- Instantiated pipeline to build custom Yolo model where the pipeline:
+    - ingested images, labels, and class files
+    - preprocessed images by resizing them to a maximum width
+    - distributed images to “train”, “test”, and “valid” groups for Yolo training
+    - trained a custom yolo model
+    - exported our custom model to “onnx” format
+    - saved our model, export, and training artifacts to object storage
+    - Deployed our custom model to OpenShift in a containerized FastAPI application
+- Validated our custom model by interacting with API endpoints
