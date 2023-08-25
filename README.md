@@ -8,9 +8,9 @@ The `bootstrap` directory contains scripts to create all the assets for the proj
 ```
 cd bootstrap
 flyingthings-standalone
-./01-create-pipelines.sh 
-./02-build-images.sh
-./10-run-model-a-training.sh
+./01-create-pipelines.sh <your-project>
+./02-build-images.sh <your-project>
+./10-run-model-a-training.sh <your-project>
 ```
 ## Notebooks
 
