@@ -2,7 +2,6 @@ apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
   name: create-bucket
-  namespace: flyingthings-standalone
 spec:
   params:
     - name: SIMPLEVIS_DATA
@@ -22,8 +21,8 @@ spec:
       image: ubi9:latest
       script: |
         cd $(workspaces.workspace.path) \
-        && $(workspaces.source.path)/source/minio-client/01-setup-client.sh \
-        && $(workspaces.source.path)/source/minio-client/02-create-bucket.sh \
+        && $(workspaces.source.path)/source/training/minio-setup-client.sh \
+        && $(workspaces.source.path)/source/training/minio-create-bucket.sh \
         && pwd && ls -al
       env:
         - name: MINIO_ENDPOINT

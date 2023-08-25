@@ -2,7 +2,6 @@ apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
   name: training-x-pipeline
-  namespace: flyingthings-standalone
 spec:
   params: 
     - name: git-url
@@ -13,49 +12,69 @@ spec:
       default: main
       description: revision to be used from repo of the code for deployment
       type: string
+    - name: ocp-tablespace
+      description: target deployment for the project
+      type: string
     - name: BATCH_SIZE
+      description: batch size for training NOTE* for CPU use a value of 2
       default: "-1"
       type: string
     - name: NUM_EPOCHS
+      description: number of epochs for training
       default: "10"
       type: string
     - name: IMG_RESIZE
+      description: flag to resize the source images before training
       default: "N"
       type: string
-    - name: IMG_WIDTH
-      default: "200"
-      type: string
-    - name: IMG_HEIGHT
+    - name: MAX_WIDTH
+      description: maximum width for images when resizing
       default: "200"
       type: string
     - name: WEIGHTS
+      description: target wieghts file name
       default: flyingthings.pt
       type: string
     - name: BASE_MODEL
-      default: yolov8n.pt
+      description: base model used to begin training
+      default: yolov5s.pt
       type: string
     - name: MINIO_ENDPOINT
+      description: endpoint of minio api
       default: http://minio:9000
       type: string
     - name: DATASET_ZIP
+      description: name of the dataset zip file for training
       default: flyingthings-yolo.zip
       type: string
     - name: SIMPLEVIS_DATA
+      description: mount point for work files during training
       default: /opt/app-root/src/simplevis-data
       type: string
     - name: MINIO_BUCKET
+      description: bucket with training dataset and target of model artifacts
       default: flyingthings
       type: string
     - name: MINIO_ACCESSKEY
+      description: access key for minio NOTE* use secrets for production
       default: minioadmin
       type: string
     - name: MINIO_SECRETKEY
+      description: secret key for minio NOTE* use secrets for production
       default: minioadmin
       type: string
     - name: MINIO_CLIENT_URL
-      default: util02.davenet.local
+      description: location of minio client binary
+      default: https://dl.min.io/client/mc/release/linux-amd64/mc
       type: string
-    - name: DEPLOY_FILE
+    - name: DEPLOY
+      description: flag for deploying model server along with model
+      type: string
+    - name: MODEL_NAME
+      description: name used to deploy the model and model server
+      type: string
+    - name: GPU
+      description: flag for use of GPU for training
       type: string
   tasks: 
     - name: fetch-repository
@@ -105,6 +124,8 @@ spec:
       params:
         - name: SIMPLEVIS_DATA
           value: $(params.SIMPLEVIS_DATA)
+        - name: ocp-tablespace
+          value: $(params.ocp-tablespace)
       runAfter:
         - get-dataset
       workspaces:
@@ -124,10 +145,10 @@ spec:
           value: $(params.SIMPLEVIS_DATA)
         - name: IMG_RESIZE
           value: "$(params.IMG_RESIZE)"
-        - name: IMG_WIDTH
-          value: "$(params.IMG_WIDTH)"
-        - name: IMG_HEIGHT
-          value: "$(params.IMG_HEIGHT)"
+        - name: MAX_WIDTH
+          value: "$(params.MAX_WIDTH)"
+        - name: ocp-tablespace
+          value: $(params.ocp-tablespace)
       runAfter:
         - create-classfile
       workspaces:
@@ -148,9 +169,13 @@ spec:
           workspace: sourcecode
         - name: workspace
           workspace: shared-workspace
-    - name: train-model
+    - name: train-model-gpu
+      when:
+        - input: "$(params.GPU)"
+          operator: in
+          values: ["Y"]
       taskRef:
-        name: train-model
+        name: train-model-gpu
       params:
         - name: BATCH_SIZE
           value: $(params.BATCH_SIZE)
@@ -162,8 +187,58 @@ spec:
           value: $(params.BASE_MODEL)
         - name: SIMPLEVIS_DATA
           value: $(params.SIMPLEVIS_DATA)
+        - name: ocp-tablespace
+          value: $(params.ocp-tablespace)
       runAfter:
         - distribute-dataset
+      workspaces:
+        - name: source
+          workspace: sourcecode
+        - name: workspace
+          workspace: shared-workspace
+    - name: train-model-cpu
+      when:
+        - input: "$(params.GPU)"
+          operator: in
+          values: ["N"]
+      taskRef:
+        name: train-model-cpu
+      timeout: "2h"
+      params:
+        - name: BATCH_SIZE
+          value: $(params.BATCH_SIZE)
+        - name: NUM_EPOCHS
+          value: $(params.NUM_EPOCHS)
+        - name: WEIGHTS
+          value: $(params.WEIGHTS)
+        - name: BASE_MODEL
+          value: $(params.BASE_MODEL)
+        - name: SIMPLEVIS_DATA
+          value: $(params.SIMPLEVIS_DATA)
+        - name: ocp-tablespace
+          value: $(params.ocp-tablespace)
+      runAfter:
+        - distribute-dataset
+      workspaces:
+        - name: source
+          workspace: sourcecode
+        - name: workspace
+          workspace: shared-workspace
+    - name: export-model
+      taskRef:
+        name: export-model
+      params:
+        - name: WEIGHTS
+          value: $(params.WEIGHTS)
+        - name: BASE_MODEL
+          value: $(params.BASE_MODEL)
+        - name: SIMPLEVIS_DATA
+          value: $(params.SIMPLEVIS_DATA)
+        - name: ocp-tablespace
+          value: $(params.ocp-tablespace)
+      runAfter:
+        - train-model-cpu
+        - train-model-gpu
       workspaces:
         - name: source
           workspace: sourcecode
@@ -187,14 +262,20 @@ spec:
           value: $(params.MINIO_SECRETKEY)
         - name: MINIO_CLIENT_URL
           value: $(params.MINIO_CLIENT_URL)
+        - name: ocp-tablespace
+          value: $(params.ocp-tablespace)
       runAfter:
-        - train-model
+        - export-model
       workspaces:
         - name: source
           workspace: sourcecode
         - name: workspace
           workspace: shared-workspace
     - name: deploy-model-x
+      when:
+        - input: "$(params.DEPLOY)"
+          operator: in
+          values: ["Y"]
       taskSpec:
         metadata:
           annotations:
@@ -248,9 +329,103 @@ spec:
       runAfter:
         - push-results
       params:
+      - name: ocp-tablespace
+        value: $(params.ocp-tablespace)
+      - name: MINIO_ENDPOINT
+        value: $(params.MINIO_ENDPOINT)
+      - name: MINIO_BUCKET
+        value: $(params.MINIO_BUCKET)
+      - name: MINIO_ACCESSKEY
+        value: $(params.MINIO_ACCESSKEY)
+      - name: MINIO_SECRETKEY
+        value: $(params.MINIO_SECRETKEY)
+      - name: MODEL_NAME
+        value: $(params.MODEL_NAME)
       - name: SCRIPT
         value: |
-          oc apply -f $(workspaces.source.path)/source/model/$(params.DEPLOY_FILE)
+          oc new-app image-registry.openshift-image-registry.svc:5000/$(params.ocp-tablespace)/custom-model:latest \
+            --name=$(params.MODEL_NAME) \
+            --env=WEIGHTS=model_custom.pt \
+            --env=SIMPLEVIS_DATA=/opt/app-root/src/simplevis-data \
+            --env=MINIO_ENDPOINT=$(params.MINIO_ENDPOINT) \
+            --env=MINIO_BUCKET=$(params.MINIO_BUCKET) \
+            --env=MINIO_ACCESSKEY=$(params.MINIO_ACCESSKEY) \
+            --env=MINIO_SECRETKEY=$(params.MINIO_SECRETKEY) \
+          && oc set volume deployment/$(params.MODEL_NAME) \
+            --add \
+            --name=simplevis-data-volume \
+            --type=emptyDir \
+            --mount-path=/opt/app-root/src/simplevis-data \
+          && oc apply -f - <<EOF
+          apiVersion: route.openshift.io/v1
+          kind: Route
+          metadata:
+            name: $(params.MODEL_NAME)
+            labels:
+              app: $(params.MODEL_NAME)
+              app.kubernetes.io/component: $(params.MODEL_NAME)
+              app.kubernetes.io/instance: $(params.MODEL_NAME)
+          annotations:
+            openshift.io/host.generated: "true"
+          spec:
+            to:
+              kind: Service
+              name: $(params.MODEL_NAME)
+              weight: 100
+            port:
+              targetPort: 8000-tcp
+            tls:
+              termination: edge
+              insecureEdgeTerminationPolicy: Allow
+          EOF
+  finally:
+    - name: summary
+      taskRef:
+        name: training-summary
+      params:
+        - name: git-url
+          value: $(params.git-url)
+        - name: git-revision
+          value: $(params.git-revision)
+        - name: ocp-tablespace
+          value: $(params.ocp-tablespace)
+        - name: BATCH_SIZE
+          value: $(params.BATCH_SIZE)
+        - name: NUM_EPOCHS
+          value: $(params.NUM_EPOCHS)
+        - name: IMG_RESIZE
+          value: $(params.IMG_RESIZE)
+        - name: MAX_WIDTH
+          value: $(params.MAX_WIDTH)
+        - name: WEIGHTS
+          value: $(params.WEIGHTS)
+        - name: BASE_MODEL
+          value: $(params.BASE_MODEL)
+        - name: MINIO_ENDPOINT
+          value: $(params.MINIO_ENDPOINT)
+        - name: DATASET_ZIP
+          value: $(params.DATASET_ZIP)
+        - name: SIMPLEVIS_DATA
+          value: $(params.SIMPLEVIS_DATA)
+        - name: MINIO_BUCKET
+          value: $(params.MINIO_BUCKET)
+        - name: MINIO_ACCESSKEY
+          value: $(params.MINIO_ACCESSKEY)
+        - name: MINIO_SECRETKEY
+          value: $(params.MINIO_SECRETKEY)
+        - name: MINIO_CLIENT_URL
+          value: $(params.MINIO_CLIENT_URL)
+        - name: DEPLOY
+          value: $(params.DEPLOY)
+        - name: MODEL_NAME
+          value: $(params.MODEL_NAME)
+        - name: GPU
+          value: $(params.GPU)
+      workspaces:
+        - name: source
+          workspace: sourcecode
+        - name: workspace
+          workspace: shared-workspace
   workspaces:
     - name: shared-workspace
     - name: sourcecode

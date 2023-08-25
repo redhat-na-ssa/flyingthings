@@ -1,21 +1,24 @@
 apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
-  name: create-classfile
-  namespace: flyingthings-standalone
+  name: image-resize
 spec:
   params:
     - name: SIMPLEVIS_DATA
       type: string
+    - name: MAX_WIDTH
+      type: string
+    - name: ocp-tablespace
+      type: string
   steps:
-    - name: distribute-data
-      image: image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/base-ubi9:latest
+    - name: image-resize
+      image: image-registry.openshift-image-registry.svc:5000/$(params.ocp-tablespace)/base-ubi9:latest
       script: |
-        cp $(workspaces.source.path)/source/training/classes.yaml.j2 $(params.SIMPLEVIS_DATA)/workspace/datasets \
+        set -x \
         && cd $(params.SIMPLEVIS_DATA)/workspace/datasets \
-        && $(workspaces.source.path)/source/training/01-create-classfile.py \
-        && cat classes.yaml \
-        && mv classes.yaml $(params.SIMPLEVIS_DATA)/workspace
+        && mv images images_original \
+        && mkdir images \
+        && $(workspaces.source.path)/source/training/100-image-resize.py images_original images $(params.MAX_WIDTH)
       env:
         - name: SIMPLEVIS_DATA
           value: $(params.SIMPLEVIS_DATA)
