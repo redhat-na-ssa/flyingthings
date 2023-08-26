@@ -18,7 +18,7 @@ tkn pipeline start flyingthings-images-pipeline \
   -w name=source,volumeClaimTemplateFile=code-pvc.yaml \
   -w name=shared-workspace,volumeClaimTemplateFile=work-pvc.yaml \
   -p git-url="https://github.com/redhat-na-ssa/flyingthings.git" \
-  -p git-revision="main" \
+  -p git-revision="develop" \
   -p YOLO_IMAGE="image-registry.openshift-image-registry.svc:5000/$TABLESPACE/yolo:latest" \
   -p UBI_IMAGE="image-registry.openshift-image-registry.svc:5000/$TABLESPACE/base-ubi9:latest" \
   -p MINIMAL_IMAGE="image-registry.openshift-image-registry.svc:5000/$TABLESPACE/minimal-notebook:latest" \
