@@ -18,7 +18,7 @@ tkn pipeline start training-x-pipeline \
   -w name=sourcecode,volumeClaimTemplateFile=code-pvc.yaml \
   -w name=shared-workspace,volumeClaimTemplateFile=work-pvc.yaml \
   -p ocp-tablespace="$TABLESPACE" \
-  -p git-url=https://github.com/redhat-na-ssa/flyingthings.git \
+  -p git-url=https://github.com/davwhite/flyingthings.git \
   -p git-revision=main \
   -p GPU="Y" \
   -p BASE_MODEL="yolov5s.pt" \
