@@ -12,12 +12,13 @@ oc project $1
 
 # Execute your code here using the TABLESPACE variable
 # Hosted Copy  -p MINIO_CLIENT_URL="https://dl.min.io/client/mc/release/linux-amd64" \
-# Local Copy  -p MINIO_CLIENT_URL="htt://util02.davenet.local" \
+# Local Copy  -p MINIO_CLIENT_URL="http://util02.davenet.local" \
+# -p git-url="https://github.com/redhat-na-ssa/flyingthings.git" \
 echo "Deploying project to $TABLESPACE"
 tkn pipeline start flyingthings-images-pipeline \
   -w name=source,volumeClaimTemplateFile=code-pvc.yaml \
   -w name=shared-workspace,volumeClaimTemplateFile=work-pvc.yaml \
-  -p git-url="https://github.com/redhat-na-ssa/flyingthings.git" \
+  -p git-url="https://github.com/davwhite/flyingthings.git" \
   -p git-revision="develop" \
   -p YOLO_IMAGE="image-registry.openshift-image-registry.svc:5000/$TABLESPACE/yolo:latest" \
   -p UBI_IMAGE="image-registry.openshift-image-registry.svc:5000/$TABLESPACE/base-ubi9:latest" \
@@ -32,7 +33,7 @@ tkn pipeline start flyingthings-images-pipeline \
   -p PRETRAINED_BUCKET="yolo" \
   -p MINIO_ACCESSKEY="minioadmin" \
   -p MINIO_SECRETKEY="minioadmin" \
-  -p MINIO_CLIENT_URL="https://dl.min.io/client/mc/release/linux-amd64" \
+  -p MINIO_CLIENT_URL="http://util02.davenet.local" \
   -p ocp-tablespace="$TABLESPACE" \
   -p DEPLOY_LABELSTUDIO="Y" \
   --use-param-defaults --showlog
