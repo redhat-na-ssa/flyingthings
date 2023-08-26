@@ -8,6 +8,8 @@ fi
 # Assign the first argument to the TABLESPACE variable
 TABLESPACE=$1
 
+oc project $1
+
 # Execute your code here using the TABLESPACE variable
 # NOTE: if not hosting the minio client binary ommit MINIO_CLIENT_URL to use the hosted file
 # Official minio client https://dl.min.io/client/mc/release/linux-amd64
