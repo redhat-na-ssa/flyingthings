@@ -1,0 +1,31 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: image-resize
+spec:
+  params:
+    - name: SIMPLEVIS_DATA
+      type: string
+    - name: MAX_WIDTH
+      type: string
+    - name: ocp-tablespace
+      type: string
+  steps:
+    - name: image-resize
+      image: image-registry.openshift-image-registry.svc:5000/$(params.ocp-tablespace)/base-ubi9:latest
+      script: |
+        set -x \
+        && cd $(params.SIMPLEVIS_DATA)/workspace/datasets \
+        && mv images images_original \
+        && mkdir images \
+        && $(workspaces.source.path)/source/training/100-image-resize.py images_original images $(params.MAX_WIDTH)
+      env:
+        - name: SIMPLEVIS_DATA
+          value: $(params.SIMPLEVIS_DATA)
+        - name: BASEDIR
+          value: $(workspaces.source.path)/source/training
+  workspaces:
+    - name: workspace
+      mountPath: /opt/app-root/src/simplevis-data/workspace
+    - name: source
+      mountPath: /source

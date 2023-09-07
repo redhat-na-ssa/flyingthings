@@ -1,0 +1,54 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: upload-artifacts
+spec:
+  params:
+    - name: SIMPLEVIS_DATA
+      type: string
+    - name: MINIO_ENDPOINT
+      type: string
+    - name: MINIO_BUCKET
+      type: string
+    - name: PRETRAINED_BUCKET
+      type: string
+    - name: MINIO_ACCESSKEY
+      type: string
+    - name: MINIO_SECRETKEY
+      type: string
+    - name: MINIO_CLIENT_URL
+      type: string
+  steps:
+    - name: upload-artifacts
+      image: ubi9:latest
+      # script: |
+      #   $(workspaces.source.path)/source/minio-client/03-copy-artifacts.sh
+      script: |
+        echo "SOURCE_DIR: $SOURCE_DIR" \
+        && ls -al $(workspaces.source.path)/source \
+        && cd $(params.SIMPLEVIS_DATA)/workspace \
+        && $(workspaces.source.path)/source/training/minio-copy-artifacts.sh
+      env:
+        - name: MINIO_ENDPOINT
+          value: $(params.MINIO_ENDPOINT)
+        - name: SIMPLEVIS_DATA
+          value: $(params.SIMPLEVIS_DATA)
+        - name: BASEDIR
+          value: $(workspaces.source.path)/source/training
+        - name: SOURCE_DIR
+          value: $(workspaces.source.path)
+        - name: MINIO_BUCKET
+          value: $(params.MINIO_BUCKET)
+        - name: PRETRAINED_BUCKET
+          value: $(params.PRETRAINED_BUCKET)
+        - name: MINIO_ACCESSKEY
+          value: $(params.MINIO_ACCESSKEY)
+        - name: MINIO_SECRETKEY
+          value: $(params.MINIO_SECRETKEY)
+        - name: MINIO_CLIENT_URL
+          value: $(params.MINIO_CLIENT_URL)
+  workspaces:
+    - name: workspace
+      mountPath: /opt/app-root/src/simplevis-data/workspace
+    - name: source
+      mountPath: /source

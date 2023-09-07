@@ -1,0 +1,10 @@
+target
+.settings/
+**/*.class
+.classpath
+.settings
+.project
+dependency-reduced-pom.xml
+.mvn
+.vscode
+**/*generated.*

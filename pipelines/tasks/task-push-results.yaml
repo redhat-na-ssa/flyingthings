@@ -1,0 +1,49 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: push-results
+spec:
+  params:
+    - name: WEIGHTS
+      type: string
+    - name: MINIO_ENDPOINT
+      type: string
+    - name: SIMPLEVIS_DATA
+      type: string
+    - name: MINIO_BUCKET
+      type: string
+    - name: MINIO_ACCESSKEY
+      type: string
+    - name: MINIO_SECRETKEY
+      type: string
+    - name: MINIO_CLIENT_URL
+      type: string
+    - name: ocp-tablespace
+      type: string
+  steps:
+    - name: push-results
+      image: image-registry.openshift-image-registry.svc:5000/$(params.ocp-tablespace)/base-ubi9:latest
+      script: |
+        $(workspaces.source.path)/source/training/minio-push-results.sh
+      env:
+        - name: WEIGHTS
+          value: $(params.WEIGHTS)
+        - name: MINIO_ENDPOINT
+          value: $(params.MINIO_ENDPOINT)
+        - name: SIMPLEVIS_DATA
+          value: $(params.SIMPLEVIS_DATA)
+        - name: BASEDIR
+          value: $(workspaces.source.path)/source/training
+        - name: MINIO_BUCKET
+          value: $(params.MINIO_BUCKET)
+        - name: MINIO_ACCESSKEY
+          value: $(params.MINIO_ACCESSKEY)
+        - name: MINIO_SECRETKEY
+          value: $(params.MINIO_SECRETKEY)
+        - name: MINIO_CLIENT_URL
+          value: $(params.MINIO_CLIENT_URL)
+  workspaces:
+    - name: workspace
+      mountPath: /opt/app-root/src/simplevis-data/workspace
+    - name: source
+      mountPath: /source

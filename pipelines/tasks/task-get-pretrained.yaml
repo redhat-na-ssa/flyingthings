@@ -1,0 +1,55 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: get-pretrained
+spec:
+  params:
+    - name: WEIGHTS
+      type: string
+    - name: BASE_MODEL
+      type: string
+    - name: SIMPLEVIS_DATA
+      type: string
+    - name: MINIO_ENDPOINT
+      type: string
+    - name: PRETRAINED_BUCKET
+      type: string
+    - name: MINIO_ACCESSKEY
+      type: string
+    - name: MINIO_SECRETKEY
+      type: string
+    - name: MINIO_CLIENT_URL
+      type: string
+    - name: ocp-tablespace
+      type: string
+  steps:
+    - name: get-pretrained-model
+      image: image-registry.openshift-image-registry.svc:5000/$(params.ocp-tablespace)/yolo:latest
+      script: |
+        set -x \
+        && cd $(params.SIMPLEVIS_DATA)/workspace \
+        && $(workspaces.source.path)/source/training/minio-setup-client.sh \
+        && $(workspaces.source.path)/source/training/00-get-yolo-model.sh \
+        && $(workspaces.source.path)/source/training/00-push-yolo-model.sh
+      env:
+        - name: MINIO_ENDPOINT
+          value: $(params.MINIO_ENDPOINT)
+        - name: SIMPLEVIS_DATA
+          value: $(params.SIMPLEVIS_DATA)
+        - name: BASEDIR
+          value: $(workspaces.source.path)/source/training
+        - name: BASE_MODEL
+          value: $(params.BASE_MODEL)
+        - name: PRETRAINED_BUCKET
+          value: $(params.PRETRAINED_BUCKET)
+        - name: MINIO_ACCESSKEY
+          value: $(params.MINIO_ACCESSKEY)
+        - name: MINIO_SECRETKEY
+          value: $(params.MINIO_SECRETKEY)
+        - name: MINIO_CLIENT_URL
+          value: $(params.MINIO_CLIENT_URL)
+  workspaces:
+    - name: workspace
+      mountPath: /opt/app-root/src/simplevis-data/workspace
+    - name: source
+      mountPath: /source
