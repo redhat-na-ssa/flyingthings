@@ -160,14 +160,20 @@ $ kubectl create secret generic artemis-tls-secret \
     --from-literal=trustStorePassword=securepass
 -----
 
-. Test using _mosquitto_pub_ client:
-.. Create a X509 certificate:
+. X509 certificate:
+
+.. Create certificate using keytool:
 +
 -----
 $ wget -O $A_CERTS_DIR/server-ca-keystore.p12 https://github.com/apache/activemq-artemis/raw/main/tests/security-resources/server-ca-keystore.p12
 $ keytool -storetype pkcs12 -keystore \
     $A_CERTS_DIR/server-ca-keystore.p12 \
     -storepass securepass -alias server-ca -exportcert -rfc > $A_CERTS_DIR/server-ca.crt
+-----
+
+.. Inspect certificate:
++
+-----
 $ openssl x509 -in $A_CERTS_DIR/server-ca.crt -text
 -----
 
