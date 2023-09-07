@@ -3,7 +3,7 @@ metadata:
   attributes:
     metadata-name-field: generateName
     metadata-name-original-value: flyingthings
-  name: flyingthings
+  name: flyingthings-djw
 attributes:
   che-theia.eclipse.org/sidecar-policy: mergeImage
   controller.devfile.io/devworkspace-config:
@@ -14,14 +14,14 @@ attributes:
   dw.metadata.annotations:
     che.eclipse.org/devfile-source: |
       scm:
-        repo: github.com/redhat-na-ssa/flyingthings.git
+        repo: github.com/davwhite/flyingthings.git
         fileName: devfile.yaml
       factory:
-        params: url=https://github.com/redhat-na-ssa/flyingthings.git
+        params: url=https://github.com/davwhite/flyingthings.git
 projects:
   - git:
       remotes:
-        origin: https://github.com/redhat-na-ssa/flyingthings.git
+        origin: https://github.com/davwhite/flyingthings.git
     name: flyingthings
 components:
   - attributes:
@@ -99,6 +99,6 @@ components:
           value: OpenShift console
         - name: OPENVSX_REGISTRY_URL
           value: ''
-      image: quay.io/dawhite20910/devspace-tkn:latest
+      image: quay.io/dawhite20910/devspace-tkn:0.0
       sourceMapping: /projects
     name: my-custom
