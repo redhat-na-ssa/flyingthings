@@ -106,6 +106,9 @@ spec:
     - name: MINIO_BUCKET
       default: "flyingthings"
       type: string
+    - name: PRETRAINED_BUCKET
+      default: "yolo"
+      type: string
     - name: MINIO_ACCESSKEY
       default: "minioadmin"
       type: string
@@ -286,6 +289,8 @@ spec:
           value: $(params.MINIO_ENDPOINT)
         - name: MINIO_BUCKET
           value: $(params.MINIO_BUCKET)
+        - name: PRETRAINED_BUCKET
+          value: $(params.PRETRAINED_BUCKET)
         - name: MINIO_ACCESSKEY
           value: $(params.MINIO_ACCESSKEY)
         - name: MINIO_SECRETKEY
@@ -311,8 +316,8 @@ spec:
           value: "$(params.SIMPLEVIS_DATA)"
         - name: MINIO_ENDPOINT
           value: $(params.MINIO_ENDPOINT)
-        - name: MINIO_BUCKET
-          value: $(params.MINIO_BUCKET)
+        - name: PRETRAINED_BUCKET
+          value: $(params.PRETRAINED_BUCKET)
         - name: MINIO_ACCESSKEY
           value: $(params.MINIO_ACCESSKEY)
         - name: MINIO_SECRETKEY
@@ -419,8 +424,8 @@ spec:
         value: $(params.ocp-tablespace)
       - name: MINIO_ENDPOINT
         value: $(params.MINIO_ENDPOINT)
-      - name: MINIO_BUCKET
-        value: $(params.MINIO_BUCKET)
+      - name: PRETRAINED_BUCKET
+        value: $(params.PRETRAINED_BUCKET)
       - name: MINIO_ACCESSKEY
         value: $(params.MINIO_ACCESSKEY)
       - name: MINIO_SECRETKEY
@@ -437,7 +442,7 @@ spec:
             --env=SIMPLEVIS_DATA=/opt/app-root/src/simplevis-data \
             --env=MINIO_ENDPOINT=$(params.MINIO_ENDPOINT) \
             --env=MINIO_CLIENT_URL=$(params.MINIO_CLIENT_URL) \
-            --env=MINIO_BUCKET=$(params.MINIO_BUCKET) \
+            --env=MINIO_BUCKET=$(params.PRETRAINED_BUCKET) \
             --env=MINIO_ACCESSKEY=$(params.MINIO_ACCESSKEY) \
             --env=MINIO_SECRETKEY=$(params.MINIO_SECRETKEY) \
             --env=BASE_MODEL=$(params.BASE_MODEL) \

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ $# -eq 0 ]; then
-    echo "Warning: No tablespace provided. Please provide a target TABLESPACE name."
+    echo "Warning: No project provided. Please provide a target project name."
     exit 1
 fi
 
@@ -10,8 +10,8 @@ TABLESPACE=$1
 
 oc new-project $TABLESPACE
 
-oc apply -f ../pipelines/tasks
-oc apply -f ../pipelines/manifests
+oc create -f ../pipelines/tasks
+oc create -f ../pipelines/manifests
 
 
 # Exit the script gracefully

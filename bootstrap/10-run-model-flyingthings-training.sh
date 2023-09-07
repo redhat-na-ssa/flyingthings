@@ -8,6 +8,8 @@ fi
 # Assign the first argument to the TABLESPACE variable
 TABLESPACE=$1
 
+oc project $1
+
 # Execute your code here using the TABLESPACE variable
 # NOTE: if not hosting the minio client binary ommit MINIO_CLIENT_URL to use the hosted file
 # Official minio client https://dl.min.io/client/mc/release/linux-amd64
@@ -16,7 +18,7 @@ tkn pipeline start training-x-pipeline \
   -w name=sourcecode,volumeClaimTemplateFile=code-pvc.yaml \
   -w name=shared-workspace,volumeClaimTemplateFile=work-pvc.yaml \
   -p ocp-tablespace="$TABLESPACE" \
-  -p git-url=https://github.com/redhat-na-ssa/flyingthings.git \
+  -p git-url=https://github.com/davwhite/flyingthings.git \
   -p git-revision=main \
   -p GPU="Y" \
   -p BASE_MODEL="yolov5s.pt" \
