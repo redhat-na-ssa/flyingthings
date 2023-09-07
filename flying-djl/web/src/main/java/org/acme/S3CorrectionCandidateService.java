@@ -40,8 +40,11 @@ public class S3CorrectionCandidateService {
     @MinioQualifier("rht")
     MinioClient mClient;
 
-    @ConfigProperty(name = "com.rht.na.gtm.s3.correction.candidate.bucket.name", defaultValue = AppUtils.MODELS_CORRECTIVE_CANDIDATES)
-    String correctiveCandidateBucketName;
+    @ConfigProperty(name = "com.rht.na.gtm.s3.bucket.name")
+    String bucketName;
+
+    @ConfigProperty(name = "com.rht.na.gtm.s3.correction.candidate.subfolder.name", defaultValue = AppUtils.MODELS_CORRECTIVE_CANDIDATES)
+    String correctiveCandidateSubFolderName;
 
     @ConfigProperty(name = "com.rht.na.gtm.s3.putWithTags", defaultValue="True")
     private boolean putWithTags;
@@ -59,11 +62,11 @@ public class S3CorrectionCandidateService {
         
         
         try {
-            bucketExists = mClient.bucketExists(BucketExistsArgs.builder().bucket(correctiveCandidateBucketName).build());
+            bucketExists = mClient.bucketExists(BucketExistsArgs.builder().bucket(bucketName).build());
             if(!bucketExists) {
-                throw new RuntimeException("Following bucket must already be created in: "+correctiveCandidateBucketName);
+                throw new RuntimeException("Following bucket must already be created in: "+bucketName);
             }else {
-                log.infov("S3 Bucket already exists: {0}", correctiveCandidateBucketName);
+                log.infov("S3 Bucket already exists: {0}", bucketName);
             }
         } catch (InvalidKeyException | ErrorResponseException | InsufficientDataException | InternalException
                 | InvalidResponseException | NoSuchAlgorithmException | ServerException | XmlParserException
@@ -90,7 +93,7 @@ public class S3CorrectionCandidateService {
             Map<String, String> userMetadata = new HashMap<>();
             iStream = new ByteArrayInputStream(body.getBytes());
 
-            Builder bObj = PutObjectArgs.builder().bucket(correctiveCandidateBucketName).object(objectName).stream(iStream, body.getBytes().length, -1)
+            Builder bObj = PutObjectArgs.builder().bucket(bucketName).object(correctiveCandidateSubFolderName+"/"+objectName).stream(iStream, body.getBytes().length, -1)
             .headers(headers)
             .userMetadata(userMetadata);
 
@@ -102,10 +105,10 @@ public class S3CorrectionCandidateService {
                     String[] pair = pairs.split(":");
                     tags.put(pair[0], pair[1]);
                 }
-                log.infov("uploading {0} to S3 bucket {1} with # of tags: {2}", objectName, correctiveCandidateBucketName, tags.size());
+                log.infov("uploading {0} to S3 bucket {1} with # of tags: {2}", objectName, correctiveCandidateSubFolderName, tags.size());
                 pOArgs = (PutObjectArgs) bObj.tags(tags).build();
             } else {
-                log.infov("uploading {0} object to S3 bucket {1} with zero tags", objectName, correctiveCandidateBucketName);
+                log.infov("uploading {0} object to S3 bucket {1} with zero tags", objectName, correctiveCandidateSubFolderName);
                 pOArgs = (PutObjectArgs) bObj.build();
             }
 

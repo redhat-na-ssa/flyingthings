@@ -70,15 +70,18 @@ public class S3ModelLifecycle {
 
     }
 
-    public boolean pullAndSaveModelZip(String modelName){
+    public boolean pullAndSaveModelZip(String fullModelPathAndName){
         FileInputStream fis = null;
         File targetModelZipFile = null;
+        String modelName = fullModelPathAndName;
+        if(fullModelPathAndName.contains("/")){
+          modelName=fullModelPathAndName.substring(fullModelPathAndName.indexOf("/"));
+        }
         try {
             targetModelZipFile = new File(this.modelZipPath, modelName);
 
-            // Get input stream to have content of 'my-objectname' from 'my-bucketname'
             InputStream stream =
-                mClient.getObject(GetObjectArgs.builder().bucket(bucketName).object(modelName).build());
+                mClient.getObject(GetObjectArgs.builder().bucket(bucketName).object(fullModelPathAndName).build());
             FileUtils.copyInputStreamToFile(stream, targetModelZipFile);
 
         } catch (IOException | InvalidKeyException | ErrorResponseException | InsufficientDataException | InternalException | InvalidResponseException | NoSuchAlgorithmException | ServerException | XmlParserException | IllegalArgumentException e) {

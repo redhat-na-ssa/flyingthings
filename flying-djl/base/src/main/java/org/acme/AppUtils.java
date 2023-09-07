@@ -18,6 +18,6 @@ public class AppUtils {
     public static final String S3_OBJECT_CREATED = "s3:ObjectCreated:Put";
     public static final String S3_OBJECT_DELETED = "s3:ObjectRemoved:Delete";
     public static final String SYNSET_FILE_NAME = "synsetFileName";
-    public static final String MODELS_CORRECTIVE_CANDIDATES = "models-correctivecandidates";
+    public static final String MODELS_CORRECTIVE_CANDIDATES = "correctivecandidates";
     
 }

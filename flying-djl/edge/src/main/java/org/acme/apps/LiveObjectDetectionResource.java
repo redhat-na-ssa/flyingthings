@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -581,7 +583,7 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
     }
 
      @Incoming(AppUtils.MODEL_NOTIFY)
-     public void processModelStateChangeNotification(byte[] nMessageBytes) throws JsonMappingException, JsonProcessingException{
+     public void processModelStateChangeNotification(byte[] nMessageBytes) throws JsonMappingException, JsonProcessingException, UnsupportedEncodingException{
         String nMessage = new String(nMessageBytes);
         log.debugv("modelStateChangeNotification =  {0}", nMessage);
 
@@ -593,7 +595,7 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
 
             this.stopPrediction();
             org.acme.apps.s3.Record record = modelN.records.get(0);
-            String fileName = record.s3.object.key;
+            String fileName = URLDecoder.decode(record.s3.object.key, "UTF-8");
             String fileSize = record.s3.object.size;
             boolean success = s3ModelLifecycle.pullAndSaveModelZip(fileName);
             if(success){
