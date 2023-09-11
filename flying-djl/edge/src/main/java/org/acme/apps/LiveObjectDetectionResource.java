@@ -103,10 +103,10 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
     @ConfigProperty(name = "org.acme.objectdetection.video.capture.interval.millis", defaultValue = "50")
     int videoCaptureIntevalMillis;
 
-    @ConfigProperty(name = "org.acme.djl.model.zip.path")
+    @ConfigProperty(name = "org.acme.djl.model.zip.path", defaultValue = AppUtils.NA)
     String modelZipPath;
 
-    @ConfigProperty(name = "org.acme.djl.model.zip.name")
+    @ConfigProperty(name = "org.acme.djl.model.zip.name", defaultValue = AppUtils.NA)
     String modelZipName;
 
     @ConfigProperty(name = "org.acme.djl.model.artifact.name", defaultValue = AppUtils.NA)
@@ -219,21 +219,30 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
         String newModelFilePath = newModelZipPath+"/"+newModelZipName;
         log.infov("loadModel() {0}", newModelFilePath);
         try { 
-            Criteria<Image, DetectedObjects> criteria = Criteria.builder()
+            Criteria.Builder<Image, DetectedObjects> cBuilder = Criteria.builder()
                 .setTypes(Image.class, DetectedObjects.class) // defines input and output data type
-                .optModelUrls(newModelFilePath)
-                .optModelName(this.modelName)
                 .optEngine("OnnxRuntime")  // Specify OnnX explicitly because classpath also includes pytorch
                 .optTranslatorFactory(new YoloV5TranslatorFactory())
                 .optProgress(new ProgressBar())
-                .optArgument("synsetFileName", this.synsetFileName)
                 .optArgument("optApplyRatio", true)  // post process
-                .optArgument("rescale", true) // post process
-                .build();
+                .optArgument("rescale", true); // post process
+
+            // If a custom model is not specified, then have DJL pull its default model for ONNX engine
+            if(!AppUtils.NA.equals(newModelZipPath)){
+                cBuilder
+                    .optModelUrls(newModelFilePath)
+                    .optModelName(this.modelName)
+                    .optArgument("synsetFileName", this.synsetFileName);
+            }
+
+            Criteria<Image, DetectedObjects> criteria = cBuilder.build();
 
             ZooModel<Image, DetectedObjects> newModel = criteria.loadModel();
 
-            testModel(newModel);
+            // Don't even bother testing model if its just the default model provided by DJL
+            if(!AppUtils.NA.equals(newModelZipPath)){
+                testModel(newModel);
+            }
 
             this.model = newModel;
             this.modelZipPath = newModelZipPath;

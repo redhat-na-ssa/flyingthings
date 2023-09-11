@@ -45,7 +45,7 @@ public class S3ModelLifecycle {
     @ConfigProperty(name = "com.rht.na.gtm.s3.bucket.name", defaultValue = AppUtils.NA)
     String bucketName;
 
-    @ConfigProperty(name = "org.acme.djl.model.zip.path")
+    @ConfigProperty(name = "org.acme.djl.model.zip.path", defaultValue = AppUtils.NA)
     String modelZipPath;
 
     @ConfigProperty(name = "org.acme.djl.model.temp.unzip.path", defaultValue="/tmp/unzippedModels")

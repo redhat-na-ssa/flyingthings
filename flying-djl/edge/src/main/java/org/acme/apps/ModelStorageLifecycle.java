@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import org.acme.AppUtils;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
@@ -26,13 +27,13 @@ public class ModelStorageLifecycle {
     private static final String RETURN_CHAR="\n";
     private static Logger log = Logger.getLogger(ModelStorageLifecycle.class);
 
-    @ConfigProperty(name = "org.acme.djl.model.zip.path")
+    @ConfigProperty(name = "org.acme.djl.model.zip.path", defaultValue = AppUtils.NA)
     String modelZipPath;
 
     @ConfigProperty(name = "org.acme.djl.model.temp.unzip.path", defaultValue="/tmp/unzippedModels")
     String targetBaseDirToUnzipTo;
 
-    @ConfigProperty(name = "org.acme.djl.model.zip.name")
+    @ConfigProperty(name = "org.acme.djl.model.zip.name", defaultValue = AppUtils.NA)
     String modelZipName;
 
     @ConfigProperty(name = "org.acme.djl.model.synset.name", defaultValue = "synset.txt")
