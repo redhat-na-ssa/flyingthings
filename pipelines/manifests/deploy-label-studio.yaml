@@ -170,13 +170,5 @@ spec:
               termination: edge
               insecureEdgeTerminationPolicy: Allow
           EOF
-      params:
-      - name: ocp-tablespace
-        value: $(params.ocp-tablespace)
-      runAfter:
-        - build-labelstudio
-      workspaces:
-        - name: source
-          workspace: source
   workspaces:
     - name: source
