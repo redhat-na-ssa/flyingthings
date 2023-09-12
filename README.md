@@ -13,7 +13,7 @@ I've created a video series explaining the workshop and a runthrough of the setu
 
 OpenShift is the foundation of everything we’re using today. Its ability to securely run containerized workloads makes it ideal for our purposes. Since the nature of Data Science is experimentation and many many iterations, its ability to consistently deploy and maintain multiple environments and configurations makes it a great foundation for ML Operations.
 
-##$ Red Hat OpenShift Pipelines
+### Red Hat OpenShift Pipelines
 
 OpenShift Pipelines is the engine that drives our operation. All of the elements and tasks that make up our workflow have been automated and are managed by Tekton. As it’s a Kubernetes native CI tool, it helps establish workflows that ensure consistent results with the flexibility to extend capabilities at any time.
 
