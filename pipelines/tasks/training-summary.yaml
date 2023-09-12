@@ -8,7 +8,7 @@ spec:
       type: string
     - name: git-revision
       type: string
-    - name: ocp-tablespace
+    - name: NAMESPACE
       type: string
     - name: BATCH_SIZE
       type: string
@@ -50,7 +50,7 @@ spec:
         && echo "$HOSTNAME" \
         && echo "git-url: $git-url" \
         && echo "git-revision: $git-revision" \
-        && echo "ocp-tablespace: $ocp-tablespace" \
+        && echo "NAMESPACE: $NAMESPACE" \
         && echo "BATCH_SIZE: $BATCH_SIZE" \
         && echo "NUM_EPOCHS: $NUM_EPOCHS" \
         && echo "IMG_RESIZE: $IMG_RESIZE" \
@@ -72,8 +72,8 @@ spec:
         value: $(params.git-url)
       - name: git-revision
         value: $(params.git-revision)
-      - name: ocp-tablespace
-        value: $(params.ocp-tablespace)
+      - name: NAMESPACE
+        value: $(params.NAMESPACE)
       - name: BATCH_SIZE
         value: $(params.BATCH_SIZE)
       - name: NUM_EPOCHS

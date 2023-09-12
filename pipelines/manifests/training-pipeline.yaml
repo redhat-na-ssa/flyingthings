@@ -12,7 +12,7 @@ spec:
       default: main
       description: revision to be used from repo of the code for deployment
       type: string
-    - name: ocp-tablespace
+    - name: NAMESPACE
       description: target deployment for the project
       type: string
     - name: BATCH_SIZE
@@ -124,8 +124,8 @@ spec:
       params:
         - name: SIMPLEVIS_DATA
           value: $(params.SIMPLEVIS_DATA)
-        - name: ocp-tablespace
-          value: $(params.ocp-tablespace)
+        - name: NAMESPACE
+          value: $(params.NAMESPACE)
       runAfter:
         - get-dataset
       workspaces:
@@ -147,8 +147,8 @@ spec:
           value: "$(params.IMG_RESIZE)"
         - name: MAX_WIDTH
           value: "$(params.MAX_WIDTH)"
-        - name: ocp-tablespace
-          value: $(params.ocp-tablespace)
+        - name: NAMESPACE
+          value: $(params.NAMESPACE)
       runAfter:
         - create-classfile
       workspaces:
@@ -187,8 +187,8 @@ spec:
           value: $(params.BASE_MODEL)
         - name: SIMPLEVIS_DATA
           value: $(params.SIMPLEVIS_DATA)
-        - name: ocp-tablespace
-          value: $(params.ocp-tablespace)
+        - name: NAMESPACE
+          value: $(params.NAMESPACE)
       runAfter:
         - distribute-dataset
       workspaces:
@@ -215,8 +215,8 @@ spec:
           value: $(params.BASE_MODEL)
         - name: SIMPLEVIS_DATA
           value: $(params.SIMPLEVIS_DATA)
-        - name: ocp-tablespace
-          value: $(params.ocp-tablespace)
+        - name: NAMESPACE
+          value: $(params.NAMESPACE)
       runAfter:
         - distribute-dataset
       workspaces:
@@ -234,8 +234,8 @@ spec:
           value: $(params.BASE_MODEL)
         - name: SIMPLEVIS_DATA
           value: $(params.SIMPLEVIS_DATA)
-        - name: ocp-tablespace
-          value: $(params.ocp-tablespace)
+        - name: NAMESPACE
+          value: $(params.NAMESPACE)
       runAfter:
         - train-model-cpu
         - train-model-gpu
@@ -262,8 +262,8 @@ spec:
           value: $(params.MINIO_SECRETKEY)
         - name: MINIO_CLIENT_URL
           value: $(params.MINIO_CLIENT_URL)
-        - name: ocp-tablespace
-          value: $(params.ocp-tablespace)
+        - name: NAMESPACE
+          value: $(params.NAMESPACE)
       runAfter:
         - export-model
       workspaces:
@@ -329,8 +329,8 @@ spec:
       runAfter:
         - push-results
       params:
-      - name: ocp-tablespace
-        value: $(params.ocp-tablespace)
+      - name: NAMESPACE
+        value: $(params.NAMESPACE)
       - name: MINIO_ENDPOINT
         value: $(params.MINIO_ENDPOINT)
       - name: MINIO_BUCKET
@@ -343,7 +343,7 @@ spec:
         value: $(params.MODEL_NAME)
       - name: SCRIPT
         value: |
-          oc new-app image-registry.openshift-image-registry.svc:5000/$(params.ocp-tablespace)/custom-model:latest \
+          oc new-app image-registry.openshift-image-registry.svc:5000/$(params.NAMESPACE)/custom-model:latest \
             --name=$(params.MODEL_NAME) \
             --env=WEIGHTS=model_custom.pt \
             --env=SIMPLEVIS_DATA=/opt/app-root/src/simplevis-data \
@@ -387,8 +387,8 @@ spec:
           value: $(params.git-url)
         - name: git-revision
           value: $(params.git-revision)
-        - name: ocp-tablespace
-          value: $(params.ocp-tablespace)
+        - name: NAMESPACE
+          value: $(params.NAMESPACE)
         - name: BATCH_SIZE
           value: $(params.BATCH_SIZE)
         - name: NUM_EPOCHS

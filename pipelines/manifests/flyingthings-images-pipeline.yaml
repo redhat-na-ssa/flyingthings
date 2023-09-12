@@ -12,34 +12,34 @@ spec:
       default: main
       description: revision to be used from repo of the code for deployment
       type: string
-    - name: ocp-tablespace
-      description: tablespace for the deployment
+    - name: NAMESPACE
+      description: NAMESPACE for the deployment
       type: string
-    - name: LABELSTUD_IMAGE
-      default: image-registry.openshift-image-registry.svc:5000/$(params.ocp-tablespace)/labelstudio:latest
+    - name: LABELSTUDIO_IMAGE
+      default: image-registry.openshift-image-registry.svc:5000/$(params.NAMESPACE)/labelstudio:latest
       description: image for label studio
       type: string
     - name: YOLO_IMAGE
-      default: image-registry.openshift-image-registry.svc:5000/$(params.ocp-tablespace)/yolo:latest
+      default: image-registry.openshift-image-registry.svc:5000/$(params.NAMESPACE)/yolo:latest
       description: base image for yolo
       type: string
     - name: UBI_IMAGE
-      default: image-registry.openshift-image-registry.svc:5000/$(params.ocp-tablespace)/base-ubi9:latest
+      default: image-registry.openshift-image-registry.svc:5000/$(params.NAMESPACE)/base-ubi9:latest
       description: base image for notebook
       type: string
     - name: MINIMAL_IMAGE
-      default: image-registry.openshift-image-registry.svc:5000/$(params.ocp-tablespace)/minimal-notebook:latest
+      default: image-registry.openshift-image-registry.svc:5000/$(params.NAMESPACE)/minimal-notebook:latest
       description: notebook template
       type: string
     - name: CUSTOM_NOTEBOOK_IMAGE
-      default: image-registry.openshift-image-registry.svc:5000/$(params.ocp-tablespace)/yolo-notebook:latest
+      default: image-registry.openshift-image-registry.svc:5000/$(params.NAMESPACE)/yolo-notebook:latest
       description: custom notebook image
       type: string
     - name: MODEL_IMAGE
-      default: image-registry.openshift-image-registry.svc:5000/$(params.ocp-tablespace)/custom-model:latest
+      default: image-registry.openshift-image-registry.svc:5000/$(params.NAMESPACE)/custom-model:latest
       description: model server image
       type: string
-    - name: LABELSTUD_DOCKERFILE
+    - name: LABELSTUDIO_DOCKERFILE
       default: source/labelstudio
       description: dockerfile path 
       type: string
@@ -64,15 +64,15 @@ spec:
       description: dockerfile path
       type: string
     - name: MINIMAL_BUILD_ARGS
-      default: --build-arg BASE_IMAGE=image-registry.openshift-image-registry.svc:5000/$(params.ocp-tablespace)/base-ubi9:latest
+      default: --build-arg BASE_IMAGE=image-registry.openshift-image-registry.svc:5000/$(params.NAMESPACE)/base-ubi9:latest
       description: build arguments for minimal notebook
       type: string
     - name: MODEL_BUILD_ARGS
-      default: --build-arg WEIGHTS=flyingthings.pt --build-arg BASE_IMAGE=image-registry.openshift-image-registry.svc:5000/$(params.ocp-tablespace)/yolo:latest
+      default: --build-arg WEIGHTS=flyingthings.pt --build-arg BASE_IMAGE=image-registry.openshift-image-registry.svc:5000/$(params.NAMESPACE)/yolo:latest
       description: build arguments for model server
       type: string
     - name: CUSTOM_BUILD_ARGS
-      default: --build-arg BASE_IMAGE=image-registry.openshift-image-registry.svc:5000/$(params.ocp-tablespace)/minimal-notebook:latest
+      default: --build-arg BASE_IMAGE=image-registry.openshift-image-registry.svc:5000/$(params.NAMESPACE)/minimal-notebook:latest
       description: build arguments for custom notebook
       type: string
     - name: YOLO_BUILD_ARGS
@@ -324,8 +324,8 @@ spec:
           value: $(params.MINIO_SECRETKEY)
         - name: MINIO_CLIENT_URL
           value: $(params.MINIO_CLIENT_URL)
-        - name: ocp-tablespace
-          value: $(params.ocp-tablespace)
+        - name: NAMESPACE
+          value: $(params.NAMESPACE)
       runAfter:
         - build-yolo
       workspaces:
@@ -420,8 +420,8 @@ spec:
       runAfter:
         - build-model-server
       params:
-      - name: ocp-tablespace
-        value: $(params.ocp-tablespace)
+      - name: NAMESPACE
+        value: $(params.NAMESPACE)
       - name: MINIO_ENDPOINT
         value: $(params.MINIO_ENDPOINT)
       - name: PRETRAINED_BUCKET
@@ -436,7 +436,7 @@ spec:
         value: $(params.BASE_MODEL)
       - name: SCRIPT
         value: |
-          oc new-app image-registry.openshift-image-registry.svc:5000/$(params.ocp-tablespace)/custom-model:latest \
+          oc new-app image-registry.openshift-image-registry.svc:5000/$(params.NAMESPACE)/custom-model:latest \
             --name=model-yolo \
             --env=WEIGHTS=model_pretrained.pt \
             --env=SIMPLEVIS_DATA=/opt/app-root/src/simplevis-data \

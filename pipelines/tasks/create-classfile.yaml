@@ -6,11 +6,11 @@ spec:
   params:
     - name: SIMPLEVIS_DATA
       type: string
-    - name: ocp-tablespace
+    - name: NAMESPACE
       type: string
   steps:
     - name: create-classfile
-      image: image-registry.openshift-image-registry.svc:5000/$(params.ocp-tablespace)/base-ubi9:latest
+      image: image-registry.openshift-image-registry.svc:5000/$(params.NAMESPACE)/base-ubi9:latest
       script: |
         cp $(workspaces.source.path)/source/training/classes.yaml.j2 $(params.SIMPLEVIS_DATA)/workspace/datasets \
         && cd $(params.SIMPLEVIS_DATA)/workspace/datasets \
