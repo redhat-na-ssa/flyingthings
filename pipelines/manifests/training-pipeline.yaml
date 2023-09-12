@@ -32,7 +32,7 @@ spec:
       default: "200"
       type: string
     - name: WEIGHTS
-      description: target wieghts file name
+      description: target weights file name
       default: flyingthings.pt
       type: string
     - name: BASE_MODEL

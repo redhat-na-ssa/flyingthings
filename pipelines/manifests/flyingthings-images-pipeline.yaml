@@ -473,7 +473,7 @@ spec:
               termination: edge
               insecureEdgeTerminationPolicy: Allow
           EOF
-    - name: build-labelstud
+    - name: build-labelstudio
       when:
         - input: "$(params.DEPLOY_LABELSTUDIO)"
           operator: in
@@ -562,7 +562,7 @@ spec:
         - name: source
           workspace: source
       runAfter:
-        - build-labelstud
+        - build-labelstudio
       params:
       - name: ocp-tablespace
         value: $(params.ocp-tablespace)

@@ -13,18 +13,18 @@ spec:
 kind: Deployment
 apiVersion: apps/v1
 metadata:
-  name: labelstud
+  name: labelstudio
   annotations:
     deployment.kubernetes.io/revision: '1'
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: labelstud
+      app: labelstudio
   template:
     metadata:
       labels:
-        app: labelstud
+        app: labelstudio
     spec:
       containers:
         - name: container
@@ -60,23 +60,23 @@ spec:
 kind: Service
 apiVersion: v1
 metadata:
-  name: labelstud
+  name: labelstudio
 spec:
   ports:
     - protocol: TCP
       port: 8080
       targetPort: 8080
   selector:
-    app: labelstud
+    app: labelstudio
 ---
 kind: Route
 apiVersion: route.openshift.io/v1
 metadata:
-  name: labelstud
+  name: labelstudio
 spec:
   to:
     kind: Service
-    name: labelstud
+    name: labelstudio
     weight: 100
   port:
     targetPort: 8080
