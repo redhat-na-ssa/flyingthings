@@ -43,7 +43,7 @@ spec:
           workspace: source
         - name: ssh-directory
           workspace: git-credentials
-    - name: build-labelstud
+    - name: build-labelstudio
       params:
         - name: IMAGE
           value: $(params.LABELSTUD_IMAGE)
@@ -100,7 +100,7 @@ spec:
       - name: ocp-tablespace
         value: $(params.ocp-tablespace)
       runAfter:
-        - build-labelstud
+        - build-labelstudio
       workspaces:
         - name: source
           workspace: source
