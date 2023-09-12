@@ -1,19 +1,22 @@
 #!/bin/bash
 
-if [ $# -eq 0 ]; then
-    echo "Warning: No project provided. Please provide a target project name."
-    exit 1
-fi
+select_namespace(){
+  if [ $# -eq 0 ]; then
+    NAMESPACE=${1:-modemo}
+    echo "NOTICE: No namespace / project name provided"
+  fi
 
-# Assign the first argument to the TABLESPACE variable
-TABLESPACE=$1
+  echo "NAMESPACE: ${NAMESPACE}"
+  oc project "${NAMESPACE}" &>/dev/null || oc new-project "${NAMESPACE}"
+}
 
-oc new-project $TABLESPACE
+create_pipelines(){
+  
+  select_namespace
 
-oc create -f ../pipelines/tasks
-oc create -f ../pipelines/manifests
+  # apply pipeline objects
+  oc apply -f pipelines/tasks
+  oc apply -f pipelines/manifests
+}
 
-
-# Exit the script gracefully
-exit 0
-
+create_pipelines
