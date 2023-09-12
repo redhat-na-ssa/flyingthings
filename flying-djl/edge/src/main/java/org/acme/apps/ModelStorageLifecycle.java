@@ -46,6 +46,11 @@ public class ModelStorageLifecycle {
     }
 
     public boolean unzipModelAndRefreshModelClassList(){
+        if(AppUtils.NA.equals(this.modelZipPath)){
+            log.warn("modelZipPath not defined.  Will not refresh model class list");
+            return false;
+        }
+
         InputStream fStream = null;
         try {
             String zipFilePrefix = modelZipName.substring(0, modelZipName.indexOf(ZIP_SUFFIX));
