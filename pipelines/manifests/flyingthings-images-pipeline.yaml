@@ -15,28 +15,32 @@ spec:
     - name: NAMESPACE
       description: NAMESPACE for the deployment
       type: string
+    - name: IMAGE_REGISTRY
+      description: Default image registry
+      default: image-registry.openshift-image-registry.svc:5000
+      type: string
     - name: LABELSTUDIO_IMAGE
-      default: image-registry.openshift-image-registry.svc:5000/$(params.NAMESPACE)/labelstudio:latest
+      default: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/labelstudio:latest
       description: image for label studio
       type: string
     - name: YOLO_IMAGE
-      default: image-registry.openshift-image-registry.svc:5000/$(params.NAMESPACE)/yolo:latest
+      default: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/yolo:latest
       description: base image for yolo
       type: string
     - name: UBI_IMAGE
-      default: image-registry.openshift-image-registry.svc:5000/$(params.NAMESPACE)/base-ubi9:latest
+      default: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/base-ubi9:latest
       description: base image for notebook
       type: string
     - name: MINIMAL_IMAGE
-      default: image-registry.openshift-image-registry.svc:5000/$(params.NAMESPACE)/minimal-notebook:latest
+      default: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/minimal-notebook:latest
       description: notebook template
       type: string
     - name: CUSTOM_NOTEBOOK_IMAGE
-      default: image-registry.openshift-image-registry.svc:5000/$(params.NAMESPACE)/yolo-notebook:latest
+      default: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/yolo-notebook:latest
       description: custom notebook image
       type: string
     - name: MODEL_IMAGE
-      default: image-registry.openshift-image-registry.svc:5000/$(params.NAMESPACE)/custom-model:latest
+      default: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/custom-model:latest
       description: model server image
       type: string
     - name: LABELSTUDIO_DOCKERFILE
@@ -64,15 +68,15 @@ spec:
       description: dockerfile path
       type: string
     - name: MINIMAL_BUILD_ARGS
-      default: --build-arg BASE_IMAGE=image-registry.openshift-image-registry.svc:5000/$(params.NAMESPACE)/base-ubi9:latest
+      default: --build-arg BASE_IMAGE=$(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/base-ubi9:latest
       description: build arguments for minimal notebook
       type: string
     - name: MODEL_BUILD_ARGS
-      default: --build-arg WEIGHTS=flyingthings.pt --build-arg BASE_IMAGE=image-registry.openshift-image-registry.svc:5000/$(params.NAMESPACE)/yolo:latest
+      default: --build-arg WEIGHTS=flyingthings.pt --build-arg BASE_IMAGE=$(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/yolo:latest
       description: build arguments for model server
       type: string
     - name: CUSTOM_BUILD_ARGS
-      default: --build-arg BASE_IMAGE=image-registry.openshift-image-registry.svc:5000/$(params.NAMESPACE)/minimal-notebook:latest
+      default: --build-arg BASE_IMAGE=$(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/minimal-notebook:latest
       description: build arguments for custom notebook
       type: string
     - name: YOLO_BUILD_ARGS
@@ -138,7 +142,7 @@ spec:
       workspaces:
         - name: output
           workspace: source
-    - name: see-stuff
+    - name: debug-workspace
       taskSpec:
         steps:
           - name: run-batch-file
@@ -163,7 +167,7 @@ spec:
         - name: YOLO_BUILD_ARGS
           value: "$(params.YOLO_BUILD_ARGS)"
       runAfter:
-        - see-stuff
+        - debug-workspace
       taskRef:
         kind: ClusterTask
         name: buildah
@@ -179,7 +183,7 @@ spec:
         - name: DOCKERFILE
           value: $(workspaces.path)/$(params.UBI_DOCKERFILE)/Dockerfile
       runAfter:
-        - see-stuff
+        - debug-workspace
       taskRef:
         kind: ClusterTask
         name: buildah
@@ -400,6 +404,8 @@ spec:
               export KUBECONFIG=$(workspaces.kubeconfig-dir.path)/kubeconfig
 
               $(params.SCRIPT)
+              
+              exit 0
             securityContext:
               runAsNonRoot: true
               runAsUser: 65532
@@ -436,7 +442,7 @@ spec:
         value: $(params.BASE_MODEL)
       - name: SCRIPT
         value: |
-          oc new-app image-registry.openshift-image-registry.svc:5000/$(params.NAMESPACE)/custom-model:latest \
+          oc new-app $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/custom-model:latest \
             --name=model-yolo \
             --env=WEIGHTS=model_pretrained.pt \
             --env=SIMPLEVIS_DATA=/opt/app-root/src/simplevis-data \
@@ -445,13 +451,15 @@ spec:
             --env=MINIO_BUCKET=$(params.PRETRAINED_BUCKET) \
             --env=MINIO_ACCESSKEY=$(params.MINIO_ACCESSKEY) \
             --env=MINIO_SECRETKEY=$(params.MINIO_SECRETKEY) \
-            --env=BASE_MODEL=$(params.BASE_MODEL) \
-          && oc set volume deployment/model-yolo \
+            --env=BASE_MODEL=$(params.BASE_MODEL)
+          
+          oc set volume deployment/model-yolo \
             --add \
             --name=simplevis-data-volume \
             --type=emptyDir \
-            --mount-path=/opt/app-root/src/simplevis-data \
-          && oc apply -f - <<EOF
+            --mount-path=/opt/app-root/src/simplevis-data
+          
+          oc apply -f - <<EOF
           apiVersion: route.openshift.io/v1
           kind: Route
           metadata:

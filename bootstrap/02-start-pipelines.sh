@@ -67,6 +67,7 @@ start_pipelines(){
     -p git-url="${GIT_URL}" \
     -p git-revision="${GIT_REVISION}" \
     -p NAMESPACE="${NAMESPACE}" \
+    -p BASE_MODEL="yolov5s.pt" \
     -w name=source,volumeClaimTemplateFile=code-pvc.yaml \
     -w name=shared-workspace,volumeClaimTemplateFile=work-pvc.yaml \
     --use-param-defaults --showlog
