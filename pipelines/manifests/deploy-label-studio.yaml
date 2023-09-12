@@ -12,12 +12,12 @@ spec:
       default: main
       description: revision to be used from repo of the code for deployment
       type: string
-    - name: ocp-tablespace
+    - name: NAMESPACE
       description: tablespace for the deployment
       default: modemo
       type: string
     - name: LABELSTUD_IMAGE
-      default: image-registry.openshift-image-registry.svc:5000/$(params.ocp-tablespace)/labelstudio:latest
+      default: image-registry.openshift-image-registry.svc:5000/$(params.NAMESPACE)/labelstudio:latest
       description: image for label studio
       type: string
     - name: LABELSTUD_DOCKERFILE
@@ -135,12 +135,12 @@ spec:
       runAfter:
         - build-labelstudio
       params:
-      - name: ocp-tablespace
-        value: $(params.ocp-tablespace)
+      - name: NAMESPACE
+        value: $(params.NAMESPACE)
       - name: SCRIPT
         value: |
           oc apply -f $(workspaces.source.path)/source/labelstudio/pvc.yaml \
-          && oc new-app image-registry.openshift-image-registry.svc:5000/$(params.ocp-tablespace)/labelstudio:latest \
+          && oc new-app image-registry.openshift-image-registry.svc:5000/$(params.NAMESPACE)/labelstudio:latest \
             --name=labelstudio \
           && oc set volume deployment/labelstudio \
             --add \

@@ -181,7 +181,7 @@ All the supplied params should be fine, but we will want to change a few if weâ€
 tkn pipeline start training-x-pipeline \
   -w name=sourcecode,volumeClaimTemplateFile=code-pvc.yaml \
   -w name=shared-workspace,volumeClaimTemplateFile=work-pvc.yaml \
-  -p ocp-tablespace="$TABLESPACE" \
+  -p NAMESPACE="$TABLESPACE" \
   -p git-url=https://github.com/redhat-na-ssa/flyingthings.git \
   -p git-revision=main \
   -p GPU="Y" \

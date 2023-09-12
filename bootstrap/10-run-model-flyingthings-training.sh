@@ -17,7 +17,7 @@ echo "Run model training"
 tkn pipeline start training-x-pipeline \
   -w name=sourcecode,volumeClaimTemplateFile=code-pvc.yaml \
   -w name=shared-workspace,volumeClaimTemplateFile=work-pvc.yaml \
-  -p ocp-tablespace="$TABLESPACE" \
+  -p NAMESPACE="$TABLESPACE" \
   -p git-url=https://github.com/davwhite/flyingthings.git \
   -p git-revision=main \
   -p GPU="Y" \
