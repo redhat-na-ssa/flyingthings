@@ -70,9 +70,9 @@ spec:
                 --name=labelstudio \
               && oc set volume deployment/labelstudio \
                 --add \
-                --name=labelstud-pvc \
+                --name=labelstudio-pvc \
                 --type=persistentVolumeClaim \
-                --claim-name=labelstud-pvc \
+                --claim-name=labelstudio-pvc \
                 --mount-path=/opt/app-root/src/.local \
               && oc apply -f - <<EOF
               apiVersion: route.openshift.io/v1
