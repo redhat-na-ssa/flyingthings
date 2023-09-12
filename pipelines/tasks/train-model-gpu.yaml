@@ -38,7 +38,7 @@ spec:
           value: $(workspaces.source.path)/source/training-job
       resources:
         limits:
-          nvidia.com/gpu: '1'
+          nvidia.com/gpu: 1
       volumeMounts:
         - mountPath: /dev/shm
           name: dshm

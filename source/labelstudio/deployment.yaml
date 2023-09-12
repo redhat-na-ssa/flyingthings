@@ -29,7 +29,7 @@ spec:
       containers:
         - name: container
           image: >-
-            image-registry.openshift-image-registry.svc:5000/modemo/labelstud:latest
+            image-registry.openshift-image-registry.svc:5000/modemo/labelstudio:latest
           ports:
             - containerPort: 8080
               protocol: TCP
