@@ -16,7 +16,7 @@ spec:
       description: tablespace for the deployment
       type: string
     - name: LABELSTUD_IMAGE
-      default: image-registry.openshift-image-registry.svc:5000/$(params.ocp-tablespace)/labelstud:latest
+      default: image-registry.openshift-image-registry.svc:5000/$(params.ocp-tablespace)/labelstudio:latest
       description: image for label studio
       type: string
     - name: YOLO_IMAGE
