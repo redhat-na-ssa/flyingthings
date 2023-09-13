@@ -39,7 +39,7 @@ start_pipelines(){
 
   # debug_pipeline; exit 0
 
-  check_pipeline training-x-pipeline
+  check_pipeline model-retraining
   tkn pipeline start "${PIPELINE_NAME}" \
     -w name=sourcecode,volumeClaimTemplateFile=code-pvc.yaml \
     -w name=shared-workspace,volumeClaimTemplateFile=work-pvc.yaml \

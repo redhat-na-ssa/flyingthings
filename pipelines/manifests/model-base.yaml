@@ -1,7 +1,7 @@
 apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
-  name: flyingthings-images-pipeline
+  name: model-base
 spec:
   params:
     - name: GIT_URL
