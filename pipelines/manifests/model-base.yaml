@@ -19,69 +19,37 @@ spec:
       description: Default image registry
       default: image-registry.openshift-image-registry.svc:5000
       type: string
-    - name: LABELSTUDIO_IMAGE
-      default: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/labelstudio:latest
-      description: image for label studio
-      type: string
     - name: YOLO_IMAGE
       default: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/yolo:latest
       description: base image for yolo
-      type: string
-    - name: UBI_IMAGE
-      default: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/base-ubi9:latest
-      description: base image for notebook
-      type: string
-    - name: MINIMAL_IMAGE
-      default: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/minimal-notebook:latest
-      description: notebook template
-      type: string
-    - name: CUSTOM_NOTEBOOK_IMAGE
-      default: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/yolo-notebook:latest
-      description: custom notebook image
-      type: string
-    - name: MODEL_IMAGE
-      default: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/custom-model:latest
-      description: model server image
-      type: string
-    - name: LABELSTUDIO_DOCKERFILE
-      default: source/labelstudio
-      description: dockerfile path 
       type: string
     - name: YOLO_DOCKERFILE
       default: source/yolo
       description: dockerfile path 
       type: string
+    - name: YOLO_BUILD_ARGS
+      default: --build-arg env=YOLOv5_VERSION=7.0
+      description: build arguments for yolo
+      type: string
+    - name: MODEL_IMAGE
+      default: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/custom-model:latest
+      description: model server image
+      type: string
     - name: MODEL_DOCKERFILE
       default: source/model
       description: dockerfile path 
-      type: string
-    - name: UBI_DOCKERFILE
-      default: source/ubi9
-      description: dockerfile path 
-      type: string
-    - name: MINIMAL_DOCKERFILE
-      default: source/minimal/py39
-      description: dockerfile path 
-      type: string
-    - name: CUSTOM_DOCKERFILE
-      default: source/custom
-      description: dockerfile path
-      type: string
-    - name: MINIMAL_BUILD_ARGS
-      default: --build-arg BASE_IMAGE=$(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/base-ubi9:latest
-      description: build arguments for minimal notebook
       type: string
     - name: MODEL_BUILD_ARGS
       default: --build-arg WEIGHTS=flyingthings.pt --build-arg BASE_IMAGE=$(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/yolo:latest
       description: build arguments for model server
       type: string
-    - name: CUSTOM_BUILD_ARGS
-      default: --build-arg BASE_IMAGE=$(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/minimal-notebook:latest
-      description: build arguments for custom notebook
+    - name: UBI_IMAGE
+      default: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/base-ubi9:latest
+      description: base image for notebook
       type: string
-    - name: YOLO_BUILD_ARGS
-      default: --build-arg env=YOLOv5_VERSION=7.0
-      description: build arguments for yolo
+    - name: UBI_DOCKERFILE
+      default: source/ubi9
+      description: dockerfile path 
       type: string
     - name: BATCH_SIZE
       default: "2"
@@ -122,9 +90,6 @@ spec:
     - name: MINIO_CLIENT_URL
       default: "https://dl.min.io/client/mc/release/linux-amd64"
       type: string
-    - name: DEPLOY_LABELSTUDIO
-      default: "N"
-      type: string
   tasks:
     - name: fetch-repository
       params:
@@ -142,32 +107,32 @@ spec:
       workspaces:
         - name: output
           workspace: source
-    - name: debug-workspace
-      taskSpec:
-        steps:
-          - name: run-batch-file
-            image: ubi9:latest
-            script: |
-              #!/usr/bin/env bash
-              echo "Let's see what we got here..." \
-              && ls -al $(workspaces.workspace.path)
-      runAfter:
-        - upload-artifacts
-      workspaces:
-        - name: workspace
-          workspace: shared-workspace
+    # - name: debug-workspace
+    #   taskSpec:
+    #     steps:
+    #       - name: run-batch-file
+    #         image: ubi9:latest
+    #         script: |
+    #           #!/usr/bin/env bash
+    #           echo "Let's see what we got here..." \
+    #           && ls -al $(workspaces.workspace.path)
+    #   runAfter:
+    #     - upload-artifacts
+    #   workspaces:
+    #     - name: workspace
+    #       workspace: shared-workspace
     - name: build-yolo
       params:
         - name: IMAGE
           value: $(params.YOLO_IMAGE)
-        - name: DOCKERFILE_PATH
+        - name: CONTEXT
           value: $(params.YOLO_DOCKERFILE)          
         - name: DOCKERFILE
-          value: $(workspaces.path)/$(params.YOLO_DOCKERFILE)/Dockerfile
+          value: ./Dockerfile
         - name: YOLO_BUILD_ARGS
           value: "$(params.YOLO_BUILD_ARGS)"
       runAfter:
-        - debug-workspace
+        - fetch-repository
       taskRef:
         kind: ClusterTask
         name: buildah
@@ -178,12 +143,12 @@ spec:
       params:
         - name: IMAGE
           value: $(params.UBI_IMAGE)
-        - name: DOCKERFILE_PATH
+        - name: CONTEXT
           value: $(params.UBI_DOCKERFILE)          
         - name: DOCKERFILE
-          value: $(workspaces.path)/$(params.UBI_DOCKERFILE)/Dockerfile
+          value: ./Dockerfile
       runAfter:
-        - debug-workspace
+        - fetch-repository
       taskRef:
         kind: ClusterTask
         name: buildah
@@ -206,8 +171,6 @@ spec:
           value: $(params.MINIO_SECRETKEY)
         - name: MINIO_CLIENT_URL
           value: $(params.MINIO_CLIENT_URL)
-      runAfter:
-        - fetch-repository
       workspaces:
         - name: source
           workspace: source
@@ -232,6 +195,7 @@ spec:
         - name: MINIO_CLIENT_URL
           value: $(params.MINIO_CLIENT_URL)
       runAfter:
+        - fetch-repository
         - create-bucket
       workspaces:
         - name: source
@@ -287,31 +251,11 @@ spec:
           workspace: source
     - name: deploy-model-server
       taskSpec:
-        metadata:
-          annotations:
-            # operator.tekton.dev/last-applied-hash: 64d9014f8c7f4cd290afc619a32a185211cae3b23d56af70197b0e936ec8d35b
-            tekton.dev/displayName: openshift client
-            tekton.dev/pipelines.minVersion: 0.17.0
-            tekton.dev/tags: cli
-          labels:
-            app.kubernetes.io/version: '0.2'
-            operator.tekton.dev/operand-name: openshift-pipelines-addons
-            operator.tekton.dev/provider-type: redhat
-        description: >-
-          This task runs commands against the cluster provided by user and if not
-          provided then where the Task is being executed.
-
-          OpenShift is a Kubernetes distribution from Red Hat which provides oc, the
-          OpenShift CLI that complements kubectl for simplifying deployment and
-          configuration applications on OpenShift.
         params:
           - name: SCRIPT
-            default: oc help
-            description: The OpenShift CLI arguments to run
             type: string
-          - name: VERSION
-            default: latest
-            description: The OpenShift Version to use
+          - name: IMAGE
+            default: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
           - name: BASE_MODEL            
             type: string
             description: Base model for training
@@ -319,35 +263,13 @@ spec:
           - env:
               - name: HOME
                 value: /tekton/home
-            image: >-
-              image-registry.openshift-image-registry.svc:5000/openshift/cli:$(params.VERSION)
+            image: $(params.IMAGE)
             name: oc
             resources: {}
             script: |
               #!/usr/bin/env bash
-
-              [[ "$(workspaces.manifest-dir.bound)" == "true" ]] && \
-              cd $(workspaces.manifest-dir.path)
-
-              [[ "$(workspaces.kubeconfig-dir.bound)" == "true" ]] && \
-              [[ -f $(workspaces.kubeconfig-dir.path)/kubeconfig ]] && \
-              export KUBECONFIG=$(workspaces.kubeconfig-dir.path)/kubeconfig
-
               $(params.SCRIPT)
-              
               exit 0
-
-        workspaces:
-          - description: >-
-              The workspace which contains kubernetes manifests which we want to apply
-              on the cluster.
-            name: manifest-dir
-            optional: true
-          - description: >-
-              The workspace which contains the the kubeconfig file if in case we want to
-              run the oc command on another cluster.
-            name: kubeconfig-dir
-            optional: true
       workspaces:
         - name: source
           workspace: source
