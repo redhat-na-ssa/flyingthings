@@ -57,7 +57,7 @@ start_pipelines(){
 
   IMAGE_REGISTRY=image-registry.openshift-image-registry.svc:5000
   GIT_URL=https://github.com/redhat-na-ssa/flyingthings.git
-  GIT_REVISION=main
+  GIT_REVISION=cory-review
 
   # kludge
   [ "${PWD##*/}" != "scripts" ] && pushd scripts
