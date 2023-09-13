@@ -172,7 +172,7 @@ spec:
           workspace: shared-workspace
     - name: train-model-gpu
       when:
-        - input: "Completed"
+        - input: "Succeeded"
           operator: in
           values: 
             - "$(tasks.check-gpu.results.output)"
@@ -201,7 +201,7 @@ spec:
           workspace: shared-workspace
     - name: train-model-cpu
       when:
-        - input: "Completed"
+        - input: "Succeeded"
           operator: notin
           values: 
             - "$(tasks.check-gpu.results.output)"
