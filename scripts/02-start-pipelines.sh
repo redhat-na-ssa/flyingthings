@@ -1,14 +1,5 @@
 #!/bin/sh
 
-check_namespace(){
-  NAMESPACE=$(oc project -q)
-  echo "NAMESPACE: ${NAMESPACE}"
-  echo ""
-  echo "NOTICE: Verify you are working in the correct namespace"
-  echo "Use CTRL + C to cancel"
-  sleep 8
-}
-
 check_pipeline(){
   PIPELINE_NAME="${1}"
 
@@ -49,8 +40,6 @@ debug_pipeline(){
 }
 
 start_pipelines(){
-  
-  check_namespace
 
   # Hosted -p MINIO_CLIENT_URL="https://dl.min.io/client/mc/release/linux-amd64"
   # Local  -p MINIO_CLIENT_URL="http://util02.davenet.local"
