@@ -237,9 +237,7 @@ spec:
               export KUBECONFIG=$(workspaces.kubeconfig-dir.path)/kubeconfig
 
               $(params.SCRIPT)
-            securityContext:
-              runAsNonRoot: true
-              runAsUser: 65532
+
         workspaces:
           - description: >-
               The workspace which contains kubernetes manifests which we want to apply
@@ -406,9 +404,7 @@ spec:
               $(params.SCRIPT)
               
               exit 0
-            securityContext:
-              runAsNonRoot: true
-              runAsUser: 65532
+
         workspaces:
           - description: >-
               The workspace which contains kubernetes manifests which we want to apply
