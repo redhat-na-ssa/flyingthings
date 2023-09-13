@@ -1,8 +1,11 @@
 apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
-  name: bash-script
+  name: shell-script
 spec:
+  results:
+    - name: output
+      description: Generic output you can use as a result
   params:
     - name: SCRIPT
       description: The bash script you want to run
@@ -18,7 +21,7 @@ spec:
     - name: run-script
       image: $(params.IMAGE)
       script: |
-        #!/usr/bin/env bash
+        #!/usr/bin/env sh
         SOURCE_DIR=${SOURCE_DIR:-$HOME}
 
         $(params.SCRIPT)
