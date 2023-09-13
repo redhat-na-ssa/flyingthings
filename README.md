@@ -179,7 +179,7 @@ All the supplied params should be fine, but we will want to change a few if weâ€
 
 ```
 tkn pipeline start model-retraining \
-  -w name=sourcecode,volumeClaimTemplateFile=code-pvc.yaml \
+  -w name=source,volumeClaimTemplateFile=code-pvc.yaml \
   -w name=shared-workspace,volumeClaimTemplateFile=work-pvc.yaml \
   -p NAMESPACE="$TABLESPACE" \
   -p GIT_URL=https://github.com/redhat-na-ssa/flyingthings.git \
