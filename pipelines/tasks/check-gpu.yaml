@@ -1,0 +1,45 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: check-gpu
+spec:
+  results:
+    - name: output
+  params:
+    - name: SCRIPT
+      description: The bash script you want to run
+      type: string
+      default: ""
+    - name: IMAGE
+      description: The image used to run the script
+      type: string
+      default: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
+  steps:
+    - name: warmup-gpu
+      image: $(params.IMAGE)
+      script: |
+        #!/usr/bin/env bash
+        oc apply -f - <<YAML
+        apiVersion: v1
+        kind: Pod
+        metadata:
+          name: gpu-operator-test
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: cuda-vector-add
+              # https://github.com/kubernetes/kubernetes/blob/v1.7.11/test/images/nvidia-cuda/Dockerfile
+              image: "k8s.gcr.io/cuda-vector-add:v0.1"
+              resources:
+                limits:
+                  nvidia.com/gpu: 1
+        YAML
+        oc wait \
+          pod/gpu-operator-test \
+          --for=condition=Completed \
+          --timeout=12m \
+            && echo Available | tee $(results.output.path)
+
+        $(params.SCRIPT)
+        
+        exit 0

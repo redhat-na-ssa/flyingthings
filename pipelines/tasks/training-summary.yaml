@@ -40,8 +40,6 @@ spec:
       type: string
     - name: MODEL_NAME
       type: string
-    - name: GPU
-      type: string
   steps:
     - name: summary
       image: alpine
@@ -104,8 +102,6 @@ spec:
         value: $(params.DEPLOY)
       - name: MODEL_NAME
         value: $(params.MODEL_NAME)
-      - name: GPU
-        value: $(params.GPU)
   workspaces:
     - name: workspace
       mountPath: /opt/app-root/src/simplevis-data/workspace
