@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 case $OC_VERSION in
     4.*)

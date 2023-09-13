@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 MINCFG=miniocfg
 

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 select_namespace(){
   if [ $# -eq 0 ]; then

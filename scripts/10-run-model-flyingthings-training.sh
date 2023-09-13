@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 if [ $# -eq 0 ]; then
     echo Warning: No namespace provided. Please provide a target namespace.
