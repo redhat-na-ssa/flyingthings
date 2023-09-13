@@ -9,6 +9,18 @@ check_namespace(){
   sleep 8
 }
 
+check_pipeline(){
+  PIPELINE_NAME="${1}"
+
+  # check for pipeline in current namespace
+  if oc get pipeline "${PIPELINE_NAME}" -o name; then
+    echo "PIPELINE: ${PIPELINE_NAME} exists"
+  else
+    echo "PIPELINE: ${PIPELINE_NAME} missing"
+    exit 0
+  fi
+  echo "Starting pipeline: ${PIPELINE_NAME}"
+}
 
 debug_pipeline(){
 
@@ -43,26 +55,26 @@ start_pipelines(){
   # Hosted -p MINIO_CLIENT_URL="https://dl.min.io/client/mc/release/linux-amd64"
   # Local  -p MINIO_CLIENT_URL="http://util02.davenet.local"
 
-  PIPELINE_NAME=flyingthings-images-pipeline
   IMAGE_REGISTRY=image-registry.openshift-image-registry.svc:5000
   GIT_URL=https://github.com/redhat-na-ssa/flyingthings.git
   GIT_REVISION=main
 
-  # check for pipeline in current namespace
-  if oc get pipeline "${PIPELINE_NAME}" -o name; then
-    echo "PIPELINE: ${PIPELINE_NAME} exists"
-  else
-    echo "PIPELINE: ${PIPELINE_NAME} missing"
-    exit 0
-  fi
-
-  echo "Starting pipeline: ${PIPELINE_NAME}"
-
   # kludge
-  [ "${PWD##*/}" != "bootstrap" ] && pushd bootstrap
+  [ "${PWD##*/}" != "scripts" ] && pushd scripts
 
   # debug_pipeline; exit 0
 
+  check_pipeline deploy-label-studio
+  
+  tkn pipeline start "${PIPELINE_NAME}" \
+    -p GIT_URL="${GIT_URL}" \
+    -p GIT_REVISION="${GIT_REVISION}" \
+    -p NAMESPACE="${NAMESPACE}" \
+    -w name=source,volumeClaimTemplateFile=code-pvc.yaml \
+    --use-param-defaults
+
+  check_pipeline flyingthings-images-pipeline
+ 
   tkn pipeline start "${PIPELINE_NAME}" \
     -p GIT_URL="${GIT_URL}" \
     -p GIT_REVISION="${GIT_REVISION}" \
