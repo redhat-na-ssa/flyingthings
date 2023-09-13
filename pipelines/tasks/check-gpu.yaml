@@ -5,6 +5,7 @@ metadata:
 spec:
   results:
     - name: output
+      description: Generic output you can use as a result
   params:
     - name: SCRIPT
       description: The bash script you want to run
@@ -42,9 +43,11 @@ spec:
 
         oc wait \
           pod/gpu-operator-test \
-          --for=condition=Completed \
+          --for=jsonpath='{.status.phase}'=Succeeded \
           --timeout="${WAIT_TIMEOUT}" \
-            && echo Available | tee $(results.output.path)
+            && echo "GPU Available"
+            
+        oc get pod/gpu-operator-test || echo ERROR | tee $(results.output.path)
 
         $(params.SCRIPT)
         
