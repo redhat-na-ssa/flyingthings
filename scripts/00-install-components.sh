@@ -1,30 +1,22 @@
 #!/bin/sh
 
 check_namespace(){
-  NAMESPACE=$(oc project -q)
-  echo "NAMESPACE: ${NAMESPACE}"
+  DEFAULT_NAMESPACE=modemo
+  NAMESPACE=${1:-$(oc project -q 2>/dev/null || echo "${DEFAULT_NAMESPACE}")}
+  
+  echo "Deploying in NAMESPACE: ${NAMESPACE}"
   echo ""
-  echo "NOTICE: Verify you are working in the correct namespace"
+  echo "NOTICE: Verify the information above is correct"
   echo "Use CTRL + C to cancel"
+  
   sleep 8
-}
 
-select_namespace(){
-  if [ $# -eq 0 ]; then
-    NAMESPACE=${1:-modemo}
-    echo "NOTICE: No namespace / project name provided"
-  fi
-
-  echo "NAMESPACE: ${NAMESPACE}"
-  oc project "${NAMESPACE}" &>/dev/null || oc new-project "${NAMESPACE}"
+  oc project "${NAMESPACE}" >/dev/null 2>&1 || oc new-project "${NAMESPACE}"
 }
 
 setup_minio(){
-  
-  select_namespace
-  check_namespace
-  
   oc apply -k components/demo/minio
 }
 
+check_namespace "$@"
 setup_minio

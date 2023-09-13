@@ -1,13 +1,9 @@
 #!/bin/sh
 
-select_namespace(){
-  if [ $# -eq 0 ]; then
-    NAMESPACE=${1:-modemo}
-    echo "NOTICE: No namespace / project name provided"
-  fi
-
+get_namespace(){
+  NAMESPACE=$(oc project -q 2>/dev/null)
   echo "NAMESPACE: ${NAMESPACE}"
-  oc project "${NAMESPACE}" &>/dev/null || oc new-project "${NAMESPACE}"
+  echo ""
 }
 
 check_pipeline(){
@@ -25,7 +21,7 @@ check_pipeline(){
 
 start_pipelines(){
 
-  select_namespace
+  get_namespace
 
   # Hosted -p MINIO_CLIENT_URL="https://dl.min.io/client/mc/release/linux-amd64"
   # Local  -p MINIO_CLIENT_URL="http://util02.davenet.local"
