@@ -315,9 +315,7 @@ spec:
               export KUBECONFIG=$(workspaces.kubeconfig-dir.path)/kubeconfig
 
               $(params.SCRIPT)
-            securityContext:
-              runAsNonRoot: true
-              runAsUser: 65532
+
         workspaces:
           - name: manifest-dir
             optional: true
