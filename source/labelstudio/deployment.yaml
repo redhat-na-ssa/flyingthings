@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: labelstudio-pvc
+  name: label-studio
 spec:
   accessModes:
     - ReadWriteOnce
@@ -13,18 +13,16 @@ spec:
 kind: Deployment
 apiVersion: apps/v1
 metadata:
-  name: labelstudio
-  annotations:
-    deployment.kubernetes.io/revision: '1'
+  name: label-studio
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: labelstudio
+      name: label-studio
   template:
     metadata:
       labels:
-        app: labelstudio
+        name: label-studio
     spec:
       containers:
         - name: container
@@ -35,49 +33,38 @@ spec:
               protocol: TCP
           volumeMounts:
             - mountPath: /opt/app-root/src/.local
-              name: labelstud-data
+              name: label-studio-data
           resources: {}
-          terminationMessagePath: /dev/termination-log
-          terminationMessagePolicy: File
-          imagePullPolicy: Always
       volumes:
-        - name: labelstud-data
+        - name: label-studio-data
           persistentVolumeClaim:
-            claimName: labelstudio-pvc
-      restartPolicy: Always
-      terminationGracePeriodSeconds: 30
-      dnsPolicy: ClusterFirst
-      securityContext: {}
-      schedulerName: default-scheduler
+            claimName: label-studio
   strategy:
     type: RollingUpdate
-    rollingUpdate:
-      maxUnavailable: 25%
-      maxSurge: 25%
-  revisionHistoryLimit: 10
-  progressDeadlineSeconds: 600
 ---
 kind: Service
 apiVersion: v1
 metadata:
-  name: labelstudio
+  name: label-studio
 spec:
   ports:
     - protocol: TCP
       port: 8080
       targetPort: 8080
   selector:
-    app: labelstudio
+    name: label-studio
 ---
 kind: Route
 apiVersion: route.openshift.io/v1
 metadata:
-  name: labelstudio
+  name: label-studio
 spec:
   to:
     kind: Service
-    name: labelstudio
+    name: label-studio
     weight: 100
   port:
     targetPort: 8080
-  wildcardPolicy: None
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Allow
