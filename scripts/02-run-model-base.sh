@@ -57,7 +57,7 @@ start_pipelines(){
   GIT_REVISION=cory-review
 
   # kludge
-  [ "${PWD##*/}" != "scripts" ] && cd scripts
+  [ "${PWD##*/}" != "scripts" ] && pushd scripts
 
   # debug_pipeline; exit 0
 

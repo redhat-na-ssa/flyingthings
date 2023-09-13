@@ -1,5 +1,8 @@
 #!/bin/sh
 set -x
+
+df -h
+
 cd $SIMPLEVIS_DATA/workspace
 cp -R datasets/training/* /usr/local/lib/python3.9/site-packages/yolov5/training
 ls -l /usr/local/lib/python3.9/site-packages/yolov5
