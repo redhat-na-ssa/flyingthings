@@ -15,10 +15,13 @@ spec:
       type: string
       default: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
   steps:
-    - name: warmup-gpu
+    - name: can-i-haz-gpu
       image: $(params.IMAGE)
       script: |
         #!/usr/bin/env bash
+
+        WAIT_TIMEOUT=12m
+
         oc apply -f - <<YAML
         apiVersion: v1
         kind: Pod
@@ -34,10 +37,13 @@ spec:
                 limits:
                   nvidia.com/gpu: 1
         YAML
+
+        echo "Waiting up to ${WAIT_TIMEOUT} for pod to reach Completed..."
+
         oc wait \
           pod/gpu-operator-test \
           --for=condition=Completed \
-          --timeout=12m \
+          --timeout="${WAIT_TIMEOUT}" \
             && echo Available | tee $(results.output.path)
 
         $(params.SCRIPT)
