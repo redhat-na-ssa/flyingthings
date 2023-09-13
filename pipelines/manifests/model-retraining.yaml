@@ -73,10 +73,7 @@ spec:
     - name: MODEL_NAME
       description: name used to deploy the model and model server
       type: string
-    - name: GPU
-      description: flag for use of GPU for training
-      type: string
-  tasks: 
+  tasks:
     - name: fetch-repository
       params:
         - name: url
@@ -93,6 +90,12 @@ spec:
       workspaces:
         - name: output
           workspace: source
+    - name: check-gpu
+      taskRef:
+        kind: Task
+        name: check-gpu
+      runAfter:
+        - fetch-repository
     - name: get-dataset
       taskRef:
         name: get-dataset
@@ -171,9 +174,10 @@ spec:
           workspace: shared-workspace
     - name: train-model-gpu
       when:
-        - input: "$(params.GPU)"
+        - input: "Available"
           operator: in
-          values: ["Y"]
+          values: 
+            - "$(tasks.check-gpu.results.output)"
       taskRef:
         name: train-model-gpu
       params:
@@ -198,9 +202,10 @@ spec:
           workspace: shared-workspace
     - name: train-model-cpu
       when:
-        - input: "$(params.GPU)"
-          operator: in
-          values: ["N"]
+        - input: "Available"
+          operator: notin
+          values: 
+            - "$(tasks.check-gpu.results.output)"
       taskRef:
         name: train-model-cpu
       timeout: "2h"
@@ -417,8 +422,6 @@ spec:
           value: $(params.DEPLOY)
         - name: MODEL_NAME
           value: $(params.MODEL_NAME)
-        - name: GPU
-          value: $(params.GPU)
       workspaces:
         - name: source
           workspace: source

@@ -42,7 +42,6 @@ start_pipelines(){
     -p GIT_URL="${GIT_URL}" \
     -p GIT_REVISION="${GIT_REVISION}" \
     -p NAMESPACE="${NAMESPACE}" \
-    -p GPU="Y" \
     -p BASE_MODEL="yolov5s.pt" \
     -p BATCH_SIZE="-1" \
     -p NUM_EPOCHS="100" \
