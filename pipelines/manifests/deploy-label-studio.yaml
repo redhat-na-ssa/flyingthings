@@ -13,14 +13,14 @@ spec:
       description: revision to be used from repo of the code for deployment
       type: string
     - name: NAMESPACE
-      description: tablespace for the deployment
+      description: namespace for the deployment
       default: modemo
       type: string
-    - name: LABELSTUD_IMAGE
+    - name: LABELSTUDIO_IMAGE
       default: image-registry.openshift-image-registry.svc:5000/$(params.NAMESPACE)/labelstudio:latest
       description: image for label studio
       type: string
-    - name: LABELSTUD_DOCKERFILE
+    - name: LABELSTUDIO_DOCKERFILE
       default: source/labelstudio
       description: dockerfile path 
       type: string
@@ -44,18 +44,14 @@ spec:
       workspaces:
         - name: output
           workspace: source
-    - name: build-labelstudio
-      when:
-        - input: "$(params.DEPLOY_LABELSTUDIO)"
-          operator: in
-          values: ["Y"]
+    - name: build-label-studio
       params:
         - name: IMAGE
-          value: $(params.LABELSTUD_IMAGE)
+          value: $(params.LABELSTUDIO_IMAGE)
         - name: DOCKERFILE_PATH
-          value: $(params.LABELSTUD_DOCKERFILE)          
+          value: $(params.LABELSTUDIO_DOCKERFILE)
         - name: DOCKERFILE
-          value: $(workspaces.path)/$(params.LABELSTUD_DOCKERFILE)/Dockerfile
+          value: $(workspaces.path)/$(params.LABELSTUDIO_DOCKERFILE)/Dockerfile
       runAfter:
         - fetch-repository
       taskRef:
@@ -64,7 +60,7 @@ spec:
       workspaces:
         - name: source
           workspace: source
-    - name: deploy-labelstudio
+    - name: deploy-label-studio
       when:
         - input: "$(params.DEPLOY_LABELSTUDIO)"
           operator: in
@@ -115,9 +111,7 @@ spec:
               export KUBECONFIG=$(workspaces.kubeconfig-dir.path)/kubeconfig
 
               $(params.SCRIPT)
-            securityContext:
-              runAsNonRoot: true
-              runAsUser: 65532
+              exit 0
         workspaces:
           - description: >-
               The workspace which contains kubernetes manifests which we want to apply
@@ -133,42 +127,46 @@ spec:
         - name: source
           workspace: source
       runAfter:
-        - build-labelstudio
+        - build-label-studio
       params:
       - name: NAMESPACE
         value: $(params.NAMESPACE)
       - name: SCRIPT
         value: |
-          oc apply -f $(workspaces.source.path)/source/labelstudio/pvc.yaml \
-          && oc new-app image-registry.openshift-image-registry.svc:5000/$(params.NAMESPACE)/labelstudio:latest \
-            --name=labelstudio \
-          && oc set volume deployment/labelstudio \
-            --add \
-            --name=labelstudio-pvc \
-            --type=persistentVolumeClaim \
-            --claim-name=labelstudio-pvc \
-            --mount-path=/opt/app-root/src/.local \
-          && oc apply -f - <<EOF
-          apiVersion: route.openshift.io/v1
-          kind: Route
-          metadata:
-            name: labelstudio
-            labels:
-              app: labelstudio
-              app.kubernetes.io/component: labelstudio
-              app.kubernetes.io/instance: labelstudio
-          annotations:
-            openshift.io/host.generated: "true"
-          spec:
-            to:
-              kind: Service
-              name: labelstudio
-              weight: 100
-            port:
-              targetPort: 8080-tcp
-            tls:
-              termination: edge
-              insecureEdgeTerminationPolicy: Allow
-          EOF
+          oc apply -f $(workspaces.source.path)/source/labelstudio/deployment.yaml \
+          
+          # oc new-app image-registry.openshift-image-registry.svc:5000/$(params.NAMESPACE)/labelstudio:latest \
+          #   --name=labelstudio
+          
+          # oc set volume deployment/labelstudio \
+          #   --add \
+          #   --name=labelstudio-pvc \
+          #   --type=persistentVolumeClaim \
+          #   --claim-name=labelstudio-pvc \
+          #   --mount-path=/opt/app-root/src/.local \
+          #   --overwrite
+          
+          # oc apply -f - <<EOF
+          # apiVersion: route.openshift.io/v1
+          # kind: Route
+          # metadata:
+          #   name: labelstudio
+          #   labels:
+          #     app: labelstudio
+          #     app.kubernetes.io/component: labelstudio
+          #     app.kubernetes.io/instance: labelstudio
+          # annotations:
+          #   openshift.io/host.generated: "true"
+          # spec:
+          #   to:
+          #     kind: Service
+          #     name: labelstudio
+          #     weight: 100
+          #   port:
+          #     targetPort: 8080-tcp
+          #   tls:
+          #     termination: edge
+          #     insecureEdgeTerminationPolicy: Allow
+          # EOF
   workspaces:
     - name: source
