@@ -208,5 +208,12 @@ public class BaseResource {
         return Uni.createFrom().item(eRes);
 
     }
+
+    public boolean getContinueToPredict() {
+        return this.continueToPredict;
+    }
+    public void setContinueToPredict(boolean x) {
+        this.continueToPredict = x;
+    }
     
 }

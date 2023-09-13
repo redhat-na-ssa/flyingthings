@@ -103,6 +103,15 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
     @ConfigProperty(name = "org.acme.objectdetection.video.capture.interval.millis", defaultValue = "50")
     int videoCaptureIntevalMillis;
 
+    @ConfigProperty(name = "org.acme.objectdetection.video.capture.delay.millis", defaultValue = "5000")
+    int vCaptureDelayMillis=5000;
+
+    @ConfigProperty(name = "org.acme.objectdetection.healthcheck.delay.millis", defaultValue = "2000")
+    int healthCheckStartDelayMillis = 2000;
+
+    @ConfigProperty(name = "org.acme.objectdetection.healthcheck.interval.millis", defaultValue = "10000")
+    int healthCheckIntervalMillis = 10000;
+
     @ConfigProperty(name = "org.acme.djl.model.zip.path", defaultValue = AppUtils.NA)
     String modelZipPath;
 
@@ -142,13 +151,20 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
     @Inject
     ModelStorageLifecycle modelSL;
 
+    @Inject
+    HealthCheckMonitor hMonitor;
+
     ZooModel<Image, DetectedObjects> model;
+    AppStatus aStatus = new AppStatus();
     File rawAndBoxedImageFileDir;
     VideoCapture vCapture = null;
     VideoCapturePayload previousCapture;
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern(PATTERN_FORMAT).withZone(ZoneId.systemDefault());
-    Cancellable multiCancellable = null;
+    Cancellable multiVCaptureCancellable = null;
+    Cancellable multiHealthCancellable = null;
     Multi<Long> vCaptureStreamer = null;
+
+
 
     /* The Mat class of OpenCV library is used to store the values of an image.
      * It represents an n-dimensional array and is used to store image data of grayscale or color images, voxel volumes, vector fields, tensors, histograms, etc
@@ -187,6 +203,9 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
             //     On a different thread, this app will periodically evaluate the latest captured frame at that instant in time
             refreshVideoCaptureStreamer();
 
+            // 7) Begin to monitor health of various components such as MQTT connection
+            monitorHealth();
+
         }catch(RuntimeException x) {
             throw x;
         }catch(Throwable x){
@@ -197,38 +216,40 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
     }
 
     private void refreshVideoCaptureStreamer() {
-        if(multiCancellable != null){
-            multiCancellable.cancel();
-            multiCancellable = null;
+        if(multiVCaptureCancellable != null){
+            multiVCaptureCancellable.cancel();
+            multiVCaptureCancellable = null;
             vCaptureStreamer = null;
+            aStatus.setVideoStatus(false);
         }
 
-        vCaptureStreamer = Multi.createFrom().ticks().every((Duration.ofMillis(videoCaptureIntevalMillis))).onCancellation().invoke( () -> {
+        vCaptureStreamer = Multi.createFrom()
+            .ticks().startingAfter(Duration.ofMillis(vCaptureDelayMillis)).every((Duration.ofMillis(videoCaptureIntevalMillis))).onCancellation().invoke( () -> {
                 log.info("just cancelled video capture streamer");
         });
-        continueToPredict = true;
-        multiCancellable = vCaptureStreamer.subscribe().with( (i) -> {
+        multiVCaptureCancellable = vCaptureStreamer.subscribe().with( (i) -> {
             if(vCapture != null)
-                vCapture.read(unboxedMat);
+            vCapture.read(unboxedMat);
         });
+        aStatus.setVideoStatus(true);
     }
 
     private void loadModel(String newModelZipPath, String newModelZipName) {
 
         String existingModelFilePath = this.modelZipPath+"/"+this.modelZipName;
         String newModelFilePath = newModelZipPath+"/"+newModelZipName;
-        log.infov("loadModel() {0}", newModelFilePath);
         try { 
             Criteria.Builder<Image, DetectedObjects> cBuilder = Criteria.builder()
-                .setTypes(Image.class, DetectedObjects.class) // defines input and output data type
-                .optEngine("OnnxRuntime")  // Specify OnnX explicitly because classpath also includes pytorch
-                .optTranslatorFactory(new YoloV5TranslatorFactory())
-                .optProgress(new ProgressBar())
-                .optArgument("optApplyRatio", true)  // post process
-                .optArgument("rescale", true); // post process
-
+            .setTypes(Image.class, DetectedObjects.class) // defines input and output data type
+            .optEngine("OnnxRuntime")  // Specify OnnX explicitly because classpath also includes pytorch
+            .optTranslatorFactory(new YoloV5TranslatorFactory())
+            .optProgress(new ProgressBar())
+            .optArgument("optApplyRatio", true)  // post process
+            .optArgument("rescale", true); // post process
+            
             // If a custom model is not specified, then have DJL pull its default model for ONNX engine
             if(!AppUtils.NA.equals(newModelZipPath)){
+                log.infov("loadModel() {0}", newModelFilePath);
                 cBuilder
                     .optModelUrls(newModelFilePath)
                     .optModelName(this.modelName)
@@ -264,7 +285,7 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
     @Scheduled(every = "{org.acme.objectdetection.delay.between.evaluation.seconds}" , delayed = "{org.acme.objectdetection.initial.capture.delay.seconds}", delayUnit = TimeUnit.SECONDS)
     void scheduledCapture() {
         
-        if (continueToPredict && !unboxedMat.empty()) {
+        if (aStatus.continueToPredict() && !unboxedMat.empty()) {
             Instant startCaptureTime = Instant.now();
 
             Mat matCopy = unboxedMat.clone();
@@ -591,6 +612,29 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
         }
     }
 
+    private void monitorHealth() {
+
+        log.info("monitorHealth() starting .....");
+        Multi<Long> healthStreamer = Multi.createFrom()
+            .ticks().startingAfter(Duration.ofMillis(healthCheckStartDelayMillis)).every((Duration.ofMillis(healthCheckIntervalMillis)))
+            .onFailure().invoke(e -> {
+                log.error("error with health check: "+e.getMessage());
+            })
+            .onCancellation().invoke( () -> {
+                log.info("just cancelled health check streamer");
+            });
+
+        multiHealthCancellable = healthStreamer.subscribe().with( (i) -> {
+
+            try {
+                aStatus.setSmallryeStatus(hMonitor.sitRep());
+            } catch (Throwable e) {
+                aStatus.setSmallryeStatus(false);
+                e.printStackTrace();
+            }
+        });
+    }
+
      @Incoming(AppUtils.MODEL_NOTIFY)
      public void processModelStateChangeNotification(byte[] nMessageBytes) throws JsonMappingException, JsonProcessingException, UnsupportedEncodingException{
         String nMessage = new String(nMessageBytes);
@@ -603,6 +647,7 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
         if(AppUtils.S3_OBJECT_CREATED.equals(modelN.eventName)){
 
             this.stopPrediction();
+            this.aStatus.setModelStatus(false);
             org.acme.apps.s3.Record record = modelN.records.get(0);
             String fileName = URLDecoder.decode(record.s3.object.key, "UTF-8");
             String fileSize = record.s3.object.size;
@@ -610,7 +655,7 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
             if(success){
                 loadModel(this.modelZipPath, fileName);
                 modelSL.unzipModelAndRefreshModelClassList();
-                this.continueToPredict = true;
+                this.aStatus.setModelStatus(success);
             }
 
         }else if(AppUtils.S3_OBJECT_DELETED.equals(modelN.eventName)) {
@@ -626,7 +671,7 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
     
     public Uni<Response> predict() {
         log.info("will now begin to predict on video capture stream");
-        this.continueToPredict=true;
+        this.aStatus.setApiStatus(true);
         Response eRes = Response.status(Response.Status.OK).entity(this.videoCaptureDevice).build();
         return Uni.createFrom().item(eRes);
     }
@@ -635,7 +680,7 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
     public Uni<Response> stopPrediction() {
 
         log.info("stopPrediction");
-        this.continueToPredict=false;
+        this.aStatus.setApiStatus(false);
         this.previousCapture=null;
         Response eRes = Response.status(Response.Status.OK).entity(this.videoCaptureDevice).build();
         return Uni.createFrom().item(eRes);
@@ -650,10 +695,48 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
 
     @PreDestroy
     public void shutdown() {
-        multiCancellable.cancel();
+        multiVCaptureCancellable.cancel();
         if(vCapture != null && vCapture.isOpened()){
             vCapture.release();
             log.infov("shutdown() video capture device = {0}", this.videoCaptureDevice );
         }
+
+        multiHealthCancellable.cancel();
+    }
+
+    class AppStatus {
+    
+        boolean smallryeStatus = false;
+        boolean videoStatus = false;
+        boolean modelStatus = true;
+        boolean apiStatus = true;
+    
+        public void setSmallryeStatus(boolean smallryeStatus) {
+            this.smallryeStatus = smallryeStatus;
+        }
+    
+        public void setVideoStatus(boolean videoStatus) {
+            this.videoStatus = videoStatus;
+        }
+    
+        public void setModelStatus(boolean x){
+            modelStatus = x;
+        }
+    
+        public void setApiStatus(boolean x){
+            apiStatus = x;
+        }
+    
+        public boolean continueToPredict(){
+            if(!smallryeStatus || !videoStatus || !modelStatus || !apiStatus){
+                log.warnv("continueToPredict() [smallryeStatus,videoStatus,modelStatus,apiStatus] {0}, {1}, {2}, {3}", smallryeStatus, videoStatus, modelStatus, apiStatus);
+                return false;
+            }
+    
+            return true;
+        }
+    
+    
     }
 }
+

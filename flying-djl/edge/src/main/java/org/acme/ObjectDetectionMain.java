@@ -16,10 +16,13 @@ import jakarta.ws.rs.sse.Sse;
 import jakarta.ws.rs.sse.SseEventSink;
 
 import org.acme.apps.ILiveObjectDetection;
+
+import org.acme.apps.HealthCheckMonitor;
+
+import io.quarkus.runtime.ShutdownEvent;
 import io.quarkus.runtime.StartupEvent;
 import io.quarkus.vertx.ConsumeEvent;
 import io.smallrye.mutiny.Uni;
-
 import org.jboss.logging.Logger;
 
 //https://github.com/limadelrey/quarkus-sse/blob/master/src/main/java/org/limadelrey/quarkus/sse/SimpleSSE.java
@@ -49,12 +52,16 @@ public class ObjectDetectionMain extends DJLMain {
 
     void startup(@Observes StartupEvent event)  {
 
+
         super.setDjlApp( lidInstance.get() );
 
         log.info("startup() djlApp = "+lidInstance.get());
 
         this.eventBuilder = sse.newEventBuilder();
+    }
 
+    public void shutdown(@Observes ShutdownEvent e){
+        log.info("shutting down");
     }
 
     @ConsumeEvent(AppUtils.LIVE_OBJECT_DETECTION)

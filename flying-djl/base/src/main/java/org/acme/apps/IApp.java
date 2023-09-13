@@ -17,5 +17,8 @@ public interface IApp {
     public Uni<Response> listAppModelInputsAndOutputs(ZooModel<?,?> appModel);
 
     public ZooModel<?,?> getAppModel();
+
+    public boolean getContinueToPredict();
+    public void setContinueToPredict(boolean x);
   
 }
