@@ -1,4 +1,4 @@
-#!/bin/bash -v
+#!/bin/sh -v
 cd $SIMPLEVIS_DATA/workspace
 curl $MINIO_CLIENT_URL/mc -o mc
 chmod +x mc

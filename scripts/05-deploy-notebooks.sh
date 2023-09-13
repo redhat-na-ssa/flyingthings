@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 oc project flyingthings-standalone
 nbpod=`oc get po|grep -v NAME|grep flyingthings-notebook|awk '{ print $1 }'`
 oc cp ../notebooks/01-training-prep.ipynb $nbpod:/opt/app-root/src/

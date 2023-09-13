@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 set -x
 cd $SIMPLEVIS_DATA
 curl $MINIO_CLIENT_URL/mc -o mc

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 check_namespace(){
   NAMESPACE=$(oc project -q)

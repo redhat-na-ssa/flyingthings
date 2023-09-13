@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 cd $SIMPLEVIS_DATA/workspace
 echo "*************** Training Run Results*************************"
 cat $SIMPLEVIS_DATA/workspace/runs/train/results.csv

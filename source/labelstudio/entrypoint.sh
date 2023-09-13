@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 source env/bin/activate
 cd /opt/app-root/src/.local
 

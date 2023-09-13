@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 MINCFG=miniocfg
 ./mc --config-dir ${MINCFG} cp $BASE_MODEL myminio/$PRETRAINED_BUCKET/model_pretrained.pt --insecure
