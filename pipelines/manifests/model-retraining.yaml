@@ -94,8 +94,6 @@ spec:
       taskRef:
         kind: Task
         name: check-gpu
-      runAfter:
-        - fetch-repository
     - name: get-dataset
       taskRef:
         name: get-dataset

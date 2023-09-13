@@ -11,23 +11,28 @@ spec:
       description: The bash script you want to run
       type: string
       default: |
+        #!/usr/bin/env sh
         pwd && ls -l && id
         echo "SOURCE_DIR: ${SOURCE_DIR}" && ls -l "${SOURCE_DIR}"
+        date | tee $(results.output.path)
     - name: IMAGE
       description: The image used to run the script
       type: string
       default: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
+    - name: INPUT
+      description: Generic input for environment
+      type: string
+      default: ''
   steps:
     - name: run-script
       image: $(params.IMAGE)
       script: |
-        #!/usr/bin/env sh
-        SOURCE_DIR=${SOURCE_DIR:-$HOME}
-
         $(params.SCRIPT)
       env:
         - name: SOURCE_DIR
           value: $(workspaces.source.path)
+        - name: INPUT
+          value: $(params.INPUT)
   workspaces:
     - name: source
       mountPath: /source

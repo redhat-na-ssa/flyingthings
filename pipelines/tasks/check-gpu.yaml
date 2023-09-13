@@ -7,10 +7,6 @@ spec:
     - name: output
       description: Generic output you can use as a result
   params:
-    - name: SCRIPT
-      description: The bash script you want to run
-      type: string
-      default: ""
     - name: IMAGE
       description: The image used to run the script
       type: string
@@ -19,7 +15,7 @@ spec:
     - name: can-i-haz-gpu
       image: $(params.IMAGE)
       script: |
-        #!/usr/bin/env bash
+        #!/usr/bin/env sh
 
         WAIT_TIMEOUT=12m
 
@@ -44,11 +40,8 @@ spec:
         oc wait \
           pod/gpu-operator-test \
           --for=jsonpath='{.status.phase}'=Succeeded \
-          --timeout="${WAIT_TIMEOUT}" \
-            && echo "GPU Available"
+          --timeout="${WAIT_TIMEOUT}"
             
-        oc get pod/gpu-operator-test || echo ERROR | tee $(results.output.path)
-
-        $(params.SCRIPT)
+        oc get pod/gpu-operator-test -o jsonpath='{.status.phase}' | tee $(results.output.path)
         
         exit 0
