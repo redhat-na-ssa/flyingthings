@@ -4,11 +4,11 @@ metadata:
   name: flyingthings-images-pipeline
 spec:
   params:
-    - name: git-url
+    - name: GIT_URL
       default: https://github.com/redhat-na-ssa/flyingthings.git
       description: url of the git repo for the code of deployment
       type: string
-    - name: git-revision
+    - name: GIT_REVISION
       default: main
       description: revision to be used from repo of the code for deployment
       type: string
@@ -129,13 +129,13 @@ spec:
     - name: fetch-repository
       params:
         - name: url
-          value: $(params.git-url)
+          value: $(params.GIT_URL)
         - name: subdirectory
           value: ''
         - name: deleteExisting
           value: 'true'
         - name: revision
-          value: $(params.git-revision)
+          value: $(params.GIT_REVISION)
       taskRef:
         kind: ClusterTask
         name: git-clone
@@ -457,7 +457,8 @@ spec:
             --add \
             --name=simplevis-data-volume \
             --type=emptyDir \
-            --mount-path=/opt/app-root/src/simplevis-data
+            --mount-path=/opt/app-root/src/simplevis-data \
+            --overwrite
           
           oc apply -f - <<EOF
           apiVersion: route.openshift.io/v1

@@ -4,11 +4,11 @@ metadata:
   name: deploy-label-studio
 spec:
   params:
-    - name: git-url
+    - name: GIT_URL
       default: https://github.com/redhat-na-ssa/flyingthings.git
       description: url of the git repo for the code of deployment
       type: string
-    - name: git-revision
+    - name: GIT_REVISION
       default: main
       description: revision to be used from repo of the code for deployment
       type: string
@@ -31,13 +31,13 @@ spec:
     - name: fetch-repository
       params:
         - name: url
-          value: $(params.git-url)
+          value: $(params.GIT_URL)
         - name: subdirectory
           value: ''
         - name: deleteExisting
           value: 'true'
         - name: revision
-          value: $(params.git-revision)
+          value: $(params.GIT_REVISION)
       taskRef:
         kind: ClusterTask
         name: git-clone
@@ -48,10 +48,10 @@ spec:
       params:
         - name: IMAGE
           value: $(params.LABELSTUDIO_IMAGE)
-        - name: DOCKERFILE_PATH
+        - name: CONTEXT
           value: $(params.LABELSTUDIO_DOCKERFILE)
         - name: DOCKERFILE
-          value: $(workspaces.path)/$(params.LABELSTUDIO_DOCKERFILE)/Dockerfile
+          value: ./Dockerfile
       runAfter:
         - fetch-repository
       taskRef:
