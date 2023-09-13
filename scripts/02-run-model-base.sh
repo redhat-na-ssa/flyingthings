@@ -1,5 +1,11 @@
 #!/bin/sh
 
+get_namespace(){
+  NAMESPACE=$(oc project -q 2>/dev/null)
+  echo "NAMESPACE: ${NAMESPACE}"
+  echo ""
+}
+
 check_pipeline(){
   PIPELINE_NAME="${1}"
 
@@ -41,6 +47,8 @@ debug_pipeline(){
 
 start_pipelines(){
 
+  get_namespace
+
   # Hosted -p MINIO_CLIENT_URL="https://dl.min.io/client/mc/release/linux-amd64"
   # Local  -p MINIO_CLIENT_URL="http://util02.davenet.local"
 
@@ -49,7 +57,7 @@ start_pipelines(){
   GIT_REVISION=cory-review
 
   # kludge
-  [ "${PWD##*/}" != "scripts" ] && pushd scripts
+  [ "${PWD##*/}" != "scripts" ] && cd scripts
 
   # debug_pipeline; exit 0
 

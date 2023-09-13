@@ -178,7 +178,7 @@ vi 10-run-model-flyingthings-training.sh
 All the supplied params should be fine, but we will want to change a few if we’re not running a GPU.  If your system has no available GPUs then set *GPU* to *N*. Also, since there is no GPU we’ll need to change the *BATCH_SIZE* as it is set to maximize if there are GPUs. You should set it to 2 to avoid any memory issues.  
 
 ```
-tkn pipeline start training-x-pipeline \
+tkn pipeline start model-retraining \
   -w name=sourcecode,volumeClaimTemplateFile=code-pvc.yaml \
   -w name=shared-workspace,volumeClaimTemplateFile=work-pvc.yaml \
   -p NAMESPACE="$TABLESPACE" \
