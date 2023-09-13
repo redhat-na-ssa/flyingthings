@@ -15,8 +15,8 @@ debug_pipeline(){
   tkn pipeline start "${PIPELINE_NAME}" \
     -w name=source,volumeClaimTemplateFile=code-pvc.yaml \
     -w name=shared-workspace,volumeClaimTemplateFile=work-pvc.yaml \
-    -p git-url="https://github.com/redhat-na-ssa/flyingthings.git" \
-    -p git-revision="main" \
+    -p GIT_URL="https://github.com/redhat-na-ssa/flyingthings.git" \
+    -p GIT_REVISION="main" \
     -p YOLO_IMAGE="${IMAGE_REGISTRY}/${NAMESPACE}/yolo:latest" \
     -p UBI_IMAGE="${IMAGE_REGISTRY}/${NAMESPACE}/base-ubi9:latest" \
     -p MINIMAL_IMAGE="${IMAGE_REGISTRY}/${NAMESPACE}/minimal-notebook:latest" \
@@ -64,8 +64,8 @@ start_pipelines(){
   # debug_pipeline; exit 0
 
   tkn pipeline start "${PIPELINE_NAME}" \
-    -p git-url="${GIT_URL}" \
-    -p git-revision="${GIT_REVISION}" \
+    -p GIT_URL="${GIT_URL}" \
+    -p GIT_REVISION="${GIT_REVISION}" \
     -p NAMESPACE="${NAMESPACE}" \
     -p BASE_MODEL="yolov5s.pt" \
     -w name=source,volumeClaimTemplateFile=code-pvc.yaml \

@@ -4,11 +4,11 @@ metadata:
   name: training-x-pipeline
 spec:
   params: 
-    - name: git-url
+    - name: GIT_URL
       default: https://github.com/redhat-na-ssa/flyingthings.git
       description: url of the git repo for the code of deployment
       type: string
-    - name: git-revision
+    - name: GIT_REVISION
       default: main
       description: revision to be used from repo of the code for deployment
       type: string
@@ -80,13 +80,13 @@ spec:
     - name: fetch-repository
       params:
         - name: url
-          value: $(params.git-url)
+          value: $(params.GIT_URL)
         - name: subdirectory
           value: ''
         - name: deleteExisting
           value: 'true'
         - name: revision
-          value: $(params.git-revision)
+          value: $(params.GIT_REVISION)
       taskRef:
         kind: ClusterTask
         name: git-clone
@@ -383,10 +383,10 @@ spec:
       taskRef:
         name: training-summary
       params:
-        - name: git-url
-          value: $(params.git-url)
-        - name: git-revision
-          value: $(params.git-revision)
+        - name: GIT_URL
+          value: $(params.GIT_URL)
+        - name: GIT_REVISION
+          value: $(params.GIT_REVISION)
         - name: NAMESPACE
           value: $(params.NAMESPACE)
         - name: BATCH_SIZE
