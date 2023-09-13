@@ -62,7 +62,7 @@ start_pipelines(){
     -w name=source,volumeClaimTemplateFile=code-pvc.yaml \
     --use-param-defaults
 
-  check_pipeline flyingthings-images-pipeline
+  check_pipeline model-base
  
   tkn pipeline start "${PIPELINE_NAME}" \
     -p GIT_URL="${GIT_URL}" \
