@@ -63,8 +63,7 @@ spec:
         && echo "MINIO_SECRETKEY: $MINIO_SECRETKEY" \
         && echo "MINIO_CLIENT_URL: $MINIO_CLIENT_URL" \
         && echo "DEPLOY: $DEPLOY" \
-        && echo "MODEL_NAME: $MODEL_NAME" \
-        && echo "GPU: $GPU"
+        && echo "MODEL_NAME: $MODEL_NAME"
       env:
       - name: GIT_URL
         value: $(params.GIT_URL)
