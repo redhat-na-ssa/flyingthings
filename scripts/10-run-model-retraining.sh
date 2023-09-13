@@ -37,7 +37,7 @@ start_pipelines(){
 
   check_pipeline model-retraining
   tkn pipeline start "${PIPELINE_NAME}" \
-    -w name=sourcecode,volumeClaimTemplateFile=code-pvc.yaml \
+    -w name=source,volumeClaimTemplateFile=code-pvc.yaml \
     -w name=shared-workspace,volumeClaimTemplateFile=work-pvc.yaml \
     -p GIT_URL="${GIT_URL}" \
     -p GIT_REVISION="${GIT_REVISION}" \

@@ -92,7 +92,7 @@ spec:
         name: git-clone
       workspaces:
         - name: output
-          workspace: sourcecode
+          workspace: source
     - name: get-dataset
       taskRef:
         name: get-dataset
@@ -115,7 +115,7 @@ spec:
         - fetch-repository
       workspaces:
         - name: source
-          workspace: sourcecode
+          workspace: source
         - name: workspace
           workspace: shared-workspace
     - name: create-classfile
@@ -130,7 +130,7 @@ spec:
         - get-dataset
       workspaces:
         - name: source
-          workspace: sourcecode
+          workspace: source
         - name: workspace
           workspace: shared-workspace
     - name: image-resize
@@ -153,7 +153,7 @@ spec:
         - create-classfile
       workspaces:
         - name: source
-          workspace: sourcecode
+          workspace: source
         - name: workspace
           workspace: shared-workspace
     - name: distribute-dataset
@@ -166,7 +166,7 @@ spec:
         - image-resize
       workspaces:
         - name: source
-          workspace: sourcecode
+          workspace: source
         - name: workspace
           workspace: shared-workspace
     - name: train-model-gpu
@@ -193,7 +193,7 @@ spec:
         - distribute-dataset
       workspaces:
         - name: source
-          workspace: sourcecode
+          workspace: source
         - name: workspace
           workspace: shared-workspace
     - name: train-model-cpu
@@ -221,7 +221,7 @@ spec:
         - distribute-dataset
       workspaces:
         - name: source
-          workspace: sourcecode
+          workspace: source
         - name: workspace
           workspace: shared-workspace
     - name: export-model
@@ -241,7 +241,7 @@ spec:
         - train-model-gpu
       workspaces:
         - name: source
-          workspace: sourcecode
+          workspace: source
         - name: workspace
           workspace: shared-workspace
     - name: push-results
@@ -268,7 +268,7 @@ spec:
         - export-model
       workspaces:
         - name: source
-          workspace: sourcecode
+          workspace: source
         - name: workspace
           workspace: shared-workspace
     - name: deploy-model-x
@@ -323,7 +323,7 @@ spec:
             optional: true
       workspaces:
         - name: source
-          workspace: sourcecode
+          workspace: source
       runAfter:
         - push-results
       params:
@@ -421,9 +421,9 @@ spec:
           value: $(params.GPU)
       workspaces:
         - name: source
-          workspace: sourcecode
+          workspace: source
         - name: workspace
           workspace: shared-workspace
   workspaces:
     - name: shared-workspace
-    - name: sourcecode
+    - name: source
