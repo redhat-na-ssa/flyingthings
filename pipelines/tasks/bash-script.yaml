@@ -1,0 +1,20 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: bash-script
+spec:
+  params:
+    - name: SCRIPT
+      description: The bash script you want to run
+      type: string
+      default: |
+        pwd && ls -l
+  steps:
+    - name: run-script
+      image: ubi9:latest
+      script: |
+        #!/usr/bin/env bash
+        $(params.SCRIPT)
+  workspaces:
+    - name: source
+      mountPath: /source
