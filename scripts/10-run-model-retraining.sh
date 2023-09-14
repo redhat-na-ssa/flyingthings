@@ -49,13 +49,7 @@ start_pipelines(){
     -p MAX_WIDTH="200" \
     -p WEIGHTS=flyingthings.pt \
     -p DATASET_ZIP=flyingthings-yolo.zip \
-    -p MINIO_ENDPOINT=http://minio:9000 \
-    -p MINIO_ACCESSKEY=minioadmin \
-    -p MINIO_SECRETKEY=minioadmin \
-    -p MINIO_BUCKET=flyingthings \
     -p MODEL_NAME=model-flyingthings \
-    -p MINIO_CLIENT_URL=https://dl.min.io/client/mc/release/linux-amd64 \
-    -p DEPLOY="Y" \
     --use-param-defaults --showlog
 
 }

@@ -13,6 +13,7 @@ spec:
       description: revision to be used from repo of the code for deployment
       type: string
     - name: NAMESPACE
+      default: modemo
       description: target deployment for the project
       type: string
     - name: BATCH_SIZE
@@ -65,12 +66,14 @@ spec:
       type: string
     - name: MINIO_CLIENT_URL
       description: location of minio client binary
-      default: https://dl.min.io/client/mc/release/linux-amd64/mc
+      default: https://dl.min.io/client/mc/release/linux-amd64
       type: string
     - name: DEPLOY
+      default: 'Y'
       description: flag for deploying model server along with model
       type: string
     - name: MODEL_NAME
+      default: model
       description: name used to deploy the model and model server
       type: string
   tasks:
@@ -192,8 +195,8 @@ spec:
         - name: NAMESPACE
           value: $(params.NAMESPACE)
       runAfter:
-        - distribute-dataset
         - check-gpu
+        - distribute-dataset
       workspaces:
         - name: source
           workspace: source
@@ -222,8 +225,8 @@ spec:
         - name: NAMESPACE
           value: $(params.NAMESPACE)
       runAfter:
-        - distribute-dataset
         - check-gpu
+        - distribute-dataset
       workspaces:
         - name: source
           workspace: source
