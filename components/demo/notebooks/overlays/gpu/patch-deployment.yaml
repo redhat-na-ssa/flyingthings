@@ -1,0 +1,12 @@
+- op: replace
+  path:  /metadata/name
+  value: flyingthings-notebook
+- op: replace
+  path:  /spec/template/spec/containers/0/resources
+  value:
+    limits:
+      nvidia.com/gpu: 1
+- op: add
+  path:  /spec/template/spec/nodeSelector
+  value:
+    nvidia.com/gpu.deploy.driver: 'true'
