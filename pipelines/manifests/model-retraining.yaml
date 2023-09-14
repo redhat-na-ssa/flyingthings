@@ -203,11 +203,11 @@ spec:
         - name: workspace
           workspace: shared-workspace
     - name: train-model-cpu
-      when:
-        - input: "Succeeded"
-          operator: notin
-          values: 
-            - "$(tasks.check-gpu.results.output)"
+      # when:
+      #   - input: "Succeeded"
+      #     operator: notin
+      #     values: 
+      #       - "$(tasks.check-gpu.results.output)"
       taskRef:
         name: train-model-cpu
       timeout: "2h"
