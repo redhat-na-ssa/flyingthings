@@ -6,37 +6,14 @@ resources:
 
 patches:
   - target:
-      group: image.openshift.io
-      kind: ImageStream
-    patch: |-
-      - op: replace
-        path: /metadata/namespace
-        value: redhat-ods-applications
-  - target:
-      group: image.openshift.io
-      kind: ImageStreamTag
-    patch: |-
-      - op: replace
-        path: /metadata/namespace
-        value: redhat-ods-applications
-  - target:
-      group: build.openshift.io
-      kind: BuildConfig
-    patch: |-
-      - op: replace
-        path: /spec/output/to/namespace
-        value: redhat-ods-applications
-  - target:
-      group: build.openshift.io
-      kind: BuildConfig
-      # name: opencv-notebook-graphviz
-    patch: |-
-      - op: replace
-        path: /spec/strategy/dockerStrategy/from/namespace
-        value: redhat-ods-applications
-  - target:
-      group: user.openshift.io
       version: v1
-      kind: Group
-      name: workshop-users
-    path: patch-workshop-users.yaml
+      kind: PersistentVolumeClaim
+    patch: |-
+      - op: replace
+        path: /spec/resources/requests/storage
+        value: 10Gi
+  - target:
+      group: apps
+      kind: Deployment
+      name: label-studio
+    path: patch-deployment.yaml

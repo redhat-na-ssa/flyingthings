@@ -1,0 +1,34 @@
+- op: replace
+  path:  /spec/template/spec/containers/0/env
+  value:
+    - name: DJANGO_DB
+      value: default
+    - name: JSON_LOG
+      value: "1"
+- op: add
+  path: /spec/template/spec/initContainers
+  value:
+    - name: setup
+      command:
+        - bash
+        - -c
+        - |
+          #/bin/sh
+
+          mkdir -p /opt/app-root/src/.local/share
+          cd /opt/app-root/src/.local/share
+          fileid="16qq4YFPmU2rQ7ZPRfqL0oBmOCz_Dnbp7"
+          filename="label-studio.tar.gz"
+          curl -c ./cookie -s -L "https://drive.google.com/uc?export=download&id=${fileid}" > /dev/null
+          curl -Lb ./cookie "https://drive.google.com/uc?export=download&confirm=`awk '/download/ {print $NF}' ./cookie`&id=${fileid}" -o ${filename}
+          tar xzf label-studio.tar.gz
+
+      image: label-studio:s2i
+      volumeMounts:
+        - mountPath: /opt/app-root/src
+          name: label-studio-data
+          subPath: s2i
+      resources:
+        limits:
+          cpu: 500m
+          memory: 512Mi
