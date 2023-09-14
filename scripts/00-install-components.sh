@@ -18,5 +18,9 @@ setup_minio(){
   oc apply -k components/demo/minio
 }
 
+setup_label_studio(){
+  oc apply -k compoents/demo/label-studio/overlays/default
+}
+
 check_namespace "$@"
 setup_minio
