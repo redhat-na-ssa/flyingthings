@@ -1,0 +1,33 @@
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: label-studio-s2i
+  annotations:
+    app.openshift.io/vcs-ref: main
+    app.openshift.io/vcs-uri: https://github.com/redhat-na-ssa/demo-ocp-label-studio.git
+  labels:
+    app.openshift.io/runtime: python
+    app.openshift.io/runtime-version: 3.9-ubi8
+spec:
+  output:
+    to:
+      kind: ImageStreamTag
+      name: label-studio:s2i
+  runPolicy: SerialLatestOnly
+  source:
+    contextDir: /container/s2i
+    git:
+      ref: main
+      uri: https://github.com/redhat-na-ssa/demo-ocp-label-studio.git
+    type: Git
+  strategy:
+    sourceStrategy:
+      from:
+        kind: ImageStreamTag
+        name: python:3.9-ubi8
+        namespace: openshift
+    type: Source
+  triggers:
+  - imageChange: {}
+    type: ImageChange
+  - type: ConfigChange
