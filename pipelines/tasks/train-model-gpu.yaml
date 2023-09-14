@@ -48,6 +48,7 @@ spec:
     - name: dshm
       emptyDir:
           medium: Memory
+          sizeLimit: 4Gi
     - name: training
       emptyDir: {}
   workspaces:

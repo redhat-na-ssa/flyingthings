@@ -11,13 +11,18 @@ spec:
       description: The image used to run the script
       type: string
       default: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
+    - name: TIMEOUT
+      description: How long to wait to test GPUs before giving up
+      type: string
+      default: 12m
   steps:
     - name: can-i-haz-gpu
+      env:
+        - name: TIMEOUT
+          value: $(params.TIMEOUT)
       image: $(params.IMAGE)
       script: |
         #!/usr/bin/env sh
-
-        WAIT_TIMEOUT=12m
 
         oc apply -f - <<YAML
         apiVersion: v1
@@ -35,12 +40,12 @@ spec:
                   nvidia.com/gpu: 1
         YAML
 
-        echo "Waiting up to ${WAIT_TIMEOUT} for pod to reach Completed..."
+        echo "Waiting up to ${TIMEOUT} for pod to run..."
 
         oc wait \
           pod/gpu-operator-test \
           --for=jsonpath='{.status.phase}'=Succeeded \
-          --timeout="${WAIT_TIMEOUT}"
+          --timeout="${TIMEOUT}"
         
         if [[ $? -eq 1 ]]; then
           echo "Timeout Reached" | tee $(results.output.path)
