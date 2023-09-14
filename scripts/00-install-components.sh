@@ -24,3 +24,4 @@ setup_label_studio(){
 
 check_namespace "$@"
 setup_minio
+setup_label_studio

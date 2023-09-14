@@ -8,10 +8,24 @@ patches:
   - target:
       version: v1
       kind: PersistentVolumeClaim
+      name: label-studio-data
     patch: |-
       - op: replace
         path: /spec/resources/requests/storage
         value: 10Gi
+  - target:
+      group: build.openshift.io
+      kind: BuildConfig
+    patch: |-
+      - op: replace
+        path: /spec/source/contextDir
+        value: components/demo/label-studio/container/s2i
+      - op: replace
+        path: /spec/source/git/uri
+        value: https://github.com/redhat-na-ssa/flyingthings.git
+      - op: replace
+        path: /spec/source/git/ref
+        value: cory-review
   - target:
       group: apps
       kind: Deployment
