@@ -4,6 +4,7 @@ metadata:
   name: corrective-candidates
   labels:
     monitoring-key: corrective-candidates
+  namespace: user1-flying-djl
 spec:
   instanceSelector:
     matchLabels:

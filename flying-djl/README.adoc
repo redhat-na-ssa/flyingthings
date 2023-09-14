@@ -106,77 +106,23 @@ Accessible without a RHN subscription
 
 In this demo, the MQTT acceptor of Red Hat AMQ Artemis needs to be accessed remotely (from outside the OpenShift cluster) by the 'edge' application.  This can be accomplished via either of the following mechanisms:
 
-===== LoadBalancer service
-This is the default approach.
-If MQTT client(s) OpenShift are on the same LAN, the a _LoadBalancer_ implementation such as MetalLB can be used.
 
 ===== Passthrough TLS
 
-* Reference:
+This is the default approach and is configured automatically.
+More details of this configuration can be found in the appendix of this document.
 
-** link:https://artemiscloud.io/docs/tutorials/external_mqtt_clients/[Artemis Cloud: external clients]
-** link:https://smallrye.io/smallrye-reactive-messaging/smallrye-reactive-messaging/3.4/mqtt/mqtt.html[SmallRye Reactive Messaging: MQTT]
+===== LoadBalancer service
 
-. TO-DO:  
-.. Why is a client not able to connect to an mqtt artemis acceptor via an unencrypted route ?????
-.. link:https://artemiscloud.io/docs/tutorials/cert-manager-and-trust-manager/[Use Cert Manager]
+If your OCP cluster supports a kubernetes _LoadBalancer_ service, then this approach is viable as well.
 
-. Review/modify configuration of the Artemis broker to be deployed to OpenShift:
+After deploying the AMQ Broker (in the next section), the network address and MQTT port can be identified similar to the following:
 
-.. In a text editor, open the following config file in this project: `config_mgmt/gitops/base/amq-broker-app/kubernetes.yml`
-
-.. Review the following section of the config:
-+
 -----
-    # https://artemiscloud.io/docs/tutorials/external_mqtt_clients/
-    - name: mqtt-tls
-      port: 1884     # de-conflict port with default mqtt address
-      protocols: mqtt
-      expose: true
-      sslEnabled: true
-      sslSecret: artemis-tls-secret
+$ oc get service mqtt-lb
+NAME      TYPE           CLUSTER-IP       EXTERNAL-IP                                                              PORT(S)          AGE
+mqtt-lb   LoadBalancer   172.30.199.169   ad41fc250d7174aa9a27e46e6713109a-238829704.us-east-2.elb.amazonaws.com   1883:31858/TCP   27m
 -----
-+
-If not intending to use passthrough TLS for remote access, comment this entire section out.
-
-. Acquire test server and client certificates:
-+
------
-$ A_CERTS_DIR=.artemis_certs && mkdir -p $A_CERTS_DIR
-
-$ wget -O $A_CERTS_DIR/server-keystore.jks https://github.com/apache/activemq-artemis/raw/main/tests/security-resources/server-keystore.jks \
-    && wget -O $A_CERTS_DIR/client-ca-truststore.jks https://github.com/apache/activemq-artemis/raw/main/tests/security-resources/client-ca-truststore.jks
------
-
-
-. Create a kubernetes secret with both server and client certificates:
-+
------
-$ kubectl create secret generic artemis-tls-secret \
-    -n user1-flying-djl \
-    --from-file=broker.ks=$A_CERTS_DIR/server-keystore.jks \
-    --from-file=client.ts=$A_CERTS_DIR/client-ca-truststore.jks \
-    --from-literal=keyStorePassword=securepass \
-    --from-literal=trustStorePassword=securepass
------
-
-. X509 certificate:
-
-.. Create certificate using keytool:
-+
------
-$ wget -O $A_CERTS_DIR/server-ca-keystore.p12 https://github.com/apache/activemq-artemis/raw/main/tests/security-resources/server-ca-keystore.p12
-$ keytool -storetype pkcs12 -keystore \
-    $A_CERTS_DIR/server-ca-keystore.p12 \
-    -storepass securepass -alias server-ca -exportcert -rfc > $A_CERTS_DIR/server-ca.crt
------
-
-.. Inspect certificate:
-+
------
-$ openssl x509 -in $A_CERTS_DIR/server-ca.crt -text
------
-
 
 
 ==== Kustomize
@@ -210,24 +156,7 @@ pod/amq-broker-operator-76b7f5985b-w9pwj condition met
 $ oc apply -k config_mgmt/gitops/base/apps -n user1-flying-djl
 -----
 
-==== Test MQTT via TLS Passthrough
 
-If edge app is to connect to remote MQTT acceptor of remote AMQ Artemis broker via TLS Passthrough, test as follows:
-
-. Wireshark display filter:
-+
------
-tls.handshake.extensions_server_name and ip.addr == 136.29.109.58
------
-+
-image::docs/images/artemis_sni.png[]
-
-. Invoke the remote Artemis broker using an mqtt client:
-+
------
-$ export ARTEMIS_MQTT_HOST=$(oc get route artemis-mqtt-tls-0-svc-rte -n user1-flying-djl --template='{{ .spec.host }}')
-$ mosquitto_pub -d --insecure -t "ExpiryQueue" -m "test" -u admin -P admin  -h $ARTEMIS_MQTT_HOST -p 443 --cafile $A_CERTS_DIR/server-ca.crt
------
 
 
 === Admin Consoles
@@ -906,3 +835,91 @@ libarm_compute-23619548.so        libarm_compute_graph-ebe58799.so  libgomp-d22c
 
 -----
 
+
+== Appendix
+
+=== Artemis TLS Passthrough 
+
+* Reference:
+
+** link:https://artemiscloud.io/docs/tutorials/external_mqtt_clients/[Artemis Cloud: external clients]
+** link:https://smallrye.io/smallrye-reactive-messaging/smallrye-reactive-messaging/3.4/mqtt/mqtt.html[SmallRye Reactive Messaging: MQTT]
+
+. TO-DO:  
+.. Why is a client not able to connect to an mqtt artemis acceptor via an unencrypted route ?????
+.. link:https://artemiscloud.io/docs/tutorials/cert-manager-and-trust-manager/[Use Cert Manager]
+
+. Review/modify configuration of the Artemis broker to be deployed to OpenShift:
+
+.. In a text editor, open the following config file in this project: `config_mgmt/gitops/base/amq-broker-app/kubernetes.yml`
+
+.. Review the following section of the config:
++
+-----
+    # https://artemiscloud.io/docs/tutorials/external_mqtt_clients/
+    - name: mqtt-tls
+      port: 1884     # de-conflict port with default mqtt address
+      protocols: mqtt
+      expose: true
+      sslEnabled: true
+      sslSecret: artemis-tls-secret
+-----
++
+If not intending to use passthrough TLS for remote access, comment this entire section out.
+
+. Acquire test server and client certificates:
++
+-----
+$ A_CERTS_DIR=.artemis_certs && mkdir -p $A_CERTS_DIR
+
+$ wget -O $A_CERTS_DIR/server-keystore.jks https://github.com/apache/activemq-artemis/raw/main/tests/security-resources/server-keystore.jks \
+    && wget -O $A_CERTS_DIR/client-ca-truststore.jks https://github.com/apache/activemq-artemis/raw/main/tests/security-resources/client-ca-truststore.jks
+-----
+
+
+. Create a kubernetes secret with both server and client certificates:
++
+-----
+$ kubectl create secret generic artemis-tls-secret \
+    -n user1-flying-djl \
+    --from-file=broker.ks=$A_CERTS_DIR/server-keystore.jks \
+    --from-file=client.ts=$A_CERTS_DIR/client-ca-truststore.jks \
+    --from-literal=keyStorePassword=securepass \
+    --from-literal=trustStorePassword=securepass
+-----
+
+. X509 certificate:
+
+.. Create certificate using keytool:
++
+-----
+$ wget -O $A_CERTS_DIR/server-ca-keystore.p12 https://github.com/apache/activemq-artemis/raw/main/tests/security-resources/server-ca-keystore.p12
+$ keytool -storetype pkcs12 -keystore \
+    $A_CERTS_DIR/server-ca-keystore.p12 \
+    -storepass securepass -alias server-ca -exportcert -rfc > $A_CERTS_DIR/server-ca.crt
+-----
+
+.. Inspect certificate:
++
+-----
+$ openssl x509 -in $A_CERTS_DIR/server-ca.crt -text
+-----
+
+=== Test MQTT via TLS Passthrough
+
+If edge app is to connect to remote MQTT acceptor of remote AMQ Artemis broker via TLS Passthrough, test as follows:
+
+. Wireshark display filter:
++
+-----
+tls.handshake.extensions_server_name and ip.addr == 136.29.109.58
+-----
++
+image::docs/images/artemis_sni.png[]
+
+. Invoke the remote Artemis broker using an mqtt client:
++
+-----
+$ export ARTEMIS_MQTT_HOST=$(oc get route artemis-mqtt-tls-0-svc-rte -n user1-flying-djl --template='{{ .spec.host }}')
+$ mosquitto_pub -d --insecure -t "ExpiryQueue" -m "test" -u admin -P admin  -h $ARTEMIS_MQTT_HOST -p 443 --cafile $A_CERTS_DIR/server-ca.crt
+-----
