@@ -19,7 +19,7 @@ setup_minio(){
 }
 
 setup_label_studio(){
-  oc apply -k compoents/demo/label-studio/overlays/default
+  oc apply -k components/demo/label-studio/overlays/flyingthings
 }
 
 check_namespace "$@"
