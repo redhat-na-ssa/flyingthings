@@ -10,3 +10,7 @@
 - [ ] Review training pipeline GPU task parameters
 - [ ] Review tasks
 - [ ] Make task `upload-artifacts` more generic
+
+### label-studio login
+user: user1@example.com
+pass: password1
