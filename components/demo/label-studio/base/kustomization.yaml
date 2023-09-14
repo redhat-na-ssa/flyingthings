@@ -16,7 +16,7 @@ resources:
 - db-secret.yaml
 - db-svc.yaml
 # - deploy-patch.yaml
-- deploy-s2i.yaml
+- deploy.yaml
 - is.yaml
 - pvc.yaml
 - route.yaml
