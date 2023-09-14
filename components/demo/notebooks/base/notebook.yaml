@@ -1,64 +1,59 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: training-data
+  name: notebook
 spec:
   accessModes:
     - ReadWriteOnce
   volumeMode: Filesystem
   resources:
     requests:
-      storage: 10Gi
+      storage: 1Gi
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: 'flyingthings-notebook'
-  annotations: {}
+  name: notebook
 spec:
   selector:
     matchLabels:
-      app: flyingthings
+      app: notebook
   replicas: 1
   template:
     metadata:
       labels:
-        app: flyingthings
+        app: notebook
     spec:
       containers:
         - name: container
           image: >-
             image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/yolo-notebook:latest
-          # envFrom:
-          #   - configMapRef:
-          #       name: flyingthings-configmap
           ports:
             - containerPort: 8888
               protocol: TCP
           volumeMounts:
             - mountPath: /mydata
-              name: training-data
+              name: notebook-data
             - mountPath: /dev/shm
               name: dshm
+          resources: {}
       volumes:
-        - name: training-data
+        - name: notebook-data
           persistentVolumeClaim:
-            claimName: training-data
+            claimName: notebook
         - name: dshm
           emptyDir:
              medium: Memory
-      imagePullSecrets: []
   strategy:
     type: Recreate
-  paused: false
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: flyingthings-svc
+  name: notebook
 spec:
   selector:
-    app: flyingthings
+    app: notebook
   ports:
     - protocol: TCP
       port: 8888
@@ -66,16 +61,13 @@ spec:
 kind: Route
 apiVersion: route.openshift.io/v1
 metadata:
-  name: flyingthings-rt
-  labels: {}
+  name: notebook
 spec:
   to:
     kind: Service
-    name: flyingthings-svc
+    name: notebook
   tls:
     termination: edge
     insecureEdgeTerminationPolicy: Allow
-  wildcardPolicy: None
-  path: /
   port:
     targetPort: 8888

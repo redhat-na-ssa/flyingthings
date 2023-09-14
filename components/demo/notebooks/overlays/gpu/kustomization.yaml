@@ -1,12 +1,23 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
+commonLabels:
+  app: flyingthings-notebook
+
 resources:
   - ../../base
 
-# patches:
-#   - +      nodeSelector:
-# +        nvidia.com/gpu.deploy.driver: 'true'
-# +          resources:
-# +            limits:
-# +              nvidia.com/gpu: 1
+patches:
+  - target:
+      version: v1
+      kind: PersistentVolumeClaim
+      name: notebook
+    patch: |-
+      - op: replace
+        path: /spec/resources/requests/storage
+        value: 10Gi
+  - target:
+      group: apps
+      kind: Deployment
+      name: notebook
+    path: patch-deployment.yaml
