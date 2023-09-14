@@ -27,7 +27,7 @@ spec:
             secretKeyRef:
               key: database-name
               name: label-studio-db
-        - name: POSTGRE_USER_NOPE
+        - name: POSTGRE_USER_NAME
           valueFrom:
             secretKeyRef:
               key: database-user
