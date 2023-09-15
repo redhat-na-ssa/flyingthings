@@ -107,6 +107,8 @@ spec:
       taskSpec:
         params:
           - name: SCRIPT
+          - name: IMAGE
+            default: image-registry.openshift-image-registry.svc:5000/cli:latest
         steps:
           - name: debug
             image: ubi9:latest
@@ -114,7 +116,7 @@ spec:
               #!/usr/bin/env bash
               df -h && pwd && ls -al
           - name: run
-            image: cli:latest
+            image: $(params.IMAGE)
             resources: {}
             script: |
               #!/usr/bin/env bash
