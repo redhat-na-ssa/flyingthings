@@ -113,14 +113,8 @@ minio_push_results(){
 }
 
 minio_get_dataset(){
-  pwd
   minio_copy "${MINIO_REMOTE}/${MINIO_BUCKET}/${DATASET_ZIP}" "${DATASET_ZIP}"
-
-  mkdir -p "${SIMPLEVIS_DATA}/workspace/datasets"
-  pushd "${SIMPLEVIS_DATA}/workspace/datasets" || exit
-    unzip "${SIMPLEVIS_DATA}/workspace/${DATASET_ZIP}"
-    ls -l "${SIMPLEVIS_DATA}/workspace/datasets"
-  popd || exit
+  unzip -d datasets "${DATASET_ZIP}"
 }
 
 minio_copy_yolo_model(){
