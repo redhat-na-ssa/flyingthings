@@ -26,8 +26,6 @@ spec:
       type: string
     - name: DATASET_ZIP
       type: string
-    - name: SIMPLEVIS_DATA
-      type: string
     - name: MINIO_BUCKET
       type: string
     - name: MINIO_ACCESSKEY
@@ -84,8 +82,6 @@ spec:
         value: $(params.MINIO_ENDPOINT)
       - name: DATASET_ZIP
         value: $(params.DATASET_ZIP)
-      - name: SIMPLEVIS_DATA
-        value: $(params.SIMPLEVIS_DATA)
       - name: MINIO_BUCKET
         value: $(params.MINIO_BUCKET)
       - name: MINIO_ACCESSKEY

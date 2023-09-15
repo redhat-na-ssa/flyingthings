@@ -4,8 +4,6 @@ metadata:
   name: create-classfile
 spec:
   params:
-    - name: SIMPLEVIS_DATA
-      type: string
     - name: NAMESPACE
       type: string
     - name: IMAGE
@@ -15,15 +13,18 @@ spec:
     - name: create-classfile
       image: $(params.IMAGE)
       script: |
-        cd $(params.SIMPLEVIS_DATA)/workspace/datasets \
-        && $(workspaces.source.path)/source/training/create-classfile.sh \
-        && cat classes.yaml \
-        && mv classes.yaml $(params.SIMPLEVIS_DATA)/workspace
-      env:
-        - name: SIMPLEVIS_DATA
-          value: $(params.SIMPLEVIS_DATA)
-        - name: BASEDIR
-          value: $(workspaces.source.path)/source/training
+        cd $(workspaces.workspace.path)
+
+        SOURCE_DIR=$(workspaces.source.path)
+        BASEDIR=${SOURCE_DIR}/source/training
+        
+        cd datasets \
+        
+        $(workspaces.source.path)/source/training/create-classfile.sh && \
+        cat classes.yaml && \
+        mv classes.yaml $(workspaces.workspace.path)
+
+        pwd && ls -al
   workspaces:
     - name: workspace
       mountPath: /opt/app-root/src/simplevis-data/workspace
