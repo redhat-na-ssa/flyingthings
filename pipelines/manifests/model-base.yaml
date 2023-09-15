@@ -29,7 +29,7 @@ spec:
       description: dockerfile path
       type: string
     - name: YOLO_BUILD_ARGS
-      default: --build-arg env=YOLOv5_VERSION=7.0
+      default: --build-arg env=YOLOv5_VERSION=v7.0
       description: build arguments for yolo
       type: string
     - name: MODEL_IMAGE
@@ -62,7 +62,7 @@ spec:
       default: "flyingthings.pt"
       type: string
     - name: BASE_MODEL
-      default: "yolov8n.pt"
+      default: "yolov5s.pt"
       type: string
     - name: MINIO_ENDPOINT
       default: "http://minio:9000"
