@@ -3,7 +3,7 @@ kind: Pipeline
 metadata:
   name: model-retraining
 spec:
-  params: 
+  params:
     - name: GIT_URL
       default: https://github.com/redhat-na-ssa/flyingthings.git
       description: url of the git repo for the code of deployment
@@ -14,7 +14,7 @@ spec:
       type: string
     - name: NAMESPACE
       default: modemo
-      description: target deployment for the project
+      description: namespace for the deployment
       type: string
     - name: BATCH_SIZE
       description: batch size for training NOTE* for CPU use a value of 2
@@ -171,7 +171,7 @@ spec:
       when:
         - input: "Succeeded"
           operator: in
-          values: 
+          values:
             - "$(tasks.check-gpu.results.output)"
       taskRef:
         name: train-model-gpu
@@ -200,7 +200,7 @@ spec:
       when:
         - input: "Succeeded"
           operator: notin
-          values: 
+          values:
             - "$(tasks.check-gpu.results.output)"
       taskRef:
         name: train-model-cpu
