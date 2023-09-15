@@ -12,17 +12,20 @@ spec:
       type: string
     - name: BASE_MODEL
       type: string
-    - name: SIMPLEVIS_DATA
-      type: string
     - name: NAMESPACE
       type: string
   steps:
     - name: train-model-using-cpu
       image: image-registry.openshift-image-registry.svc:5000/$(params.NAMESPACE)/yolo:latest
       script: |
-        set -x \
-        && $(workspaces.source.path)/source/training/03-run-training.sh \
-        && ls -l $(params.SIMPLEVIS_DATA)/workspace
+        cd $(workspaces.workspace.path)
+
+        SOURCE_DIR=$(workspaces.source.path)
+        BASEDIR=${SOURCE_DIR}/source/training-job
+
+        $(workspaces.source.path)/source/training/03-run-training.sh \
+        
+        pwd && ls -al
       env:
         - name: BATCH_SIZE
           value: $(params.BATCH_SIZE)
@@ -32,10 +35,6 @@ spec:
           value: $(params.WEIGHTS)
         - name: BASE_MODEL
           value: $(params.BASE_MODEL)
-        - name: SIMPLEVIS_DATA
-          value: $(params.SIMPLEVIS_DATA)
-        - name: BASEDIR
-          value: $(workspaces.source.path)/source/training-job
       volumeMounts:
         - mountPath: /dev/shm
           name: dshm
