@@ -8,6 +8,7 @@ MINIO_ENDPOINT="${MINIO_ENDPOINT:-http://minio:9000}"
 MINIO_ACCESSKEY="${MINIO_ACCESSKEY:-minioadmin}"
 MINIO_SECRETKEY="${MINIO_SECRETKEY:-minioadmin}"
 MINIO_BUCKET="${MINIO_BUCKET}"
+SIMPLEVIS_DATA="${SIMPLEVIS_DATA:-/opt/app-root/src/simplevis-data}"
 
 download_mc(){
   curl "${MINIO_CLIENT_URL}/mc" -o ./mc
