@@ -13,8 +13,8 @@ MCONFIG=$SIMPLEVIS_DATA/mconfig
 allowed_models=("yolov8n.pt" "yolov5s.pt")
 if [[ " ${allowed_models[@]} " =~ " ${BASE_MODEL} " ]]; then
   echo "Using pretrained model..."
-  ./mc --config-dir=$MCONFIG cp  myminio/$MINIO_BUCKET/model_pretrained.pt $WEIGHTS --insecure
-  ./mc --config-dir=$MCONFIG cp  myminio/$MINIO_BUCKET/model_pretrained_classes.yaml data.yaml --insecure
+  ./mc --config-dir=$MCONFIG cp  myminio/$MINIO_BUCKET/pretrained/model_pretrained.pt $WEIGHTS --insecure
+  ./mc --config-dir=$MCONFIG cp  myminio/$MINIO_BUCKET/pretrained/model_pretrained_classes.yaml data.yaml --insecure
 else
   echo "Using custom model..."
 
