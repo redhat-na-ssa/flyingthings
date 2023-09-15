@@ -12,8 +12,6 @@ spec:
       type: string
     - name: MINIO_ENDPOINT
       type: string
-    - name: PRETRAINED_BUCKET
-      type: string
     - name: MINIO_ACCESSKEY
       type: string
     - name: MINIO_SECRETKEY
@@ -38,8 +36,6 @@ spec:
           value: $(workspaces.source.path)/source/training
         - name: BASE_MODEL
           value: $(params.BASE_MODEL)
-        - name: PRETRAINED_BUCKET
-          value: $(params.PRETRAINED_BUCKET)
         - name: MINIO_ACCESSKEY
           value: $(params.MINIO_ACCESSKEY)
         - name: MINIO_SECRETKEY
