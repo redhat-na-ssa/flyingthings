@@ -80,7 +80,7 @@ spec:
       default: "minioadmin"
       type: string
     - name: MODEL_NAME
-      default: model-base
+      default: model-pretrain
       description: name used to deploy the model and model server
       type: string
   tasks:
@@ -253,6 +253,8 @@ spec:
         value: $(params.MODEL_IMAGE)
       - name: SCRIPT
         value: |
+          set -x
+          
           oc new-app $(params.MODEL_IMAGE) \
             --name=$(params.MODEL_NAME) \
             --env=WEIGHTS=model_pretrained.pt \
