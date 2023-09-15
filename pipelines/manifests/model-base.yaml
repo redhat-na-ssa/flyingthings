@@ -45,11 +45,11 @@ spec:
       description: build arguments for model server
       type: string
     - name: UBI_IMAGE
-      default: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/python-custom:latest
+      default: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/task-runner:latest
       description: base image for notebook
       type: string
     - name: UBI_CONTEXT
-      default: source/python-custom
+      default: source/task-runner
       description: dockerfile path
       type: string
     - name: BATCH_SIZE
@@ -116,7 +116,7 @@ spec:
       workspaces:
         - name: source
           workspace: source
-    - name: build-python-custom
+    - name: build-task-runner
       params:
         - name: IMAGE
           value: $(params.UBI_IMAGE)

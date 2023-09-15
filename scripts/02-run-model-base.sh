@@ -19,26 +19,6 @@ check_pipeline(){
   echo "Starting pipeline: ${PIPELINE_NAME}"
 }
 
-debug_pipeline(){
-
-  tkn pipeline start "${PIPELINE_NAME}" \
-    -w name=source,volumeClaimTemplateFile=code-pvc.yaml \
-    -w name=shared-workspace,volumeClaimTemplateFile=work-pvc.yaml \
-    -p GIT_URL="https://github.com/redhat-na-ssa/flyingthings.git" \
-    -p GIT_REVISION="main" \
-    -p YOLO_IMAGE="${IMAGE_REGISTRY}/${NAMESPACE}/model:latest" \
-    -p UBI_IMAGE="${IMAGE_REGISTRY}/${NAMESPACE}/python-custom:latest" \
-    -p MODEL_IMAGE="${IMAGE_REGISTRY}/${NAMESPACE}/model-server:latest" \
-    -p BASE_MODEL="yolov5s.pt" \
-    -p MODEL_BUILD_ARGS="--build-arg WEIGHTS=flyingthings.pt --build-arg BASE_IMAGE=${IMAGE_REGISTRY}/${NAMESPACE}/yolo:latest" \
-    -p MINIO_BUCKET="flyingthings" \
-    -p MINIO_ACCESSKEY="minioadmin" \
-    -p MINIO_SECRETKEY="minioadmin" \
-    -p NAMESPACE="${NAMESPACE}" \
-    -p DEPLOY_LABELSTUDIO="Y" \
-    --use-param-defaults --showlog
-}
-
 start_pipelines(){
 
   get_namespace
