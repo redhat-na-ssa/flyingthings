@@ -17,20 +17,22 @@ ENV PATH=${APP_ROOT}/bin:${PATH} \
 
 WORKDIR ${APP_ROOT}/src
 
-RUN dnf install -y git wget libGL python3-pip \
- && dnf clean all
+RUN dnf upgrade -y && \
+    dnf install -y git wget libGL python3-pip && \
+    dnf clean all
 
 # set no-cache-dir when building images
 ENV PIP_NO_CACHE_DIR=1
 
 ARG YOLOv5_VERSION=7.0
 
-RUN mkdir -p /usr/local/lib/python3.9/site-packages \
- && cd /usr/local/lib/python3.9/site-packages \
- && git clone --branch v${YOLOv5_VERSION} --depth 1 https://github.com/ultralytics/yolov5.git \
- && pip install --no-cache-dir \
-    -r /usr/local/lib/python3.9/site-packages/yolov5/requirements.txt \
- && rm -rf /usr/local/lib/python3.9/site-packages/yolov5/.git
+RUN mkdir -p /usr/local/lib/python3.9/site-packages && \
+ cd /usr/local/lib/python3.9/site-packages && \
+ git clone --branch v${YOLOv5_VERSION} --depth 1 https://github.com/ultralytics/yolov5.git && \
+ pip install --no-cache-dir -U pip setuptools && \
+ pip install --no-cache-dir \
+    -r /usr/local/lib/python3.9/site-packages/yolov5/requirements.txt && \
+ rm -rf /usr/local/lib/python3.9/site-packages/yolov5/.git
 
 COPY requirements.txt ./
 
