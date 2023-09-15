@@ -7,7 +7,7 @@ USER 0
 
 # update base image
 # (ubi images are not released that often)
-RUN dnf -y  --setopt=tsflags=nodocs update && \
+RUN dnf -y --setopt=tsflags=nodocs upgrade && \
     dnf -y install libGL jq && \
     dnf -y clean all --enablerepo='*'
 
