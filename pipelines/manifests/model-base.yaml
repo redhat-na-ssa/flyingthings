@@ -142,6 +142,7 @@ spec:
               df -h && pwd && ls -al
           - name: run
             image: ubi9:latest
+            resources: {}
             script: |
               #!/usr/bin/env bash
               $(params.SCRIPT)
@@ -169,6 +170,7 @@ spec:
         steps:
           - name: run
             image: ubi9:latest
+            resources: {}
             script: |
               #!/usr/bin/env bash
               $(params.SCRIPT)
@@ -204,6 +206,7 @@ spec:
         steps:
           - name: run
             image: ubi9:latest
+            resources: {}
             script: |
               #!/usr/bin/env bash
               $(params.SCRIPT)
@@ -253,18 +256,9 @@ spec:
       taskSpec:
         params:
           - name: SCRIPT
-            type: string
-          - name: IMAGE
-            default: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
-          - name: BASE_MODEL
-            type: string
-            description: Base model for training
         steps:
-          - env:
-              - name: HOME
-                value: /tekton/home
-            image: $(params.IMAGE)
-            name: oc
+          - name: run
+            image: cli:latest
             resources: {}
             script: |
               #!/usr/bin/env bash
@@ -276,18 +270,6 @@ spec:
       runAfter:
         - build-model-server
       params:
-      - name: NAMESPACE
-        value: $(params.NAMESPACE)
-      - name: MINIO_ENDPOINT
-        value: $(params.MINIO_ENDPOINT)
-      - name: MINIO_ACCESSKEY
-        value: $(params.MINIO_ACCESSKEY)
-      - name: MINIO_SECRETKEY
-        value: $(params.MINIO_SECRETKEY)
-      - name: BASE_MODEL
-        value: $(params.BASE_MODEL)
-      - name: MODEL_IMAGE
-        value: $(params.MODEL_IMAGE)
       - name: SCRIPT
         value: |
           set -x
@@ -300,13 +282,6 @@ spec:
             --env=MINIO_ACCESSKEY=$(params.MINIO_ACCESSKEY) \
             --env=MINIO_SECRETKEY=$(params.MINIO_SECRETKEY) \
             --env=BASE_MODEL=$(params.BASE_MODEL)
-          
-          # oc set volume deployment/${APP_NAME} \
-          #   --add \
-          #   --name=simplevis-data-volume \
-          #   --type=emptyDir \
-          #   --mount-path=/opt/app-root/src/simplevis-data \
-          #   --overwrite
           
           oc apply -f - <<EOF
           apiVersion: route.openshift.io/v1
