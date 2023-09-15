@@ -131,36 +131,64 @@ spec:
         - name: source
           workspace: source
     - name: create-bucket
-      taskRef:
-        name: create-bucket
+      taskSpec:
+        params:
+          - name: SCRIPT
+        steps:
+          - name: debug
+            image: ubi9:latest
+            script: |
+              #!/usr/bin/env bash
+              df -h && pwd && ls -al
+          - name: step
+            image: ubi9:latest
+            script: |
+              #!/usr/bin/env bash
+              $(params.SCRIPT)
       params:
-        - name: MINIO_ENDPOINT
-          value: $(params.MINIO_ENDPOINT)
-        - name: MINIO_BUCKET
-          value: $(params.MINIO_BUCKET)
-        - name: MINIO_ACCESSKEY
-          value: $(params.MINIO_ACCESSKEY)
-        - name: MINIO_SECRETKEY
-          value: $(params.MINIO_SECRETKEY)
+        - name: SCRIPT
+          value: |
+            MINIO_ENDPOINT=$(params.MINIO_ENDPOINT)
+            MINIO_BUCKET=$(params.MINIO_BUCKET)
+            MINIO_ACCESSKEY=$(params.MINIO_ACCESSKEY)
+            MINIO_SECRETKEY=$(params.MINIO_SECRETKEY)
+
+            source $(workspaces.source.path)/source/training/functions.sh && \
+            minio_create_bucket ${MINIO_BUCKET}
+
+            pwd && ls -al
+      runAfter:
+        - fetch-repository
       workspaces:
         - name: source
           workspace: source
-        - name: workspace
-          workspace: shared-workspace
-      runAfter:
-        - fetch-repository
     - name: upload-artifacts
-      taskRef:
-        name: upload-artifacts
+      taskSpec:
+        params:
+          - name: SCRIPT
+        steps:
+          - name: step
+            image: ubi9:latest
+            script: |
+              #!/usr/bin/env bash
+              $(params.SCRIPT)
       params:
-        - name: MINIO_ENDPOINT
-          value: $(params.MINIO_ENDPOINT)
-        - name: MINIO_BUCKET
-          value: $(params.MINIO_BUCKET)
-        - name: MINIO_ACCESSKEY
-          value: $(params.MINIO_ACCESSKEY)
-        - name: MINIO_SECRETKEY
-          value: $(params.MINIO_SECRETKEY)
+        - name: SCRIPT
+          value: |
+            MINIO_ENDPOINT=$(params.MINIO_ENDPOINT)
+            MINIO_BUCKET=$(params.MINIO_BUCKET)
+            MINIO_ACCESSKEY=$(params.MINIO_ACCESSKEY)
+            MINIO_SECRETKEY=$(params.MINIO_SECRETKEY)
+
+            cd $(workspaces.workspace.path)
+
+            SOURCE_DIR=$(workspaces.source.path)
+            BASEDIR=${SOURCE_DIR}/source/training
+
+            source $(workspaces.source.path)/source/training/functions.sh && \
+            minio_copy_artifacts
+
+            pwd && ls -al
       runAfter:
         - fetch-repository
         - create-bucket
@@ -300,8 +328,7 @@ spec:
     #         image: ubi9:latest
     #         script: |
     #           #!/usr/bin/env bash
-    #           echo "Let's see what we got here..." \
-    #           && ls -al $(workspaces.workspace.path)
+    #           df -h && pwd && ls -al
     #   runAfter:
     #     - upload-artifacts
     #   workspaces:
