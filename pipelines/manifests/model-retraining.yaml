@@ -100,6 +100,9 @@ spec:
       taskRef:
         kind: Task
         name: check-gpu
+      params:
+        - name: TIMEOUT
+          value: 1m
     - name: get-dataset
       taskRef:
         name: get-dataset
@@ -188,6 +191,8 @@ spec:
           value: $(params.BASE_MODEL)
         - name: NAMESPACE
           value: $(params.NAMESPACE)
+        - name: IMAGE
+          value: $(params.MODEL_IMAGE)
       runAfter:
         - check-gpu
         - distribute-dataset
@@ -216,6 +221,8 @@ spec:
           value: $(params.BASE_MODEL)
         - name: NAMESPACE
           value: $(params.NAMESPACE)
+        - name: IMAGE
+          value: $(params.MODEL_IMAGE)
       runAfter:
         - check-gpu
         - distribute-dataset
