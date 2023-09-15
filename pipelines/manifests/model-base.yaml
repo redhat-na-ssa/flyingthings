@@ -140,7 +140,7 @@ spec:
             script: |
               #!/usr/bin/env bash
               df -h && pwd && ls -al
-          - name: step
+          - name: run
             image: ubi9:latest
             script: |
               #!/usr/bin/env bash
@@ -167,7 +167,7 @@ spec:
         params:
           - name: SCRIPT
         steps:
-          - name: step
+          - name: run
             image: ubi9:latest
             script: |
               #!/usr/bin/env bash
@@ -198,25 +198,34 @@ spec:
         - name: workspace
           workspace: shared-workspace
     - name: get-pretrained
-      taskRef:
-        name: get-pretrained
+      taskSpec:
+        params:
+          - name: SCRIPT
+        steps:
+          - name: run
+            image: ubi9:latest
+            script: |
+              #!/usr/bin/env bash
+              $(params.SCRIPT)
       params:
-        - name: WEIGHTS
-          value: $(params.WEIGHTS)
-        - name: BASE_MODEL
-          value: "$(params.BASE_MODEL)"
-        - name: MINIO_ENDPOINT
-          value: $(params.MINIO_ENDPOINT)
-        - name: MINIO_ACCESSKEY
-          value: $(params.MINIO_ACCESSKEY)
-        - name: MINIO_SECRETKEY
-          value: $(params.MINIO_SECRETKEY)
-        - name: MINIO_BUCKET
-          value: $(params.MINIO_BUCKET)
-        - name: NAMESPACE
-          value: $(params.NAMESPACE)
-        - name: IMAGE
-          value: $(params.YOLO_IMAGE)
+        - name: SCRIPT
+          value: |
+            MINIO_ENDPOINT=$(params.MINIO_ENDPOINT)
+            MINIO_BUCKET=$(params.MINIO_BUCKET)
+            MINIO_ACCESSKEY=$(params.MINIO_ACCESSKEY)
+            MINIO_SECRETKEY=$(params.MINIO_SECRETKEY)
+            BASE_MODEL=$(params.BASE_MODEL)
+
+            cd $(workspaces.workspace.path)
+
+            SOURCE_DIR=$(workspaces.source.path)
+            BASEDIR=${SOURCE_DIR}/source/training
+
+            source $(workspaces.source.path)/source/training/functions.sh && \
+            download_yolo_model && \
+            minio_copy_yolo_model
+
+            pwd && ls -al
       runAfter:
         - build-model-base
       workspaces:
