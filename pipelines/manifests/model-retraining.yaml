@@ -316,6 +316,8 @@ spec:
 
               $(params.SCRIPT)
 
+              exit 0
+
         workspaces:
           - name: manifest-dir
             optional: true
@@ -348,13 +350,15 @@ spec:
             --env=MINIO_ENDPOINT=$(params.MINIO_ENDPOINT) \
             --env=MINIO_BUCKET=$(params.MINIO_BUCKET) \
             --env=MINIO_ACCESSKEY=$(params.MINIO_ACCESSKEY) \
-            --env=MINIO_SECRETKEY=$(params.MINIO_SECRETKEY) \
-          && oc set volume deployment/$(params.MODEL_NAME) \
+            --env=MINIO_SECRETKEY=$(params.MINIO_SECRETKEY)
+          
+          oc set volume deployment/$(params.MODEL_NAME) \
             --add \
             --name=simplevis-data-volume \
             --type=emptyDir \
-            --mount-path=/opt/app-root/src/simplevis-data \
-          && oc apply -f - <<EOF
+            --mount-path=/opt/app-root/src/simplevis-data
+
+          oc apply -f - <<EOF
           apiVersion: route.openshift.io/v1
           kind: Route
           metadata:
