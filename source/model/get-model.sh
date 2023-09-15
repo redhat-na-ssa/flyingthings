@@ -1,5 +1,8 @@
 #!/bin/sh
 set -x
+
+MINIO_CLIENT_URL=https://dl.min.io/client/mc/release/linux-amd64
+
 cd $SIMPLEVIS_DATA
 curl $MINIO_CLIENT_URL/mc -o mc
 chmod +x mc

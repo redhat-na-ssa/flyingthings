@@ -64,10 +64,6 @@ spec:
       description: secret key for minio NOTE* use secrets for production
       default: minioadmin
       type: string
-    - name: MINIO_CLIENT_URL
-      description: location of minio client binary
-      default: https://dl.min.io/client/mc/release/linux-amd64
-      type: string
     - name: DEPLOY
       default: 'Y'
       description: flag for deploying model server along with model
@@ -113,8 +109,6 @@ spec:
           value: $(params.MINIO_ACCESSKEY)
         - name: MINIO_SECRETKEY
           value: $(params.MINIO_SECRETKEY)
-        - name: MINIO_CLIENT_URL
-          value: $(params.MINIO_CLIENT_URL)
       runAfter:
         - fetch-repository
       workspaces:
@@ -268,8 +262,6 @@ spec:
           value: $(params.MINIO_ACCESSKEY)
         - name: MINIO_SECRETKEY
           value: $(params.MINIO_SECRETKEY)
-        - name: MINIO_CLIENT_URL
-          value: $(params.MINIO_CLIENT_URL)
         - name: NAMESPACE
           value: $(params.NAMESPACE)
       runAfter:
@@ -419,8 +411,6 @@ spec:
           value: $(params.MINIO_ACCESSKEY)
         - name: MINIO_SECRETKEY
           value: $(params.MINIO_SECRETKEY)
-        - name: MINIO_CLIENT_URL
-          value: $(params.MINIO_CLIENT_URL)
         - name: DEPLOY
           value: $(params.DEPLOY)
         - name: MODEL_NAME

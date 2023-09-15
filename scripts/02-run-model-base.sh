@@ -39,7 +39,6 @@ debug_pipeline(){
     -p PRETRAINED_BUCKET="yolo" \
     -p MINIO_ACCESSKEY="minioadmin" \
     -p MINIO_SECRETKEY="minioadmin" \
-    -p MINIO_CLIENT_URL="https://dl.min.io/client/mc/release/linux-amd64" \
     -p NAMESPACE="${NAMESPACE}" \
     -p DEPLOY_LABELSTUDIO="Y" \
     --use-param-defaults --showlog
@@ -48,9 +47,6 @@ debug_pipeline(){
 start_pipelines(){
 
   get_namespace
-
-  # Hosted -p MINIO_CLIENT_URL="https://dl.min.io/client/mc/release/linux-amd64"
-  # Local  -p MINIO_CLIENT_URL="http://util02.davenet.local"
 
   IMAGE_REGISTRY=image-registry.openshift-image-registry.svc:5000
   GIT_URL=https://github.com/redhat-na-ssa/flyingthings.git
