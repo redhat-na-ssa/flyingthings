@@ -41,7 +41,7 @@ spec:
       description: dockerfile path
       type: string
     - name: MODEL_BUILD_ARGS
-      default: --build-arg WEIGHTS=flyingthings.pt --build-arg BASE_IMAGE=$(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/yolo:latest
+      default: --build-arg WEIGHTS=flyingthings.pt --build-arg BASE_IMAGE=$(params.YOLO_IMAGE)
       description: build arguments for model server
       type: string
     - name: UBI_IMAGE
