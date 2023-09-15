@@ -147,13 +147,30 @@ spec:
         - name: workspace
           workspace: shared-workspace
     - name: create-classfile
-      taskRef:
-        name: create-classfile
+      taskSpec:
+        params:
+          - name: SCRIPT
+          - name: IMAGE
+            default: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
+        steps:
+          - name: run
+            image: $(params.IMAGE)
+            resources: {}
+            script: |
+              #!/usr/bin/env bash
+              $(params.SCRIPT)
       params:
-        - name: NAMESPACE
-          value: $(params.NAMESPACE)
-        # - name: IMAGE
-        #   value: $(params.UBI_IMAGE)
+        - name: SCRIPT
+          value: |
+            cd $(workspaces.workspace.path)
+
+            cd datasets \
+            
+            $(workspaces.source.path)/source/training/create-classfile.sh && \
+            cat classes.yaml && \
+            mv classes.yaml $(workspaces.workspace.path)
+
+            pwd && ls -al
       runAfter:
         - get-dataset
       workspaces:
@@ -166,17 +183,31 @@ spec:
         - input: "$(params.IMG_RESIZE)"
           operator: in
           values: ["Y"]
-      taskRef:
-        name: image-resize
+      taskSpec:
+        params:
+          - name: SCRIPT
+          - name: IMAGE
+            default: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
+        steps:
+          - name: run
+            image: $(params.IMAGE)
+            resources: {}
+            script: |
+              #!/usr/bin/env bash
+              $(params.SCRIPT)
       params:
-        - name: IMG_RESIZE
-          value: "$(params.IMG_RESIZE)"
-        - name: MAX_WIDTH
-          value: "$(params.MAX_WIDTH)"
-        - name: NAMESPACE
-          value: $(params.NAMESPACE)
         - name: IMAGE
           value: $(params.UBI_IMAGE)
+        - name: SCRIPT
+          value: |
+            cd $(workspaces.workspace.path)
+
+            cd datasets && \
+            mv images images_original && \
+            mkdir images && \
+            $(workspaces.source.path)/source/training/image-resize.py images_original images $(params.MAX_WIDTH)
+
+            pwd && ls -al
       runAfter:
         - create-classfile
       workspaces:
