@@ -1,4 +1,5 @@
 #!/bin/sh
+set -x
 
 MINIO_CLIENT_URL="${MINIO_CLIENT_URL:-https://dl.min.io/client/mc/release/linux-amd64}"
 MINIO_CFG="${MINIO_CFG:-miniocfg}"

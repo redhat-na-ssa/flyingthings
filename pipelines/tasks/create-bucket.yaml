@@ -18,10 +18,12 @@ spec:
     - name: create-bucket
       image: ubi9:latest
       script: |
-        cd $(workspaces.workspace.path) \
-        && $(workspaces.source.path)/source/training/minio-setup-client.sh \
-        && $(workspaces.source.path)/source/training/minio-create-bucket.sh \
-        && pwd && ls -al
+        cd $(workspaces.workspace.path)
+
+        source $(workspaces.source.path)/source/training/functions.sh && \
+        minio_create_bucket $(params.MINIO_BUCKET)
+
+        pwd && ls -al
       env:
         - name: MINIO_ENDPOINT
           value: $(params.MINIO_ENDPOINT)
