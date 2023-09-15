@@ -25,7 +25,7 @@ RUN mkdir -p $SIMPLEVIS_DATA \
  && chown -R 1001:1001 $SIMPLEVIS_DATA
 
 COPY requirements.txt ./
-COPY get-model.sh ./
+COPY app.sh ./
 RUN pip install --no-cache-dir -r ./requirements.txt
 
 COPY app/ ./
