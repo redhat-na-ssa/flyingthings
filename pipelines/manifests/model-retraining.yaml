@@ -381,46 +381,41 @@ spec:
           EOF
   finally:
     - name: summary
-      taskRef:
-        name: training-summary
+      taskSpec:
+        params:
+          - name: SCRIPT
+        steps:
+          - name: run
+            image: ubi9:latest
+            script: |
+              #!/usr/bin/env bash
+              $(params.SCRIPT)
       params:
-        - name: GIT_URL
-          value: $(params.GIT_URL)
-        - name: GIT_REVISION
-          value: $(params.GIT_REVISION)
-        - name: NAMESPACE
-          value: $(params.NAMESPACE)
-        - name: BATCH_SIZE
-          value: $(params.BATCH_SIZE)
-        - name: NUM_EPOCHS
-          value: $(params.NUM_EPOCHS)
-        - name: IMG_RESIZE
-          value: $(params.IMG_RESIZE)
-        - name: MAX_WIDTH
-          value: $(params.MAX_WIDTH)
-        - name: WEIGHTS
-          value: $(params.WEIGHTS)
-        - name: BASE_MODEL
-          value: $(params.BASE_MODEL)
-        - name: MINIO_ENDPOINT
-          value: $(params.MINIO_ENDPOINT)
-        - name: DATASET_ZIP
-          value: $(params.DATASET_ZIP)
-        - name: MINIO_BUCKET
-          value: $(params.MINIO_BUCKET)
-        - name: MINIO_ACCESSKEY
-          value: $(params.MINIO_ACCESSKEY)
-        - name: MINIO_SECRETKEY
-          value: $(params.MINIO_SECRETKEY)
-        - name: DEPLOY
-          value: $(params.DEPLOY)
-        - name: MODEL_NAME
-          value: $(params.MODEL_NAME)
-      workspaces:
-        - name: source
-          workspace: source
-        - name: workspace
-          workspace: shared-workspace
+        - name: SCRIPT
+          value: |
+            echo "Training run parameters:"
+            echo ""
+            echo "GIT_URL: $(params.GIT_URL)"
+            echo "GIT_REVISION: $(params.GIT_REVISION)"
+            echo "BATCH_SIZE: $(params.BATCH_SIZE)"
+            echo "NUM_EPOCHS: $(params.NUM_EPOCHS)"
+            echo "IMG_RESIZE: $(params.IMG_RESIZE)"
+            echo "MAX_WIDTH: $MAX_WIDTH"
+            echo "WEIGHTS: $WEIGHTS"
+            echo "BASE_MODEL: $BASE_MODEL"
+            echo "MINIO_ENDPOINT: $MINIO_ENDPOINT"
+            echo "DATASET_ZIP: $DATASET_ZIP"
+            echo "SIMPLEVIS_DATA: $SIMPLEVIS_DATA"
+            echo "MINIO_BUCKET: $MINIO_BUCKET"
+            echo "MINIO_ACCESSKEY: $MINIO_ACCESSKEY"
+            echo "MINIO_SECRETKEY: $MINIO_SECRETKEY"
+            echo "DEPLOY: $DEPLOY"
+            echo "MODEL_NAME: $MODEL_NAME"
+      # workspaces:
+      #   - name: source
+      #     workspace: source
+      #   - name: workspace
+      #     workspace: shared-workspace
   workspaces:
     - name: shared-workspace
     - name: source
