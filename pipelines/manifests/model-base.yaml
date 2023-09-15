@@ -256,9 +256,10 @@ spec:
       taskSpec:
         params:
           - name: SCRIPT
+          - name: IMAGE
         steps:
           - name: run
-            image: cli:latest
+            image: $(params.IMAGE)
             resources: {}
             script: |
               #!/usr/bin/env bash
@@ -270,6 +271,8 @@ spec:
       runAfter:
         - build-model-server
       params:
+      - name: IMAGE
+        value: $(params.IMAGE_REGISTRY)/cli:latest
       - name: SCRIPT
         value: |
           set -x
