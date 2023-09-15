@@ -54,15 +54,6 @@ start_pipelines(){
 
   # debug_pipeline; exit 0
 
-  # check_pipeline deploy-label-studio
-  
-  # tkn pipeline start "${PIPELINE_NAME}" \
-  #   -p GIT_URL="${GIT_URL}" \
-  #   -p GIT_REVISION="${GIT_REVISION}" \
-  #   -p NAMESPACE="${NAMESPACE}" \
-  #   -w name=source,volumeClaimTemplateFile=code-pvc.yaml \
-  #   --use-param-defaults
-
   check_pipeline model-base
  
   tkn pipeline start "${PIPELINE_NAME}" \
