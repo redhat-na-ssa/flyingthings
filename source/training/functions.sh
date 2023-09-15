@@ -21,8 +21,9 @@ minio_setup_client(){
 
 minio_create_bucket(){
   [ ! -d "${MINIO_CFG}" ] && minio_setup_client
-  local REMOTE="${1:-${MINIO_REMOTE}}"
-  local BUCKET="${2}"
+  local BUCKET="${1}"
+  local REMOTE="${MINIO_REMOTE}"
+
   ./mc --insecure --config-dir "${MINIO_CFG}" mb "${REMOTE}/${BUCKET}"
   ./mc --insecure --config-dir "${MINIO_CFG}" version enable "${REMOTE}/${BUCKET}"
 }
