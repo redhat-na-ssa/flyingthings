@@ -1,7 +1,7 @@
 #!/bin/sh
 
 check_namespace(){
-  DEFAULT_NAMESPACE=modemo
+  DEFAULT_NAMESPACE=ml-demo
   NAMESPACE=${1:-$(oc project -q 2>/dev/null || echo "${DEFAULT_NAMESPACE}")}
   
   echo "Deploying in NAMESPACE: ${NAMESPACE}"

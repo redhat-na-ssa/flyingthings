@@ -13,7 +13,7 @@ spec:
       description: revision to be used from repo of the code for deployment
       type: string
     - name: NAMESPACE
-      default: modemo
+      default: ml-demo
       description: namespace for the deployment
       type: string
     - name: BATCH_SIZE
