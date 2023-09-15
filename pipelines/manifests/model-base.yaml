@@ -235,10 +235,10 @@ spec:
       params:
         - name: IMAGE
           value: $(params.MODEL_IMAGE)
-        - name: DOCKERFILE_PATH
+        - name: CONTEXT
           value: $(params.MODEL_DOCKERFILE)          
         - name: DOCKERFILE
-          value: $(workspaces.path)/$(params.MODEL_DOCKERFILE)/Dockerfile
+          value: ./Dockerfile
         - name: BUILD_EXTRA_ARGS
           value: "$(params.MODEL_BUILD_ARGS)"
       runAfter:

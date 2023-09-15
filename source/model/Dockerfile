@@ -31,11 +31,11 @@ RUN mkdir -p $SIMPLEVIS_DATA \
 
 WORKDIR /opt/app-root/src/
 
-COPY source/model/requirements.txt ./
-COPY source/model/get-model.sh ./
+COPY requirements.txt ./
+COPY get-model.sh ./
 RUN pip install --no-cache-dir -r ./requirements.txt
 
-COPY source/model/app/ ./
+COPY app/ ./
 
 WORKDIR /opt/app-root/src
 
