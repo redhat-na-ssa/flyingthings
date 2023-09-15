@@ -26,11 +26,9 @@ debug_pipeline(){
     -w name=shared-workspace,volumeClaimTemplateFile=work-pvc.yaml \
     -p GIT_URL="https://github.com/redhat-na-ssa/flyingthings.git" \
     -p GIT_REVISION="main" \
-    -p YOLO_IMAGE="${IMAGE_REGISTRY}/${NAMESPACE}/yolo:latest" \
+    -p YOLO_IMAGE="${IMAGE_REGISTRY}/${NAMESPACE}/model:latest" \
     -p UBI_IMAGE="${IMAGE_REGISTRY}/${NAMESPACE}/python-custom:latest" \
-    -p MINIMAL_IMAGE="${IMAGE_REGISTRY}/${NAMESPACE}/minimal-notebook:latest" \
-    -p CUSTOM_NOTEBOOK_IMAGE="${IMAGE_REGISTRY}/${NAMESPACE}/yolo-notebook:latest" \
-    -p MODEL_IMAGE="${IMAGE_REGISTRY}/${NAMESPACE}/custom-model:latest" \
+    -p MODEL_IMAGE="${IMAGE_REGISTRY}/${NAMESPACE}/model-server:latest" \
     -p BASE_MODEL="yolov5s.pt" \
     -p MODEL_BUILD_ARGS="--build-arg WEIGHTS=flyingthings.pt --build-arg BASE_IMAGE=${IMAGE_REGISTRY}/${NAMESPACE}/yolo:latest" \
     -p MINIO_BUCKET="flyingthings" \
