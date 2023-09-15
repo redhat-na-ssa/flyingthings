@@ -68,7 +68,7 @@ spec:
       description: default image registry
       default: image-registry.openshift-image-registry.svc:5000
     - name: UBI_IMAGE
-      default: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/base-ubi9:latest
+      default: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/python-custom:latest
       description: base image for notebook
       type: string
     - name: MODEL_IMAGE
