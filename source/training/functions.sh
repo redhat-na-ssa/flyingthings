@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 set -x
 
 MINIO_CLIENT_URL="${MINIO_CLIENT_URL:-https://dl.min.io/client/mc/release/linux-amd64}"
@@ -7,7 +7,8 @@ MINIO_REMOTE="${MINIO_REMOTE:-remote}"
 MINIO_ENDPOINT="${MINIO_ENDPOINT:-http://minio:9000}"
 MINIO_ACCESSKEY="${MINIO_ACCESSKEY:-minioadmin}"
 MINIO_SECRETKEY="${MINIO_SECRETKEY:-minioadmin}"
-MINIO_BUCKET="${MINIO_BUCKET}"
+MINIO_BUCKET="${MINIO_BUCKET:-project}"
+
 SIMPLEVIS_DATA="${SIMPLEVIS_DATA:-/opt/app-root/src/simplevis-data}"
 
 download_mc(){
@@ -50,17 +51,16 @@ minio_copy_artifacts(){
 }
 
 minio_push_results(){
-  cd ${SIMPLEVIS_DATA}/workspace
+  cd "${SIMPLEVIS_DATA}/workspace" || return
 
-  pwd && find .
+  pwd && find runs && ls -l
   
   echo "*************** Training Run Results*************************"
-  cat ${SIMPLEVIS_DATA}/workspace/runs/train/results.csv
+  cat runs/results.csv
   echo "************************************************************"
-  tar czf ${SIMPLEVIS_DATA}/workspace/runs/training-results.tgz ${SIMPLEVIS_DATA}/workspace/runs/exp/
-  ls -l ${SIMPLEVIS_DATA}
+  tar vzcf runs/training-results.tgz runs/exp/
+  ls -l ../
 
-  echo "trainingrun: $trainingrun"
   minio_setup_client
 
   PREVIOUS_RUN=0000
@@ -121,10 +121,10 @@ minio_get_dataset(){
   minio_copy "${MINIO_REMOTE}/${MINIO_BUCKET}/${DATASET_ZIP}" "${DATASET_ZIP}"
 
   mkdir -p "${SIMPLEVIS_DATA}/workspace/datasets"
-  pushd "${SIMPLEVIS_DATA}/workspace/datasets"
+  pushd "${SIMPLEVIS_DATA}/workspace/datasets" || exit
     unzip "${SIMPLEVIS_DATA}/workspace/${DATASET_ZIP}"
     ls -l "${SIMPLEVIS_DATA}/workspace/datasets"
-  popd
+  popd || exit
 }
 
 minio_copy_yolo_model(){
@@ -141,8 +141,26 @@ download_yolo_model(){
 model_export(){
   pwd
   mkdir -p "${SIMPLEVIS_DATA}/workspace"
-  pushd "${SIMPLEVIS_DATA}/workspace"
+  pushd "${SIMPLEVIS_DATA}/workspace" || exit
     # yolo export model=runs/train/weights/best.pt format=onnx
     python3 /usr/local/lib/python3.9/site-packages/yolov5/export.py --weights runs/exp/weights/best.pt --include onnx
-  popd
+  popd || exit
+}
+
+model_training(){
+  pwd
+  mkdir -p "${SIMPLEVIS_DATA}/workspace"
+  pushd "${SIMPLEVIS_DATA}/workspace" || exit
+    cp -R datasets/training/* /usr/local/lib/python3.9/site-packages/yolov5/training
+    ls -l /usr/local/lib/python3.9/site-packages/yolov5
+    ls -l /usr/local/lib/python3.9/site-packages/yolov5/training
+    # yolo train model=$BASE_MODEL batch=$BATCH_SIZE epochs=$NUM_EPOCHS data=classes.yaml project=runs exist_ok=True
+    python3 /usr/local/lib/python3.9/site-packages/yolov5/train.py \
+      --epochs "${NUM_EPOCHS}" \
+      --batch-size "${BATCH_SIZE}" \
+      --weights "${BASE_MODEL}" \
+      --data classes.yaml \
+      --project runs \
+      --img 640
+  popd || exit
 }
