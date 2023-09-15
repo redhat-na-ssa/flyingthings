@@ -1,7 +1,6 @@
 #!/bin/sh
 
 MINIO_CLIENT_URL=https://dl.min.io/client/mc/release/linux-amd64
-
 MINCFG=miniocfg
 
 curl $MINIO_CLIENT_URL/mc -o mc
