@@ -15,8 +15,7 @@ spec:
     - name: create-classfile
       image: $(params.IMAGE)
       script: |
-        cp $(workspaces.source.path)/source/training/classes.yaml.j2 $(params.SIMPLEVIS_DATA)/workspace/datasets \
-        && cd $(params.SIMPLEVIS_DATA)/workspace/datasets \
+        cd $(params.SIMPLEVIS_DATA)/workspace/datasets \
         && $(workspaces.source.path)/source/training/create-classfile.sh \
         && cat classes.yaml \
         && mv classes.yaml $(params.SIMPLEVIS_DATA)/workspace
