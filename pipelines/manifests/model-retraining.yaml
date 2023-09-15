@@ -48,10 +48,6 @@ spec:
       description: name of the dataset zip file for training
       default: flyingthings-yolo.zip
       type: string
-    - name: SIMPLEVIS_DATA
-      description: mount point for work files during training
-      default: /opt/app-root/src/simplevis-data
-      type: string
     - name: MINIO_BUCKET
       description: bucket with training dataset and target of model artifacts
       default: flyingthings
@@ -112,8 +108,6 @@ spec:
           value: $(params.DATASET_ZIP)
         - name: MINIO_ENDPOINT
           value: $(params.MINIO_ENDPOINT)
-        - name: SIMPLEVIS_DATA
-          value: $(params.SIMPLEVIS_DATA)
         - name: MINIO_BUCKET
           value: $(params.MINIO_BUCKET)
         - name: MINIO_ACCESSKEY
@@ -131,8 +125,6 @@ spec:
       taskRef:
         name: create-classfile
       params:
-        - name: SIMPLEVIS_DATA
-          value: $(params.SIMPLEVIS_DATA)
         - name: NAMESPACE
           value: $(params.NAMESPACE)
         # - name: IMAGE
@@ -152,8 +144,6 @@ spec:
       taskRef:
         name: image-resize
       params:
-        - name: SIMPLEVIS_DATA
-          value: $(params.SIMPLEVIS_DATA)
         - name: IMG_RESIZE
           value: "$(params.IMG_RESIZE)"
         - name: MAX_WIDTH
@@ -172,9 +162,6 @@ spec:
     - name: distribute-dataset
       taskRef:
         name: distribute-data
-      params:
-        - name: SIMPLEVIS_DATA
-          value: $(params.SIMPLEVIS_DATA)
       runAfter:
         - image-resize
       workspaces:
@@ -199,8 +186,6 @@ spec:
           value: $(params.WEIGHTS)
         - name: BASE_MODEL
           value: $(params.BASE_MODEL)
-        - name: SIMPLEVIS_DATA
-          value: $(params.SIMPLEVIS_DATA)
         - name: NAMESPACE
           value: $(params.NAMESPACE)
       runAfter:
@@ -229,8 +214,6 @@ spec:
           value: $(params.WEIGHTS)
         - name: BASE_MODEL
           value: $(params.BASE_MODEL)
-        - name: SIMPLEVIS_DATA
-          value: $(params.SIMPLEVIS_DATA)
         - name: NAMESPACE
           value: $(params.NAMESPACE)
       runAfter:
@@ -249,8 +232,6 @@ spec:
           value: $(params.WEIGHTS)
         - name: BASE_MODEL
           value: $(params.BASE_MODEL)
-        - name: SIMPLEVIS_DATA
-          value: $(params.SIMPLEVIS_DATA)
         - name: NAMESPACE
           value: $(params.NAMESPACE)
       runAfter:
@@ -269,8 +250,6 @@ spec:
           value: $(params.WEIGHTS)
         - name: MINIO_ENDPOINT
           value: $(params.MINIO_ENDPOINT)
-        - name: SIMPLEVIS_DATA
-          value: $(params.SIMPLEVIS_DATA)
         - name: MINIO_BUCKET
           value: $(params.MINIO_BUCKET)
         - name: MINIO_ACCESSKEY
@@ -426,8 +405,6 @@ spec:
           value: $(params.MINIO_ENDPOINT)
         - name: DATASET_ZIP
           value: $(params.DATASET_ZIP)
-        - name: SIMPLEVIS_DATA
-          value: $(params.SIMPLEVIS_DATA)
         - name: MINIO_BUCKET
           value: $(params.MINIO_BUCKET)
         - name: MINIO_ACCESSKEY
