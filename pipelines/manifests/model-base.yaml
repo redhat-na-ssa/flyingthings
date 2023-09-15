@@ -176,6 +176,8 @@ spec:
           workspace: source
         - name: workspace
           workspace: shared-workspace
+      runAfter:
+        - fetch-repository
     - name: upload-artifacts
       taskRef:
         name: upload-artifacts
