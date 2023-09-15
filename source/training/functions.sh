@@ -53,10 +53,10 @@ minio_copy_artifacts(){
 minio_push_results(){
   cd "${SIMPLEVIS_DATA}/workspace" || return
 
-  pwd && find runs && ls -l
+  # pwd && find runs && ls -l
   
   echo "*************** Training Run Results*************************"
-  cat runs/results.csv
+  cat runs/exp/results.csv
   echo "************************************************************"
   tar vzcf runs/training-results.tgz runs/exp/
   ls -l ../
