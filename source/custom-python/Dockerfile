@@ -19,7 +19,6 @@ RUN curl -sL "${OC4_URL}" -o oc.tgz && \
     tar -C /opt/app-root/bin -zxf oc.tgz oc && \
     /opt/app-root/bin/oc completion bash > /etc/bash_completion.d/oc && \
     rm oc.tgz && \
-    ln -s /opt/app-root/bin/oc-wrapper.sh /opt/app-root/bin/oc && \
     fix-permissions /opt/app-root/lib
 
 USER 1001
