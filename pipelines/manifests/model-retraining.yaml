@@ -135,8 +135,8 @@ spec:
           value: $(params.SIMPLEVIS_DATA)
         - name: NAMESPACE
           value: $(params.NAMESPACE)
-        - name: IMAGE
-          value: $(params.UBI_IMAGE)
+        # - name: IMAGE
+        #   value: $(params.UBI_IMAGE)
       runAfter:
         - get-dataset
       workspaces:
