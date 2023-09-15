@@ -21,7 +21,6 @@ ENV MINIO_ENDPOINT=http://minio:9000
 ENV MINIO_BUCKET=flyingthings
 ENV MINIO_ACCESSKEY=minioadmin
 ENV MINIO_SECRETKEY=minioadmin
-ENV MINIO_CLIENT_URL=https://dl.min.io/client/mc/release/linux-amd64
 
 RUN dnf install -y git wget libGL python3-pip \
  && dnf clean all

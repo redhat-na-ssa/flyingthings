@@ -16,8 +16,6 @@ spec:
       type: string
     - name: MINIO_SECRETKEY
       type: string
-    - name: MINIO_CLIENT_URL
-      type: string
   steps:
     - name: upload-artifacts
       image: ubi9:latest
@@ -45,8 +43,6 @@ spec:
           value: $(params.MINIO_ACCESSKEY)
         - name: MINIO_SECRETKEY
           value: $(params.MINIO_SECRETKEY)
-        - name: MINIO_CLIENT_URL
-          value: $(params.MINIO_CLIENT_URL)
   workspaces:
     - name: workspace
       mountPath: /opt/app-root/src/simplevis-data/workspace

@@ -23,9 +23,6 @@ start_pipelines(){
 
   get_namespace
 
-  # Hosted -p MINIO_CLIENT_URL="https://dl.min.io/client/mc/release/linux-amd64"
-  # Local  -p MINIO_CLIENT_URL="http://util02.davenet.local"
-
   IMAGE_REGISTRY=image-registry.openshift-image-registry.svc:5000
   GIT_URL=https://github.com/redhat-na-ssa/flyingthings.git
   GIT_REVISION=cory-review
