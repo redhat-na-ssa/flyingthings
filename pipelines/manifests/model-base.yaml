@@ -70,9 +70,6 @@ spec:
     - name: DATASET_ZIP
       default: "flyingthings-yolo.zip"
       type: string
-    - name: SIMPLEVIS_DATA
-      default: "/opt/app-root/src/simplevis-data"
-      type: string
     - name: BASEDIR
       default: "/opt/app-root/src"
       type: string
@@ -138,8 +135,6 @@ spec:
       taskRef:
         name: create-bucket
       params:
-        - name: SIMPLEVIS_DATA
-          value: "$(params.SIMPLEVIS_DATA)"
         - name: MINIO_ENDPOINT
           value: $(params.MINIO_ENDPOINT)
         - name: MINIO_BUCKET
@@ -159,8 +154,6 @@ spec:
       taskRef:
         name: upload-artifacts
       params:
-        - name: SIMPLEVIS_DATA
-          value: "$(params.SIMPLEVIS_DATA)"
         - name: MINIO_ENDPOINT
           value: $(params.MINIO_ENDPOINT)
         - name: MINIO_BUCKET
@@ -185,8 +178,6 @@ spec:
           value: $(params.WEIGHTS)
         - name: BASE_MODEL
           value: "$(params.BASE_MODEL)"
-        - name: SIMPLEVIS_DATA
-          value: "$(params.SIMPLEVIS_DATA)"
         - name: MINIO_ENDPOINT
           value: $(params.MINIO_ENDPOINT)
         - name: MINIO_ACCESSKEY

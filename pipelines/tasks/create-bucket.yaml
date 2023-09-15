@@ -4,8 +4,6 @@ metadata:
   name: create-bucket
 spec:
   params:
-    - name: SIMPLEVIS_DATA
-      type: string
     - name: MINIO_ENDPOINT
       type: string
     - name: MINIO_BUCKET
@@ -30,8 +28,6 @@ spec:
       env:
         - name: MINIO_ENDPOINT
           value: $(params.MINIO_ENDPOINT)
-        - name: SIMPLEVIS_DATA
-          value: $(params.SIMPLEVIS_DATA)
         - name: MINIO_BUCKET
           value: $(params.MINIO_BUCKET)
         - name: MINIO_ACCESSKEY

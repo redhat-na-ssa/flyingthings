@@ -3,20 +3,16 @@ kind: Task
 metadata:
   name: distribute-data
 spec:
-  params:
-    - name: SIMPLEVIS_DATA
-      type: string
   steps:
     - name: distribute-data
       image: image-registry.openshift-image-registry.svc:5000/openshift/python:3.9-ubi8
       script: |
-        cd $(params.SIMPLEVIS_DATA)/workspace \
-        && $(workspaces.source.path)/source/training/02-distribute-files.py
-      env:
-        - name: SIMPLEVIS_DATA
-          value: $(params.SIMPLEVIS_DATA)
-        - name: BASEDIR
-          value: $(workspaces.source.path)/source/training
+        cd $(workspaces.workspace.path)
+
+        SOURCE_DIR=$(workspaces.source.path)
+        BASEDIR=${SOURCE_DIR}/source/training
+
+        $(workspaces.source.path)/source/training/02-distribute-files.py
   workspaces:
     - name: workspace
       mountPath: /opt/app-root/src/simplevis-data/workspace
