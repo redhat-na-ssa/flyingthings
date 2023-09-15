@@ -51,6 +51,9 @@ minio_copy_artifacts(){
 
 minio_push_results(){
   cd ${SIMPLEVIS_DATA}/workspace
+
+  pwd && find .
+  
   echo "*************** Training Run Results*************************"
   cat ${SIMPLEVIS_DATA}/workspace/runs/train/results.csv
   echo "************************************************************"
@@ -137,7 +140,6 @@ download_yolo_model(){
 
 model_export(){
   pwd
-
   mkdir -p "${SIMPLEVIS_DATA}/workspace"
   pushd "${SIMPLEVIS_DATA}/workspace"
     # yolo export model=runs/train/weights/best.pt format=onnx
