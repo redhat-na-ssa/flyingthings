@@ -344,17 +344,16 @@ spec:
           oc new-app $(params.MODEL_IMAGE) \
             --name=$(params.MODEL_NAME) \
             --env=WEIGHTS=model_custom.pt \
-            --env=SIMPLEVIS_DATA=/opt/app-root/src/simplevis-data \
             --env=MINIO_ENDPOINT=$(params.MINIO_ENDPOINT) \
             --env=MINIO_BUCKET=$(params.MINIO_BUCKET) \
             --env=MINIO_ACCESSKEY=$(params.MINIO_ACCESSKEY) \
             --env=MINIO_SECRETKEY=$(params.MINIO_SECRETKEY)
           
-          oc set volume deployment/$(params.MODEL_NAME) \
-            --add \
-            --name=simplevis-data-volume \
-            --type=emptyDir \
-            --mount-path=/opt/app-root/src/simplevis-data
+          # oc set volume deployment/$(params.MODEL_NAME) \
+          #   --add \
+          #   --name=simplevis-data-volume \
+          #   --type=emptyDir \
+          #   --mount-path=/opt/app-root/src/simplevis-data
 
           oc apply -f - <<EOF
           apiVersion: route.openshift.io/v1
