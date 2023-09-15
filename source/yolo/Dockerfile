@@ -17,7 +17,7 @@ ENV PATH=${APP_ROOT}/bin:${PATH} \
 
 WORKDIR ${APP_ROOT}/src
 
-RUN dnf upgrade -y && \
+RUN dnf -y --setopt=tsflags=nodocs upgrade && \
     dnf install -y git wget libGL python3-pip && \
     dnf clean all
 
