@@ -87,9 +87,6 @@ spec:
     - name: MINIO_SECRETKEY
       default: "minioadmin"
       type: string
-    - name: MINIO_CLIENT_URL
-      default: "https://dl.min.io/client/mc/release/linux-amd64"
-      type: string
   tasks:
     - name: fetch-repository
       params:
@@ -169,8 +166,6 @@ spec:
           value: $(params.MINIO_ACCESSKEY)
         - name: MINIO_SECRETKEY
           value: $(params.MINIO_SECRETKEY)
-        - name: MINIO_CLIENT_URL
-          value: $(params.MINIO_CLIENT_URL)
       workspaces:
         - name: source
           workspace: source
@@ -194,8 +189,6 @@ spec:
           value: $(params.MINIO_ACCESSKEY)
         - name: MINIO_SECRETKEY
           value: $(params.MINIO_SECRETKEY)
-        - name: MINIO_CLIENT_URL
-          value: $(params.MINIO_CLIENT_URL)
       runAfter:
         - fetch-repository
         - create-bucket
@@ -222,8 +215,6 @@ spec:
           value: $(params.MINIO_ACCESSKEY)
         - name: MINIO_SECRETKEY
           value: $(params.MINIO_SECRETKEY)
-        - name: MINIO_CLIENT_URL
-          value: $(params.MINIO_CLIENT_URL)
         - name: NAMESPACE
           value: $(params.NAMESPACE)
       runAfter:
@@ -288,8 +279,6 @@ spec:
         value: $(params.MINIO_ACCESSKEY)
       - name: MINIO_SECRETKEY
         value: $(params.MINIO_SECRETKEY)
-      - name: MINIO_CLIENT_URL
-        value: $(params.MINIO_CLIENT_URL)
       - name: BASE_MODEL
         value: $(params.BASE_MODEL)
       - name: SCRIPT
@@ -299,7 +288,6 @@ spec:
             --env=WEIGHTS=model_pretrained.pt \
             --env=SIMPLEVIS_DATA=/opt/app-root/src/simplevis-data \
             --env=MINIO_ENDPOINT=$(params.MINIO_ENDPOINT) \
-            --env=MINIO_CLIENT_URL=$(params.MINIO_CLIENT_URL) \
             --env=MINIO_BUCKET=$(params.PRETRAINED_BUCKET) \
             --env=MINIO_ACCESSKEY=$(params.MINIO_ACCESSKEY) \
             --env=MINIO_SECRETKEY=$(params.MINIO_SECRETKEY) \
