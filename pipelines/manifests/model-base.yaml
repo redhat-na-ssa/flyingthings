@@ -118,7 +118,7 @@ spec:
       workspaces:
         - name: source
           workspace: source
-    - name: build-ubi9
+    - name: build-python-custom
       params:
         - name: IMAGE
           value: $(params.UBI_IMAGE)
@@ -259,9 +259,11 @@ spec:
         value: $(params.MINIO_SECRETKEY)
       - name: BASE_MODEL
         value: $(params.BASE_MODEL)
+      - name: MODEL_IMAGE
+        value: $(params.MODEL_IMAGE)
       - name: SCRIPT
         value: |
-          oc new-app $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/custom-model:latest \
+          oc new-app $(params.MODEL_IMAGE) \
             --name=model-yolo \
             --env=WEIGHTS=model_pretrained.pt \
             --env=SIMPLEVIS_DATA=/opt/app-root/src/simplevis-data \
