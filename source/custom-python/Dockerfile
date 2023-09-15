@@ -1,6 +1,6 @@
 FROM registry.access.redhat.com/ubi9/python-39
 
-# This will avoid people forgetting to set no-cache-dir when building images
+# set no-cache-dir when building images
 ENV PIP_NO_CACHE_DIR=1
 
 USER 0

@@ -13,7 +13,7 @@ RUN mkdir -p ${APP_ROOT}/{bin,src} && \
     chmod -R g=u ${APP_ROOT}
 
 ENV PATH=${APP_ROOT}/bin:${PATH} \
-    HOME=${APP_ROOT}
+    HOME=${APP_ROOT}/src
 
 WORKDIR ${APP_ROOT}/src
 
