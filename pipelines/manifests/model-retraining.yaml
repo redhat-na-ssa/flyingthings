@@ -108,7 +108,7 @@ spec:
         params:
           - name: SCRIPT
           - name: IMAGE
-            default: image-registry.openshift-image-registry.svc:5000/cli:latest
+            default: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
         steps:
           - name: debug
             image: ubi9:latest
