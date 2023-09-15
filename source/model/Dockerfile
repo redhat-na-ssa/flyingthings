@@ -28,15 +28,11 @@ RUN dnf install -y git wget libGL python3-pip \
 RUN mkdir -p $SIMPLEVIS_DATA \
  && chown -R 1001:1001 $SIMPLEVIS_DATA
 
-WORKDIR /opt/app-root/src/
-
 COPY requirements.txt ./
 COPY get-model.sh ./
 RUN pip install --no-cache-dir -r ./requirements.txt
 
 COPY app/ ./
-
-WORKDIR /opt/app-root/src
 
 USER 1001
 EXPOSE 8000
