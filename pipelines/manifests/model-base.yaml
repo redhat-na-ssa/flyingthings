@@ -187,6 +187,8 @@ spec:
           value: $(params.MINIO_BUCKET)
         - name: NAMESPACE
           value: $(params.NAMESPACE)
+        - name: IMAGE
+          value: $(params.YOLO_IMAGE)
       runAfter:
         - build-model-base
       workspaces:
