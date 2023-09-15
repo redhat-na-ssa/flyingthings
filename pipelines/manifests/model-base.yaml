@@ -79,6 +79,10 @@ spec:
     - name: MINIO_SECRETKEY
       default: "minioadmin"
       type: string
+    - name: MODEL_NAME
+      default: model-base
+      description: name used to deploy the model and model server
+      type: string
   tasks:
     - name: fetch-repository
       params:
@@ -247,11 +251,11 @@ spec:
         value: $(params.MODEL_IMAGE)
       - name: SCRIPT
         value: |
-          APP_NAME=model-base
           oc new-app $(params.MODEL_IMAGE) \
-            --name=${APP_NAME} \
+            --name=$(params.MODEL_NAME) \
             --env=WEIGHTS=model_pretrained.pt \
             --env=MINIO_ENDPOINT=$(params.MINIO_ENDPOINT) \
+            --env=MINIO_BUCKET=$(params.MINIO_BUCKET) \
             --env=MINIO_ACCESSKEY=$(params.MINIO_ACCESSKEY) \
             --env=MINIO_SECRETKEY=$(params.MINIO_SECRETKEY) \
             --env=BASE_MODEL=$(params.BASE_MODEL)
