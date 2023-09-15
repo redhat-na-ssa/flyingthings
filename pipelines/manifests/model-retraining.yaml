@@ -68,7 +68,7 @@ spec:
       description: base image for notebook
       type: string
     - name: MODEL_IMAGE
-      default: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/custom-model:latest
+      default: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/model-pretrain:latest
       description: model server image
       type: string
     - name: DEPLOY
