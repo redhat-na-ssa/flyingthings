@@ -36,7 +36,6 @@ debug_pipeline(){
     -p MODEL_BUILD_ARGS="--build-arg WEIGHTS=flyingthings.pt --build-arg BASE_IMAGE=${IMAGE_REGISTRY}/${NAMESPACE}/yolo:latest" \
     -p CUSTOM_BUILD_ARGS="--build-arg BASE_IMAGE=${IMAGE_REGISTRY}/${NAMESPACE}/minimal-notebook:latest" \
     -p MINIO_BUCKET="flyingthings" \
-    -p PRETRAINED_BUCKET="yolo" \
     -p MINIO_ACCESSKEY="minioadmin" \
     -p MINIO_SECRETKEY="minioadmin" \
     -p NAMESPACE="${NAMESPACE}" \
