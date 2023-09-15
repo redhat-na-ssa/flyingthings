@@ -1,6 +1,8 @@
 #!/bin/sh
 set -x
 
+SIMPLEVIS_DATA=/opt/app-root/src/simplevis-data
+
 df -h
 
 cd $SIMPLEVIS_DATA/workspace
