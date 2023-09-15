@@ -25,8 +25,8 @@ minio_create_bucket(){
   local BUCKET="${1}"
   local REMOTE="${MINIO_REMOTE}"
 
-  ./mc --insecure --config-dir "${MINIO_CFG}" mb "${REMOTE}/${BUCKET}"
-  ./mc --insecure --config-dir "${MINIO_CFG}" version enable "${REMOTE}/${BUCKET}"
+  ./mc --insecure --config-dir "${MINIO_CFG}" mb "${REMOTE}/${BUCKET}" || true
+  ./mc --insecure --config-dir "${MINIO_CFG}" version enable "${REMOTE}/${BUCKET}" || true
 }
 
 minio_copy(){
@@ -133,3 +133,4 @@ download_yolo_model(){
   wget https://github.com/ultralytics/yolov5/raw/v7.0/data/coco128.yaml
   # ./mc --config-dir ${MINCFG} cp myminio/$MINIO_BUCKET/pretrained/model_pretrained_classes.yaml coco128.yaml  --insecure
 }
+
