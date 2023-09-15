@@ -24,11 +24,11 @@ RUN dnf -y --setopt=tsflags=nodocs upgrade && \
 # set no-cache-dir when building images
 ENV PIP_NO_CACHE_DIR=1
 
-ARG YOLOv5_VERSION=7.0
+ARG YOLOv5_VERSION=v7.0
 
 RUN mkdir -p /usr/local/lib/python3.9/site-packages && \
  cd /usr/local/lib/python3.9/site-packages && \
- git clone --branch v${YOLOv5_VERSION} --depth 1 https://github.com/ultralytics/yolov5.git && \
+ git clone --branch ${YOLOv5_VERSION} --depth 1 https://github.com/ultralytics/yolov5.git && \
  pip install --no-cache-dir -U pip setuptools && \
  pip install --no-cache-dir \
     -r /usr/local/lib/python3.9/site-packages/yolov5/requirements.txt && \

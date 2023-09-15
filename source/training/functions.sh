@@ -133,8 +133,11 @@ minio_copy_yolo_model(){
 }
 
 download_yolo_model(){
-  wget https://github.com/ultralytics/yolov5/releases/download/v7.0/yolov5s.pt
-  wget https://github.com/ultralytics/yolov5/raw/v7.0/data/coco128.yaml
+  YOLOv5_VERSION="${YOLOv5_VERSION:-v7.0}"  
+  BASE_MODEL="${BASE_MODEL:-yolov5s.pt}"
+
+  wget "https://github.com/ultralytics/yolov5/releases/download/${YOLOv5_VERSION}/${BASE_MODEL}"
+  wget "https://github.com/ultralytics/yolov5/raw/${YOLOv5_VERSION}/data/coco128.yaml"
   # ./mc --config-dir ${MINCFG} cp myminio/$MINIO_BUCKET/pretrained/model_pretrained_classes.yaml coco128.yaml  --insecure
 }
 
