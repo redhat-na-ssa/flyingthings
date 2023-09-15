@@ -134,10 +134,8 @@ spec:
       taskSpec:
         params:
           - name: SCRIPT
-          - name: REGISTRY
-            default: image-registry.openshift-image-registry.svc:5000/openshift
           - name: IMAGE
-            default: $(params.REGISTRY)/ubi9:latest
+            default: image-registry.openshift-image-registry.svc:5000/openshift/ubi9:latest
         steps:
           - name: debug
             image: $(params.IMAGE)
@@ -171,10 +169,8 @@ spec:
       taskSpec:
         params:
           - name: SCRIPT
-          - name: REGISTRY
-            default: image-registry.openshift-image-registry.svc:5000/openshift
           - name: IMAGE
-            default: $(params.REGISTRY)/ubi9:latest
+            default: image-registry.openshift-image-registry.svc:5000/openshift/ubi9:latest
         steps:
           - name: run
             image: $(params.IMAGE)
@@ -211,10 +207,8 @@ spec:
       taskSpec:
         params:
           - name: SCRIPT
-          - name: REGISTRY
-            default: image-registry.openshift-image-registry.svc:5000/openshift
           - name: IMAGE
-            default: $(params.REGISTRY)/ubi9:latest
+            default: image-registry.openshift-image-registry.svc:5000/openshift/ubi9:latest
         steps:
           - name: run
             image: $(params.IMAGE)
@@ -268,10 +262,8 @@ spec:
       taskSpec:
         params:
           - name: SCRIPT
-          - name: REGISTRY
-            default: image-registry.openshift-image-registry.svc:5000/openshift
           - name: IMAGE
-            default: $(params.REGISTRY)/ubi9:latest
+            default: image-registry.openshift-image-registry.svc:5000/openshift/ubi9:latest
         steps:
           - name: run
             image: $(params.IMAGE)

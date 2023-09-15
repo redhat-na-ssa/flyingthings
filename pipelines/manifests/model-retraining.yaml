@@ -107,10 +107,8 @@ spec:
       taskSpec:
         params:
           - name: SCRIPT
-          - name: REGISTRY
-            default: image-registry.openshift-image-registry.svc:5000/openshift
           - name: IMAGE
-            default: $(params.REGISTRY)/ubi9:latest
+            default: image-registry.openshift-image-registry.svc:5000/openshift/ubi9:latest
         steps:
           - name: debug
             image: $(params.IMAGE)
@@ -304,72 +302,30 @@ spec:
           operator: in
           values: ["Y"]
       taskSpec:
-        metadata:
-          annotations:
-            # operator.tekton.dev/last-applied-hash: 64d9014f8c7f4cd290afc619a32a185211cae3b23d56af70197b0e936ec8d35b
-            tekton.dev/displayName: openshift client
-            tekton.dev/pipelines.minVersion: 0.17.0
-            tekton.dev/tags: cli
-          labels:
-            app.kubernetes.io/version: '0.2'
-            operator.tekton.dev/operand-name: openshift-pipelines-addons
-            operator.tekton.dev/provider-type: redhat
         params:
-          - default: oc help
-            description: The OpenShift CLI arguments to run
-            name: SCRIPT
-            type: string
-          - default: latest
-            description: The OpenShift Version to use
-            name: VERSION
-            type: string
+          - name: SCRIPT
+          - name: IMAGE
+            default: image-registry.openshift-image-registry.svc:5000/openshift/ubi9:latest
         steps:
-          - env:
-              - name: HOME
-                value: /tekton/home
-            image: >-
-              image-registry.openshift-image-registry.svc:5000/openshift/cli:$(params.VERSION)
-            name: oc
+          - name: debug
+            image: $(params.IMAGE)
+            script: |
+              #!/usr/bin/env bash
+              df -h && pwd && ls -al
+          - name: run
+            image: $(params.IMAGE)
             resources: {}
             script: |
               #!/usr/bin/env bash
-
-              [[ "$(workspaces.manifest-dir.bound)" == "true" ]] && \
-              cd $(workspaces.manifest-dir.path)
-
-              [[ "$(workspaces.kubeconfig-dir.bound)" == "true" ]] && \
-              [[ -f $(workspaces.kubeconfig-dir.path)/kubeconfig ]] && \
-              export KUBECONFIG=$(workspaces.kubeconfig-dir.path)/kubeconfig
-
               $(params.SCRIPT)
-
-              exit 0
-
-        workspaces:
-          - name: manifest-dir
-            optional: true
-          - name: kubeconfig-dir
-            optional: true
       workspaces:
         - name: source
           workspace: source
       runAfter:
         - push-results
       params:
-      - name: NAMESPACE
-        value: $(params.NAMESPACE)
-      - name: MINIO_ENDPOINT
-        value: $(params.MINIO_ENDPOINT)
-      - name: MINIO_BUCKET
-        value: $(params.MINIO_BUCKET)
-      - name: MINIO_ACCESSKEY
-        value: $(params.MINIO_ACCESSKEY)
-      - name: MINIO_SECRETKEY
-        value: $(params.MINIO_SECRETKEY)
-      - name: MODEL_NAME
-        value: $(params.MODEL_NAME)
-      - name: MODEL_IMAGE
-        value: $(params.MODEL_IMAGE)
+      - name: IMAGE
+        value: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
       - name: SCRIPT
         value: |
           set -x
@@ -381,12 +337,6 @@ spec:
             --env=MINIO_BUCKET=$(params.MINIO_BUCKET) \
             --env=MINIO_ACCESSKEY=$(params.MINIO_ACCESSKEY) \
             --env=MINIO_SECRETKEY=$(params.MINIO_SECRETKEY)
-          
-          # oc set volume deployment/$(params.MODEL_NAME) \
-          #   --add \
-          #   --name=simplevis-data-volume \
-          #   --type=emptyDir \
-          #   --mount-path=/opt/app-root/src/simplevis-data
 
           oc apply -f - <<EOF
           apiVersion: route.openshift.io/v1
