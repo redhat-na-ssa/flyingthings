@@ -156,6 +156,8 @@ spec:
           value: "$(params.MAX_WIDTH)"
         - name: NAMESPACE
           value: $(params.NAMESPACE)
+        - name: IMAGE
+          value: $(params.UBI_IMAGE)
       runAfter:
         - create-classfile
       workspaces:
