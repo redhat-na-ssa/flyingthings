@@ -112,7 +112,7 @@ spec:
           - name: IMAGE
             default: $(params.REGISTRY)/ubi9:latest
         steps:
-          - name: run
+          - name: debug
             image: $(params.IMAGE)
             script: |
               #!/usr/bin/env bash
