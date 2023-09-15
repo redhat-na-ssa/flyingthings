@@ -18,9 +18,12 @@ spec:
       type: string
     - name: NAMESPACE
       type: string
+    - name: IMAGE
+      type: string
+      default: ubi9:latest
   steps:
     - name: push-results
-      image: image-registry.openshift-image-registry.svc:5000/$(params.NAMESPACE)/base-ubi9:latest
+      image: $(params.IMAGE)
       script: |
         $(workspaces.source.path)/source/training/minio-push-results.sh
       env:

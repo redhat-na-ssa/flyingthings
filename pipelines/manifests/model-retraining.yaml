@@ -64,6 +64,13 @@ spec:
       description: secret key for minio NOTE* use secrets for production
       default: minioadmin
       type: string
+    - name: IMAGE_REGISTRY
+      description: default image registry
+      default: image-registry.openshift-image-registry.svc:5000
+    - name: UBI_IMAGE
+      default: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/base-ubi9:latest
+      description: base image for notebook
+      type: string
     - name: DEPLOY
       default: 'Y'
       description: flag for deploying model server along with model
@@ -124,6 +131,8 @@ spec:
           value: $(params.SIMPLEVIS_DATA)
         - name: NAMESPACE
           value: $(params.NAMESPACE)
+        - name: IMAGE
+          value: $(params.UBI_IMAGE)
       runAfter:
         - get-dataset
       workspaces:
@@ -264,6 +273,8 @@ spec:
           value: $(params.MINIO_SECRETKEY)
         - name: NAMESPACE
           value: $(params.NAMESPACE)
+        - name: IMAGE
+          value: $(params.UBI_IMAGE)
       runAfter:
         - export-model
       workspaces:

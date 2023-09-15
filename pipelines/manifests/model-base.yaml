@@ -45,11 +45,11 @@ spec:
       description: build arguments for model server
       type: string
     - name: UBI_IMAGE
-      default: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/base-ubi9:latest
+      default: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/python-custom:latest
       description: base image for notebook
       type: string
     - name: UBI_CONTEXT
-      default: source/ubi9
+      default: source/custom-python
       description: dockerfile path
       type: string
     - name: BATCH_SIZE

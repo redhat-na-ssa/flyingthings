@@ -27,12 +27,12 @@ debug_pipeline(){
     -p GIT_URL="https://github.com/redhat-na-ssa/flyingthings.git" \
     -p GIT_REVISION="main" \
     -p YOLO_IMAGE="${IMAGE_REGISTRY}/${NAMESPACE}/yolo:latest" \
-    -p UBI_IMAGE="${IMAGE_REGISTRY}/${NAMESPACE}/base-ubi9:latest" \
+    -p UBI_IMAGE="${IMAGE_REGISTRY}/${NAMESPACE}/python-custom:latest" \
     -p MINIMAL_IMAGE="${IMAGE_REGISTRY}/${NAMESPACE}/minimal-notebook:latest" \
     -p CUSTOM_NOTEBOOK_IMAGE="${IMAGE_REGISTRY}/${NAMESPACE}/yolo-notebook:latest" \
     -p MODEL_IMAGE="${IMAGE_REGISTRY}/${NAMESPACE}/custom-model:latest" \
     -p BASE_MODEL="yolov5s.pt" \
-    -p MINIMAL_BUILD_ARGS="--build-arg BASE_IMAGE=${IMAGE_REGISTRY}/${NAMESPACE}/base-ubi9:latest" \
+    -p MINIMAL_BUILD_ARGS="--build-arg BASE_IMAGE=${IMAGE_REGISTRY}/${NAMESPACE}/python-custom:latest" \
     -p MODEL_BUILD_ARGS="--build-arg WEIGHTS=flyingthings.pt --build-arg BASE_IMAGE=${IMAGE_REGISTRY}/${NAMESPACE}/yolo:latest" \
     -p CUSTOM_BUILD_ARGS="--build-arg BASE_IMAGE=${IMAGE_REGISTRY}/${NAMESPACE}/minimal-notebook:latest" \
     -p MINIO_BUCKET="flyingthings" \
