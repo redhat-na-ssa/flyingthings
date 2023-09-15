@@ -208,6 +208,8 @@ spec:
           value: $(params.MINIO_ACCESSKEY)
         - name: MINIO_SECRETKEY
           value: $(params.MINIO_SECRETKEY)
+        - name: MINIO_BUCKET
+          value: $(params.MINIO_BUCKET)
         - name: NAMESPACE
           value: $(params.NAMESPACE)
       runAfter:

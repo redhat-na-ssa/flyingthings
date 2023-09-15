@@ -16,6 +16,8 @@ spec:
       type: string
     - name: MINIO_SECRETKEY
       type: string
+    - name: MINIO_BUCKET
+      type: string
     - name: NAMESPACE
       type: string
   steps:
@@ -40,6 +42,8 @@ spec:
           value: $(params.MINIO_ACCESSKEY)
         - name: MINIO_SECRETKEY
           value: $(params.MINIO_SECRETKEY)
+        - name: MINIO_BUCKET
+          value: $(params.MINIO_BUCKET)
   workspaces:
     - name: workspace
       mountPath: /opt/app-root/src/simplevis-data/workspace
