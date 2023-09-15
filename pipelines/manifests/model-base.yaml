@@ -108,9 +108,7 @@ spec:
           value: $(params.YOLO_IMAGE)
         - name: CONTEXT
           value: $(params.YOLO_CONTEXT)
-        - name: DOCKERFILE
-          value: ./Dockerfile
-        - name: YOLO_BUILD_ARGS
+        - name: BUILD_EXTRA_ARGS
           value: "$(params.YOLO_BUILD_ARGS)"
       runAfter:
         - fetch-repository

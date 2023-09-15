@@ -5,11 +5,22 @@ ENV PIP_NO_CACHE_DIR=1
 
 USER 0
 
-# Update base image for latest security updates
+# update base image
 # (ubi images are not released that often)
 RUN dnf -y  --setopt=tsflags=nodocs update && \
     dnf -y install libGL jq && \
     dnf -y clean all --enablerepo='*'
+
+# install: oc
+ARG OC4_URL="https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/stable/openshift-client-linux.tar.gz"
+
+RUN curl -sL "${OC4_URL}" -o oc.tgz && \
+    sha256sum < oc.tgz && \
+    tar -C /opt/app-root/bin -zxf oc.tgz oc && \
+    /opt/app-root/bin/oc completion bash > /etc/bash_completion.d/oc && \
+    rm oc.tgz && \
+    ln -s /opt/app-root/bin/oc-wrapper.sh /opt/app-root/bin/oc && \
+    fix-permissions /opt/app-root/lib
 
 USER 1001
 
@@ -22,16 +33,3 @@ RUN pip install -U Jinja2==3.1.* opencv-python==4.6.0.*
 # Copy files
 # COPY Pipfile.lock ./
 
-# Install packages and cleanup
-# (all commands are chained to minimize layer size
-
-# install: oc
-ARG OC4_URL="https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/stable/openshift-client-linux.tar.gz"
-
-RUN curl -sL "${OC4_URL}" -o oc.tgz && \
-    sha256sum < oc.tgz && \
-    tar -C /opt/app-root/bin -zxf oc.tgz oc && \
-    /opt/app-root/bin/oc completion bash > /etc/bash_completion.d/oc && \
-    rm oc.tgz && \
-    ln -s /opt/app-root/bin/oc-wrapper.sh /opt/app-root/bin/oc && \
-    fix-permissions /opt/app-root/lib
