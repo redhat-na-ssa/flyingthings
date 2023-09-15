@@ -51,10 +51,6 @@ minio_copy_artifacts(){
 }
 
 minio_push_results(){
-  cd "${SIMPLEVIS_DATA}/workspace" || return
-
-  # pwd && find runs && ls -l
-  
   echo "*************** Training Run Results*************************"
   cat runs/exp/results.csv
   echo "************************************************************"
@@ -100,14 +96,14 @@ minio_push_results(){
 
   # Push the results to minio
   # Push the training results to a training run folder
-  minio_copy "${SIMPLEVIS_DATA}/workspace/runs/training-results.tgz" "${MINIO_REMOTE}/${MINIO_BUCKET}/training-run-${CURRENT_RUN}/training-results.tgz"
-  minio_copy "${SIMPLEVIS_DATA}/workspace/runs/exp/weights/best.pt" "${MINIO_REMOTE}/${MINIO_BUCKET}/training-run-${CURRENT_RUN}/${WEIGHTS}"
+  minio_copy "runs/training-results.tgz" "${MINIO_REMOTE}/${MINIO_BUCKET}/training-run-${CURRENT_RUN}/training-results.tgz"
+  minio_copy "runs/exp/weights/best.pt" "${MINIO_REMOTE}/${MINIO_BUCKET}/training-run-${CURRENT_RUN}/${WEIGHTS}"
 
   # Push the latest model files to the root of the bucket
-  minio_copy "${SIMPLEVIS_DATA}/workspace/runs/exp/weights/best.pt" "${MINIO_REMOTE}/${MINIO_BUCKET}/models/model_custom_${CURRENT_RUN}.pt"
-  minio_copy "${SIMPLEVIS_DATA}/workspace/runs/exp/weights/best.onnx" "${MINIO_REMOTE}/${MINIO_BUCKET}/models/model_custom_${CURRENT_RUN}.onnx"
-  minio_copy "${SIMPLEVIS_DATA}/workspace/datasets/classes.txt" "${MINIO_REMOTE}/${MINIO_BUCKET}/models/classes_${CURRENT_RUN}.txt"
-  minio_copy "${SIMPLEVIS_DATA}/workspace/classes.yaml" "${MINIO_REMOTE}/${MINIO_BUCKET}/models/classes_${CURRENT_RUN}.yaml"
+  minio_copy "runs/exp/weights/best.pt" "${MINIO_REMOTE}/${MINIO_BUCKET}/models/model_custom_${CURRENT_RUN}.pt"
+  minio_copy "runs/exp/weights/best.onnx" "${MINIO_REMOTE}/${MINIO_BUCKET}/models/model_custom_${CURRENT_RUN}.onnx"
+  minio_copy "datasets/classes.txt" "${MINIO_REMOTE}/${MINIO_BUCKET}/models/classes_${CURRENT_RUN}.txt"
+  minio_copy "classes.yaml" "${MINIO_REMOTE}/${MINIO_BUCKET}/models/classes_${CURRENT_RUN}.yaml"
 
   # Set the training run tag to latest
   minio_tag "${MINIO_REMOTE}/${MINIO_BUCKET}/models/model_custom_${CURRENT_RUN}.pt" "training-run=latest"
