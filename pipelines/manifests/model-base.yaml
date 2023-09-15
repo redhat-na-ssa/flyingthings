@@ -257,6 +257,7 @@ spec:
         params:
           - name: SCRIPT
           - name: IMAGE
+            default: $(params.IMAGE_REGISTRY)/openshift/cli:latest
         steps:
           - name: run
             image: $(params.IMAGE)
@@ -271,8 +272,6 @@ spec:
       runAfter:
         - build-model-server
       params:
-      - name: IMAGE
-        value: $(params.IMAGE_REGISTRY)/cli:latest
       - name: SCRIPT
         value: |
           set -x
