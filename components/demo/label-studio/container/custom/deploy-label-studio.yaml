@@ -20,7 +20,7 @@ spec:
       default: image-registry.openshift-image-registry.svc:5000/$(params.NAMESPACE)/labelstudio:latest
       description: image for label studio
       type: string
-    - name: LABELSTUDIO_DOCKERFILE
+    - name: LABELSTUDIO_CONTEXT
       default: source/labelstudio
       description: dockerfile path 
       type: string
@@ -46,7 +46,7 @@ spec:
         - name: IMAGE
           value: $(params.LABELSTUDIO_IMAGE)
         - name: CONTEXT
-          value: $(params.LABELSTUDIO_DOCKERFILE)
+          value: $(params.LABELSTUDIO_CONTEXT)
         - name: DOCKERFILE
           value: ./Dockerfile
       runAfter:
