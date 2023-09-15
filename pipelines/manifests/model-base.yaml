@@ -13,19 +13,20 @@ spec:
       description: revision to be used from repo of the code for deployment
       type: string
     - name: NAMESPACE
-      description: NAMESPACE for the deployment
+      default: modemo
+      description: namespace for the deployment
       type: string
     - name: IMAGE_REGISTRY
-      description: Default image registry
+      description: default image registry
       default: image-registry.openshift-image-registry.svc:5000
       type: string
     - name: YOLO_IMAGE
       default: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/yolo:latest
       description: base image for yolo
       type: string
-    - name: YOLO_DOCKERFILE
+    - name: YOLO_CONTEXT
       default: source/yolo
-      description: dockerfile path 
+      description: dockerfile path
       type: string
     - name: YOLO_BUILD_ARGS
       default: --build-arg env=YOLOv5_VERSION=7.0
@@ -35,9 +36,9 @@ spec:
       default: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/custom-model:latest
       description: model server image
       type: string
-    - name: MODEL_DOCKERFILE
+    - name: MODEL_CONTEXT
       default: source/model
-      description: dockerfile path 
+      description: dockerfile path
       type: string
     - name: MODEL_BUILD_ARGS
       default: --build-arg WEIGHTS=flyingthings.pt --build-arg BASE_IMAGE=$(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/yolo:latest
@@ -47,9 +48,9 @@ spec:
       default: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/base-ubi9:latest
       description: base image for notebook
       type: string
-    - name: UBI_DOCKERFILE
+    - name: UBI_CONTEXT
       default: source/ubi9
-      description: dockerfile path 
+      description: dockerfile path
       type: string
     - name: BATCH_SIZE
       default: "2"
@@ -101,26 +102,12 @@ spec:
       workspaces:
         - name: output
           workspace: source
-    # - name: debug-workspace
-    #   taskSpec:
-    #     steps:
-    #       - name: run-batch-file
-    #         image: ubi9:latest
-    #         script: |
-    #           #!/usr/bin/env bash
-    #           echo "Let's see what we got here..." \
-    #           && ls -al $(workspaces.workspace.path)
-    #   runAfter:
-    #     - upload-artifacts
-    #   workspaces:
-    #     - name: workspace
-    #       workspace: shared-workspace
     - name: build-yolo
       params:
         - name: IMAGE
           value: $(params.YOLO_IMAGE)
         - name: CONTEXT
-          value: $(params.YOLO_DOCKERFILE)          
+          value: $(params.YOLO_CONTEXT)
         - name: DOCKERFILE
           value: ./Dockerfile
         - name: YOLO_BUILD_ARGS
@@ -138,7 +125,7 @@ spec:
         - name: IMAGE
           value: $(params.UBI_IMAGE)
         - name: CONTEXT
-          value: $(params.UBI_DOCKERFILE)          
+          value: $(params.UBI_CONTEXT)
         - name: DOCKERFILE
           value: ./Dockerfile
       runAfter:
@@ -224,7 +211,7 @@ spec:
         - name: IMAGE
           value: $(params.MODEL_IMAGE)
         - name: CONTEXT
-          value: $(params.MODEL_DOCKERFILE)          
+          value: $(params.MODEL_CONTEXT)
         - name: DOCKERFILE
           value: ./Dockerfile
         - name: BUILD_EXTRA_ARGS
@@ -244,7 +231,7 @@ spec:
             type: string
           - name: IMAGE
             default: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
-          - name: BASE_MODEL            
+          - name: BASE_MODEL
             type: string
             description: Base model for training
         steps:
@@ -314,6 +301,20 @@ spec:
               termination: edge
               insecureEdgeTerminationPolicy: Allow
           EOF
+    # - name: debug-workspace
+    #   taskSpec:
+    #     steps:
+    #       - name: run-batch-file
+    #         image: ubi9:latest
+    #         script: |
+    #           #!/usr/bin/env bash
+    #           echo "Let's see what we got here..." \
+    #           && ls -al $(workspaces.workspace.path)
+    #   runAfter:
+    #     - upload-artifacts
+    #   workspaces:
+    #     - name: workspace
+    #       workspace: shared-workspace
   workspaces:
     - name: shared-workspace
     - name: source
