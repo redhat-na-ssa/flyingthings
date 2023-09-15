@@ -8,7 +8,7 @@ spec:
       type: string
   steps:
     - name: distribute-data
-      image: python:3.9-ubi8
+      image: registry.access.redhat.com/ubi9/python-39
       script: |
         cd $(params.SIMPLEVIS_DATA)/workspace \
         && $(workspaces.source.path)/source/training/02-distribute-files.py
