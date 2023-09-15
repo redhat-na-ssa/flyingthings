@@ -247,37 +247,37 @@ spec:
         value: $(params.MODEL_IMAGE)
       - name: SCRIPT
         value: |
+          APP_NAME=model-base
           oc new-app $(params.MODEL_IMAGE) \
-            --name=model-yolo \
+            --name=${APP_NAME} \
             --env=WEIGHTS=model_pretrained.pt \
-            --env=SIMPLEVIS_DATA=/opt/app-root/src/simplevis-data \
             --env=MINIO_ENDPOINT=$(params.MINIO_ENDPOINT) \
             --env=MINIO_ACCESSKEY=$(params.MINIO_ACCESSKEY) \
             --env=MINIO_SECRETKEY=$(params.MINIO_SECRETKEY) \
             --env=BASE_MODEL=$(params.BASE_MODEL)
           
-          oc set volume deployment/model-yolo \
-            --add \
-            --name=simplevis-data-volume \
-            --type=emptyDir \
-            --mount-path=/opt/app-root/src/simplevis-data \
-            --overwrite
+          # oc set volume deployment/${APP_NAME} \
+          #   --add \
+          #   --name=simplevis-data-volume \
+          #   --type=emptyDir \
+          #   --mount-path=/opt/app-root/src/simplevis-data \
+          #   --overwrite
           
           oc apply -f - <<EOF
           apiVersion: route.openshift.io/v1
           kind: Route
           metadata:
-            name: model-yolo
+            name: ${APP_NAME}
             labels:
-              app: model-yolo
-              app.kubernetes.io/component: model-yolo
-              app.kubernetes.io/instance: model-yolo
+              app: ${APP_NAME}
+              app.kubernetes.io/component: ${APP_NAME}
+              app.kubernetes.io/instance: ${APP_NAME}
           annotations:
             openshift.io/host.generated: "true"
           spec:
             to:
               kind: Service
-              name: model-yolo
+              name: ${APP_NAME}
               weight: 100
             port:
               targetPort: 8000-tcp

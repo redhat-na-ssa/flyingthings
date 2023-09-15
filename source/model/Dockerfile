@@ -30,6 +30,8 @@ RUN pip install --no-cache-dir -r ./requirements.txt
 
 COPY app/ ./
 
+VOLUME "${SIMPLEVIS_DATA}"
+
 USER 1001
 EXPOSE 8000
 
