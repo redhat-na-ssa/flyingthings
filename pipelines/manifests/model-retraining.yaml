@@ -151,7 +151,7 @@ spec:
         params:
           - name: SCRIPT
           - name: IMAGE
-            default: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
+            default: image-registry.openshift-image-registry.svc:5000/openshift/tools:latest
         steps:
           - name: run
             image: $(params.IMAGE)
