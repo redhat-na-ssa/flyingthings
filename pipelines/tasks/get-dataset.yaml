@@ -21,6 +21,7 @@ spec:
       image: registry.access.redhat.com/ubi9/python-39
       script: |
         set -x \
+        && cd $(params.SIMPLEVIS_DATA)/workspace \
         && $(workspaces.source.path)/source/training/get-dataset.sh
       env:
         - name: DATASET_ZIP
