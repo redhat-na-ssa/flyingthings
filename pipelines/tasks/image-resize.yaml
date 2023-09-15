@@ -10,9 +10,12 @@ spec:
       type: string
     - name: NAMESPACE
       type: string
+    - name: IMAGE
+      type: string
+      default: ubi9:latest
   steps:
     - name: image-resize
-      image: image-registry.openshift-image-registry.svc:5000/$(params.NAMESPACE)/base-ubi9:latest
+      image: $(params.IMAGE)
       script: |
         set -x \
         && cd $(params.SIMPLEVIS_DATA)/workspace/datasets \
