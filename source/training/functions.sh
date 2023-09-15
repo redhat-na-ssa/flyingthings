@@ -119,8 +119,8 @@ minio_get_dataset(){
 
   mkdir -p "${SIMPLEVIS_DATA}/workspace/datasets"
   pushd "${SIMPLEVIS_DATA}/workspace/datasets"
-  unzip "${SIMPLEVIS_DATA}/workspace/${DATASET_ZIP}"
-  ls -l "${SIMPLEVIS_DATA}/workspace/datasets"
+    unzip "${SIMPLEVIS_DATA}/workspace/${DATASET_ZIP}"
+    ls -l "${SIMPLEVIS_DATA}/workspace/datasets"
   popd
 }
 
@@ -135,3 +135,12 @@ download_yolo_model(){
   # ./mc --config-dir ${MINCFG} cp myminio/$MINIO_BUCKET/pretrained/model_pretrained_classes.yaml coco128.yaml  --insecure
 }
 
+model_export(){
+  pwd
+
+  mkdir -p "${SIMPLEVIS_DATA}/workspace"
+  pushd "${SIMPLEVIS_DATA}/workspace"
+    # yolo export model=runs/train/weights/best.pt format=onnx
+    python3 /usr/local/lib/python3.9/site-packages/yolov5/export.py --weights runs/exp/weights/best.pt --include onnx
+  popd
+}
