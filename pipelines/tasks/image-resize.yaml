@@ -20,11 +20,12 @@ spec:
         SOURCE_DIR=$(workspaces.source.path)
         BASEDIR=${SOURCE_DIR}/source/training
 
-        cd datasets \
-        && mv images images_original \
-        && mkdir images \
-        && $(workspaces.source.path)/source/training/100-image-resize.py images_original images $(params.MAX_WIDTH)
+        cd datasets && \
+        mv images images_original && \
+        mkdir images && \
+        $(workspaces.source.path)/source/training/100-image-resize.py images_original images $(params.MAX_WIDTH)
 
+        pwd && ls -al
   workspaces:
     - name: workspace
       mountPath: /opt/app-root/src/simplevis-data/workspace
