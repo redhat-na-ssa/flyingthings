@@ -12,15 +12,11 @@ WORKDIR /opt/app-root/src
 #  && dnf -y install ffmpeg libGL git wget python3-pip \
 #  && dnf clean all
 
-ENV WEIGHTS=flyingthings.pt
 ENV BUILD_VER=0.0
 ENV MODEL_CLASSES=flyingthings.yaml
 ENV SIMPLEVIS_DATA=/opt/app-root/src/simplevis-data
 ENV BASEDIR=/opt/app-root/src
-ENV MINIO_ENDPOINT=http://minio:9000
 ENV MINIO_BUCKET=flyingthings
-ENV MINIO_ACCESSKEY=minioadmin
-ENV MINIO_SECRETKEY=minioadmin
 
 RUN dnf install -y git wget libGL python3-pip \
  && dnf clean all
@@ -37,4 +33,4 @@ COPY app/ ./
 USER 1001
 EXPOSE 8000
 
-CMD ["/opt/app-root/src/get-model.sh"]
+CMD ["/opt/app-root/src/app.sh"]
