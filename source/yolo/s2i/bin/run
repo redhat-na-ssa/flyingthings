@@ -1,0 +1,12 @@
+#!/bin/bash
+# source /opt/app-root/etc/generate_container_user
+
+set -e
+
+# display usage
+$STI_SCRIPTS_PATH/usage
+
+tritonserver \
+  --model-repository=${MODEL_REPOSITORY:-$HOME/src} \
+  --model-control-mode=poll \
+  --repository-poll-secs=60

@@ -1,9 +1,27 @@
 FROM quay.io/centos/centos:stream9
 
-WORKDIR /opt/app-root/src
+ENV STI_SCRIPTS_PATH=/usr/libexec/s2i/
+COPY s2i/bin/ $STI_SCRIPTS_PATH
+COPY usr/ /usr/
+
+### Setup user for build execution and application runtime
+ENV APP_ROOT=/opt/app-root
+
+RUN mkdir -p ${APP_ROOT}/{bin,src} && \
+    chmod -R u+x ${APP_ROOT}/bin && \
+    chgrp -R 0 ${APP_ROOT} && \
+    chmod -R g=u ${APP_ROOT}
+
+ENV PATH=${APP_ROOT}/bin:${PATH} \
+    HOME=${APP_ROOT}
+
+WORKDIR ${APP_ROOT}/src
 
 RUN dnf install -y git wget libGL python3-pip \
  && dnf clean all
+
+# set no-cache-dir when building images
+ENV PIP_NO_CACHE_DIR=1
 
 ARG YOLOv5_VERSION=7.0
 
