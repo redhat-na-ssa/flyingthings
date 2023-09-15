@@ -17,22 +17,21 @@ spec:
   steps:
     - name: upload-artifacts
       image: ubi9:latest
-      # script: |
-      #   $(workspaces.source.path)/source/minio-client/03-copy-artifacts.sh
       script: |
-        echo "SOURCE_DIR: $SOURCE_DIR" \
-        && ls -al $(workspaces.source.path)/source \
-        && cd $(params.SIMPLEVIS_DATA)/workspace \
-        && $(workspaces.source.path)/source/training/minio-copy-artifacts.sh
+        cd $(workspaces.workspace.path)
+
+        SOURCE_DIR=$(workspaces.source.path)
+        BASEDIR=${SOURCE_DIR}/source/training
+
+        source $(workspaces.source.path)/source/training/functions.sh && \
+        minio_copy_artifacts
+
+        pwd && ls -al
       env:
         - name: MINIO_ENDPOINT
           value: $(params.MINIO_ENDPOINT)
         - name: SIMPLEVIS_DATA
           value: $(params.SIMPLEVIS_DATA)
-        - name: BASEDIR
-          value: $(workspaces.source.path)/source/training
-        - name: SOURCE_DIR
-          value: $(workspaces.source.path)
         - name: MINIO_BUCKET
           value: $(params.MINIO_BUCKET)
         - name: MINIO_ACCESSKEY
