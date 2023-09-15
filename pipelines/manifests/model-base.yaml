@@ -21,7 +21,7 @@ spec:
       default: image-registry.openshift-image-registry.svc:5000
       type: string
     - name: YOLO_IMAGE
-      default: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/yolo:latest
+      default: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/model-base:latest
       description: base image for yolo
       type: string
     - name: YOLO_CONTEXT
@@ -33,7 +33,7 @@ spec:
       description: build arguments for yolo
       type: string
     - name: MODEL_IMAGE
-      default: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/custom-model:latest
+      default: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/model-server:latest
       description: model server image
       type: string
     - name: MODEL_CONTEXT
@@ -70,9 +70,6 @@ spec:
     - name: DATASET_ZIP
       default: "flyingthings-yolo.zip"
       type: string
-    - name: BASEDIR
-      default: "/opt/app-root/src"
-      type: string
     - name: MINIO_BUCKET
       default: "flyingthings"
       type: string
@@ -99,7 +96,7 @@ spec:
       workspaces:
         - name: output
           workspace: source
-    - name: build-yolo
+    - name: build-model-base
       params:
         - name: IMAGE
           value: $(params.YOLO_IMAGE)
@@ -121,8 +118,6 @@ spec:
           value: $(params.UBI_IMAGE)
         - name: CONTEXT
           value: $(params.UBI_CONTEXT)
-        - name: DOCKERFILE
-          value: ./Dockerfile
       runAfter:
         - fetch-repository
       taskRef:
@@ -189,7 +184,7 @@ spec:
         - name: NAMESPACE
           value: $(params.NAMESPACE)
       runAfter:
-        - build-yolo
+        - build-model-base
       workspaces:
         - name: source
           workspace: source
@@ -201,8 +196,6 @@ spec:
           value: $(params.MODEL_IMAGE)
         - name: CONTEXT
           value: $(params.MODEL_CONTEXT)
-        - name: DOCKERFILE
-          value: ./Dockerfile
         - name: BUILD_EXTRA_ARGS
           value: "$(params.MODEL_BUILD_ARGS)"
       runAfter:
