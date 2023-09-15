@@ -107,11 +107,13 @@ spec:
       taskSpec:
         params:
           - name: SCRIPT
+          - name: REGISTRY
+            default: image-registry.openshift-image-registry.svc:5000/openshift
           - name: IMAGE
-            default: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
+            default: $(params.REGISTRY)/ubi9:latest
         steps:
-          - name: debug
-            image: ubi9:latest
+          - name: run
+            image: $(params.IMAGE)
             script: |
               #!/usr/bin/env bash
               df -h && pwd && ls -al
@@ -429,17 +431,16 @@ spec:
             echo "BATCH_SIZE: $(params.BATCH_SIZE)"
             echo "NUM_EPOCHS: $(params.NUM_EPOCHS)"
             echo "IMG_RESIZE: $(params.IMG_RESIZE)"
-            echo "MAX_WIDTH: $MAX_WIDTH"
-            echo "WEIGHTS: $WEIGHTS"
-            echo "BASE_MODEL: $BASE_MODEL"
-            echo "MINIO_ENDPOINT: $MINIO_ENDPOINT"
-            echo "DATASET_ZIP: $DATASET_ZIP"
-            echo "SIMPLEVIS_DATA: $SIMPLEVIS_DATA"
-            echo "MINIO_BUCKET: $MINIO_BUCKET"
-            echo "MINIO_ACCESSKEY: $MINIO_ACCESSKEY"
-            echo "MINIO_SECRETKEY: $MINIO_SECRETKEY"
-            echo "DEPLOY: $DEPLOY"
-            echo "MODEL_NAME: $MODEL_NAME"
+            echo "MAX_WIDTH: $(params.MAX_WIDTH)"
+            echo "WEIGHTS: $(params.WEIGHTS)"
+            echo "BASE_MODEL: $(params.BASE_MODEL)"
+            echo "MINIO_ENDPOINT: $(params.MINIO_ENDPOINT)"
+            echo "DATASET_ZIP: $(params.DATASET_ZIP)"
+            echo "MINIO_BUCKET: $(params.MINIO_BUCKET)"
+            echo "MINIO_ACCESSKEY: $(params.MINIO_ACCESSKEY)"
+            echo "MINIO_SECRETKEY: $(params.MINIO_SECRETKEY)"
+            echo "DEPLOY: $(params.DEPLOY)"
+            echo "MODEL_NAME: $(params.MODEL_NAME)"
       # workspaces:
       #   - name: source
       #     workspace: source

@@ -134,14 +134,18 @@ spec:
       taskSpec:
         params:
           - name: SCRIPT
+          - name: REGISTRY
+            default: image-registry.openshift-image-registry.svc:5000/openshift
+          - name: IMAGE
+            default: $(params.REGISTRY)/ubi9:latest
         steps:
           - name: debug
-            image: ubi9:latest
+            image: $(params.IMAGE)
             script: |
               #!/usr/bin/env bash
               df -h && pwd && ls -al
           - name: run
-            image: ubi9:latest
+            image: $(params.IMAGE)
             resources: {}
             script: |
               #!/usr/bin/env bash
@@ -167,9 +171,13 @@ spec:
       taskSpec:
         params:
           - name: SCRIPT
+          - name: REGISTRY
+            default: image-registry.openshift-image-registry.svc:5000/openshift
+          - name: IMAGE
+            default: $(params.REGISTRY)/ubi9:latest
         steps:
           - name: run
-            image: ubi9:latest
+            image: $(params.IMAGE)
             resources: {}
             script: |
               #!/usr/bin/env bash
@@ -203,9 +211,13 @@ spec:
       taskSpec:
         params:
           - name: SCRIPT
+          - name: REGISTRY
+            default: image-registry.openshift-image-registry.svc:5000/openshift
+          - name: IMAGE
+            default: $(params.REGISTRY)/ubi9:latest
         steps:
           - name: run
-            image: ubi9:latest
+            image: $(params.IMAGE)
             resources: {}
             script: |
               #!/usr/bin/env bash
@@ -256,8 +268,10 @@ spec:
       taskSpec:
         params:
           - name: SCRIPT
+          - name: REGISTRY
+            default: image-registry.openshift-image-registry.svc:5000/openshift
           - name: IMAGE
-            default: $(params.IMAGE_REGISTRY)/openshift/cli:latest
+            default: $(params.REGISTRY)/ubi9:latest
         steps:
           - name: run
             image: $(params.IMAGE)
@@ -272,6 +286,8 @@ spec:
       runAfter:
         - build-model-server
       params:
+      - name: IMAGE
+        value: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
       - name: SCRIPT
         value: |
           set -x
