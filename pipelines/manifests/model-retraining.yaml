@@ -131,8 +131,8 @@ spec:
       workspaces:
         - name: source
           workspace: source
-        - name: workspace
-          workspace: shared-workspace
+        - name: scratch
+          workspace: scratch
     - name: create-classfile
       taskRef:
         name: shell-script
@@ -149,8 +149,8 @@ spec:
       workspaces:
         - name: source
           workspace: source
-        - name: workspace
-          workspace: shared-workspace
+        - name: scratch
+          workspace: scratch
     - name: image-resize
       when:
         - input: "$(params.IMG_RESIZE)"
@@ -176,8 +176,8 @@ spec:
       workspaces:
         - name: source
           workspace: source
-        - name: workspace
-          workspace: shared-workspace
+        - name: scratch
+          workspace: scratch
     - name: distribute-dataset
       taskRef:
         name: shell-script
@@ -193,8 +193,8 @@ spec:
       workspaces:
         - name: source
           workspace: source
-        - name: workspace
-          workspace: shared-workspace
+        - name: scratch
+          workspace: scratch
     - name: train-model-gpu
       when:
         - input: "Succeeded"
@@ -218,8 +218,8 @@ spec:
       workspaces:
         - name: source
           workspace: source
-        - name: workspace
-          workspace: shared-workspace
+        - name: scratch
+          workspace: scratch
     - name: train-model-cpu
       when:
         - input: "Succeeded"
@@ -244,8 +244,8 @@ spec:
       workspaces:
         - name: source
           workspace: source
-        - name: workspace
-          workspace: shared-workspace
+        - name: scratch
+          workspace: scratch
     - name: export-model
       taskRef:
         name: shell-script
@@ -265,8 +265,8 @@ spec:
       workspaces:
         - name: source
           workspace: source
-        - name: workspace
-          workspace: shared-workspace
+        - name: scratch
+          workspace: scratch
     - name: push-results
       taskRef:
         name: shell-script
@@ -294,8 +294,8 @@ spec:
       workspaces:
         - name: source
           workspace: source
-        - name: workspace
-          workspace: shared-workspace
+        - name: scratch
+          workspace: scratch
     - name: deploy-model-x
       when:
         - input: "$(params.DEPLOY)"
@@ -378,5 +378,5 @@ spec:
             echo "DEPLOY: $(params.DEPLOY)"
             echo "MODEL_NAME: $(params.MODEL_NAME)"
   workspaces:
-    - name: shared-workspace
+    - name: scratch
     - name: source
