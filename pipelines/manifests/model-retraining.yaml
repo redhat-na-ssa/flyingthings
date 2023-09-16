@@ -323,21 +323,37 @@ spec:
         - name: workspace
           workspace: shared-workspace
     - name: push-results
-      taskRef:
-        name: push-results
+      taskSpec:
+        params:
+          - name: SCRIPT
+          - name: IMAGE
+            default: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
+        steps:
+          - name: run
+            image: $(params.IMAGE)
+            resources: {}
+            script: |
+              #!/usr/bin/env bash
+              $(params.SCRIPT)
       params:
-        - name: WEIGHTS
-          value: $(params.WEIGHTS)
-        - name: MINIO_ENDPOINT
-          value: $(params.MINIO_ENDPOINT)
-        - name: MINIO_BUCKET
-          value: $(params.MINIO_BUCKET)
-        - name: MINIO_ACCESSKEY
-          value: $(params.MINIO_ACCESSKEY)
-        - name: MINIO_SECRETKEY
-          value: $(params.MINIO_SECRETKEY)
-        - name: IMAGE
-          value: $(params.UBI_IMAGE)
+        # - name: IMAGE
+        #   value: $(params.MODEL_IMAGE)
+        - name: SCRIPT
+          value: |
+            MINIO_ENDPOINT=$(params.MINIO_ENDPOINT)
+            MINIO_BUCKET=$(params.MINIO_BUCKET)
+            MINIO_ACCESSKEY=$(params.MINIO_ACCESSKEY)
+            MINIO_SECRETKEY=$(params.MINIO_SECRETKEY)
+            
+            WEIGHTS=$(params.WEIGHTS)
+            BASE_MODEL=$(params.BASE_MODEL)
+
+            cd $(workspaces.workspace.path)
+
+            source $(workspaces.source.path)/source/training/functions.sh && \
+            minio_push_results
+
+            pwd && ls -al
       runAfter:
         - export-model
       workspaces:
