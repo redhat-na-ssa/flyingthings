@@ -131,7 +131,6 @@ download_yolo_model(){
 }
 
 model_export(){
-  pwd
   mkdir -p "${SIMPLEVIS_DATA}/workspace"
   pushd "${SIMPLEVIS_DATA}/workspace" || exit
     # yolo export model=runs/train/weights/best.pt format=onnx
@@ -140,7 +139,6 @@ model_export(){
 }
 
 model_training(){
-  pwd
   mkdir -p "${SIMPLEVIS_DATA}/workspace"
   pushd "${SIMPLEVIS_DATA}/workspace" || exit
     cp -R datasets/training/* /usr/local/lib/python3.9/site-packages/yolov5/training
@@ -156,3 +154,5 @@ model_training(){
       --img 640
   popd || exit
 }
+
+df -h; pwd; ls -lsa
