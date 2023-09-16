@@ -37,7 +37,7 @@ names: ${NAMES}
 YAML
 
 cat classes.yaml && \
-mv classes.yaml $(workspaces.workspace.path)
+mv classes.yaml ../
 
 }
 
