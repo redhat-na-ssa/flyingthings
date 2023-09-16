@@ -5,7 +5,9 @@ import shutil
 
 path = os.getcwd()
 print("My Current Path is: " + str(path))
+
 os.chdir('datasets')
+
 path = os.getcwd()
 print("My Current Path is: " + str(path))
 def count_files(directory):
