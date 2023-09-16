@@ -4,15 +4,7 @@ metadata:
   name: train-model-gpu
 spec:
   params:
-    - name: BATCH_SIZE
-      type: string
-    - name: NUM_EPOCHS
-      type: string
-    - name: WEIGHTS
-      type: string
-    - name: BASE_MODEL
-      type: string
-    - name: NAMESPACE
+    - name: SCRIPT
       type: string
     - name: IMAGE
       type: string
@@ -20,6 +12,8 @@ spec:
     - name: train-model-using-gpu
       image: $(params.IMAGE)
       script: |
+        $(params.SCRIPT)
+
         cd $(workspaces.workspace.path)
 
         SOURCE_DIR=$(workspaces.source.path)
@@ -27,17 +21,8 @@ spec:
 
         source $(workspaces.source.path)/source/training/functions.sh && \
         model_training
-        
+
         pwd && ls -al
-      env:
-        - name: BATCH_SIZE
-          value: $(params.BATCH_SIZE)
-        - name: NUM_EPOCHS
-          value: $(params.NUM_EPOCHS)
-        - name: WEIGHTS
-          value: $(params.WEIGHTS)
-        - name: BASE_MODEL
-          value: $(params.BASE_MODEL)
       resources:
         limits:
           nvidia.com/gpu: 1
