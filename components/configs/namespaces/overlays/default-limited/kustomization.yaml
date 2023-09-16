@@ -11,7 +11,7 @@ patches:
     patch: |
       - op: replace
         path: /subjects
-        value: 
+        value:
   - target:
       kind: LimitRange
       name: limit-range
