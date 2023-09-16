@@ -249,18 +249,14 @@ spec:
       taskRef:
         name: train-model-gpu
       params:
-        - name: BATCH_SIZE
-          value: $(params.BATCH_SIZE)
-        - name: NUM_EPOCHS
-          value: $(params.NUM_EPOCHS)
-        - name: WEIGHTS
-          value: $(params.WEIGHTS)
-        - name: BASE_MODEL
-          value: $(params.BASE_MODEL)
-        - name: NAMESPACE
-          value: $(params.NAMESPACE)
         - name: IMAGE
           value: $(params.MODEL_IMAGE)
+        - name: SCRIPT
+          value: |
+            BATCH_SIZE=$(params.BATCH_SIZE)
+            NUM_EPOCHS=$(params.NUM_EPOCHS)
+            WEIGHTS=$(params.WEIGHTS)
+            BASE_MODEL=$(params.BASE_MODEL)
       runAfter:
         - check-gpu
         - distribute-dataset
@@ -279,18 +275,14 @@ spec:
         name: train-model-cpu
       timeout: "2h"
       params:
-        - name: BATCH_SIZE
-          value: $(params.BATCH_SIZE)
-        - name: NUM_EPOCHS
-          value: $(params.NUM_EPOCHS)
-        - name: WEIGHTS
-          value: $(params.WEIGHTS)
-        - name: BASE_MODEL
-          value: $(params.BASE_MODEL)
-        - name: NAMESPACE
-          value: $(params.NAMESPACE)
         - name: IMAGE
           value: $(params.MODEL_IMAGE)
+        - name: SCRIPT
+          value: |
+            BATCH_SIZE=$(params.BATCH_SIZE)
+            NUM_EPOCHS=$(params.NUM_EPOCHS)
+            WEIGHTS=$(params.WEIGHTS)
+            BASE_MODEL=$(params.BASE_MODEL)
       runAfter:
         - check-gpu
         - distribute-dataset
@@ -344,8 +336,6 @@ spec:
           value: $(params.MINIO_ACCESSKEY)
         - name: MINIO_SECRETKEY
           value: $(params.MINIO_SECRETKEY)
-        - name: NAMESPACE
-          value: $(params.NAMESPACE)
         - name: IMAGE
           value: $(params.UBI_IMAGE)
       runAfter:
