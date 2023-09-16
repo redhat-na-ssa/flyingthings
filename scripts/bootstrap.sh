@@ -151,7 +151,7 @@ setup_operator_nvidia(){
 
 setup_namespaces(){
   # setup namespaces
-  oc apply -f components/configs/namespaces/overlays/default
+  oc apply -k components/configs/namespaces/overlays/default
 }
 
 setup_demo(){
