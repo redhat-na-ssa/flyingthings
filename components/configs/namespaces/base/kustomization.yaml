@@ -4,3 +4,4 @@ kind: Kustomization
 resources:
   - cluster-config-project.yaml
   # - project-request-template.yaml
+  - self-provisioner-clusterrolebinding.yaml

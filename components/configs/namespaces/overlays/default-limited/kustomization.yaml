@@ -6,6 +6,13 @@ resources:
 
 patches:
   - target:
+      kind: ClusterRoleBinding
+      name: self-provisioners
+    patch: |
+      - op: replace
+        path: /subjects
+        value: 
+  - target:
       kind: LimitRange
       name: limit-range
       namespace: sandbox
