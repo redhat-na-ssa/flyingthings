@@ -149,7 +149,13 @@ setup_operator_nvidia(){
   oc apply -k components/operators/gpu-operator-certified/instance/overlays/default
 }
 
+setup_namespaces(){
+  # setup namespaces
+  oc apply -f components/configs/namespaces/overlays/default
+}
+
 setup_demo(){
+  setup_namespaces
   setup_operator_nfd
   setup_operator_nvidia
   setup_operator_devspaces
