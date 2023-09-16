@@ -284,17 +284,17 @@ spec:
           apiVersion: route.openshift.io/v1
           kind: Route
           metadata:
-            name: ${APP_NAME}
+            name: $(params.MODEL_NAME)
             labels:
-              app: ${APP_NAME}
-              app.kubernetes.io/component: ${APP_NAME}
-              app.kubernetes.io/instance: ${APP_NAME}
+              app: $(params.MODEL_NAME)
+              app.kubernetes.io/component: $(params.MODEL_NAME)
+              app.kubernetes.io/instance: $(params.MODEL_NAME)
           annotations:
             openshift.io/host.generated: "true"
           spec:
             to:
               kind: Service
-              name: ${APP_NAME}
+              name: $(params.MODEL_NAME)
               weight: 100
             port:
               targetPort: 8000-tcp
