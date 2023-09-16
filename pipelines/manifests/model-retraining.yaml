@@ -425,6 +425,7 @@ spec:
               termination: edge
               insecureEdgeTerminationPolicy: Allow
           EOF
+          exit 0
   finally:
     - name: summary
       taskSpec:
