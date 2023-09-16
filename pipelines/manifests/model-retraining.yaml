@@ -163,8 +163,6 @@ spec:
         - name: SCRIPT
           value: |
             cd $(workspaces.workspace.path)
-
-            cd datasets \
             
             $(workspaces.source.path)/source/training/create-classfile.sh && \
             cat classes.yaml && \
