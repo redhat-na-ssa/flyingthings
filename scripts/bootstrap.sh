@@ -149,6 +149,11 @@ setup_operator_nvidia(){
   oc apply -k components/operators/gpu-operator-certified/instance/overlays/default
 }
 
+setup_operator_pipelines(){
+  # setup tekton operator
+  oc apply -k components/operators/openshift-pipelines-operator-rh/operator/overlays/latest
+}
+
 setup_namespaces(){
   # setup namespaces
   oc apply -k components/configs/namespaces/overlays/default
@@ -156,6 +161,7 @@ setup_namespaces(){
 
 setup_demo(){
   setup_namespaces
+  setup_operator_pipelines
   setup_operator_nfd
   setup_operator_nvidia
   setup_operator_devspaces
