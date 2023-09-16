@@ -42,18 +42,6 @@ check_venv(){
   [ -e requirements.txt ] && pip install -q -r requirements.txt
 }
 
-check_oc(){
-  echo "Are you on the right OCP cluster?"
-
-  oc whoami || exit 0
-  UUID=$(oc whoami --show-server | sed 's@https://@@; s@:.*@@; s@api.*-@@; s@[.].*$@@')
-  export UUID
-  oc status
-
-  echo "UUID: ${UUID}"
-  sleep 4
-}
-
 # check login
 check_oc_login(){
   oc cluster-info | head -n1
@@ -170,7 +158,6 @@ setup_demo(){
 
 is_sourced && return 0
 
-check_oc
 check_oc_login
 
 setup_demo

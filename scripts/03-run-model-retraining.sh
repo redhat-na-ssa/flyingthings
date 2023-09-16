@@ -35,8 +35,6 @@ start_pipelines(){
   check_pipeline model-retraining
   
   tkn pipeline start "${PIPELINE_NAME}" \
-    -w name=source,volumeClaimTemplateFile=pvc.yaml \
-    -w name=shared-workspace,volumeClaimTemplateFile=pvc.yaml \
     -p GIT_URL="${GIT_URL}" \
     -p GIT_REVISION="${GIT_REVISION}" \
     -p NAMESPACE="${NAMESPACE}" \
@@ -48,6 +46,8 @@ start_pipelines(){
     -p WEIGHTS=flyingthings.pt \
     -p DATASET_ZIP=flyingthings-yolo.zip \
     -p MODEL_NAME=model-flyingthings \
+    -w name=source,volumeClaimTemplateFile=pvc.yaml \
+    -w name=scratch,volumeClaimTemplateFile=pvc.yaml \
     --use-param-defaults --showlog
 
 }
