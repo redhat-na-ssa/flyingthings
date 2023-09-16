@@ -122,6 +122,8 @@ spec:
               #!/usr/bin/env bash
               $(params.SCRIPT)
       params:
+        - name: IMAGE
+          value: $(params.UBI_IMAGE)
         - name: SCRIPT
           value: |
             MINIO_ENDPOINT=$(params.MINIO_ENDPOINT)
