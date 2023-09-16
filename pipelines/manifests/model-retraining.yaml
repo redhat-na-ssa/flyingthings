@@ -300,15 +300,28 @@ spec:
         - name: workspace
           workspace: shared-workspace
     - name: export-model
-      taskRef:
-        name: export-model
+      taskSpec:
+        params:
+          - name: SCRIPT
+          - name: IMAGE
+            default: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
+        steps:
+          - name: run
+            image: $(params.IMAGE)
+            resources: {}
+            script: |
+              #!/usr/bin/env bash
+              $(params.SCRIPT)
       params:
-        - name: WEIGHTS
-          value: $(params.WEIGHTS)
-        - name: BASE_MODEL
-          value: $(params.BASE_MODEL)
-        - name: NAMESPACE
-          value: $(params.NAMESPACE)
+        - name: IMAGE
+          value: $(params.MODEL_IMAGE)
+        - name: SCRIPT
+          value: |
+            WEIGHTS=$(params.WEIGHTS)
+            BASE_MODEL=$(params.BASE_MODEL)
+
+            cd $(workspaces.workspace.path)
+            $(workspaces.source.path)/source/training/distribute-files.py
       runAfter:
         - train-model-cpu
         - train-model-gpu
