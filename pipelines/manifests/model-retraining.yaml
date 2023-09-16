@@ -100,9 +100,9 @@ spec:
       taskRef:
         kind: Task
         name: check-gpu
-      params:
-        - name: TIMEOUT
-          value: 1m
+      # params:
+      #   - name: TIMEOUT
+      #     value: 1m
     - name: get-dataset
       taskSpec:
         params:

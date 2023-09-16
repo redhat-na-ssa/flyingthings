@@ -302,6 +302,7 @@ spec:
               termination: edge
               insecureEdgeTerminationPolicy: Allow
           EOF
+          exit 0
     # - name: debug-workspace
     #   taskSpec:
     #     steps:
