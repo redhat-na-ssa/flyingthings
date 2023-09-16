@@ -344,7 +344,7 @@ spec:
             MINIO_BUCKET=$(params.MINIO_BUCKET)
             MINIO_ACCESSKEY=$(params.MINIO_ACCESSKEY)
             MINIO_SECRETKEY=$(params.MINIO_SECRETKEY)
-            
+
             WEIGHTS=$(params.WEIGHTS)
             BASE_MODEL=$(params.BASE_MODEL)
 
@@ -456,11 +456,6 @@ spec:
             echo "MINIO_SECRETKEY: $(params.MINIO_SECRETKEY)"
             echo "DEPLOY: $(params.DEPLOY)"
             echo "MODEL_NAME: $(params.MODEL_NAME)"
-      # workspaces:
-      #   - name: source
-      #     workspace: source
-      #   - name: workspace
-      #     workspace: shared-workspace
   workspaces:
     - name: shared-workspace
     - name: source
