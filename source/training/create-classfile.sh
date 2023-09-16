@@ -1,6 +1,8 @@
 #/bin/sh
 # set -x
 
+pushd datasets || exit 0
+
 NC=$(cat classes.txt | wc -l)
 
 create_json_array(){
@@ -36,3 +38,4 @@ YAML
 }
 
 create_classes_yaml
+popd
