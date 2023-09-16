@@ -184,7 +184,7 @@ spec:
             MINIO_ACCESSKEY=$(params.MINIO_ACCESSKEY)
             MINIO_SECRETKEY=$(params.MINIO_SECRETKEY)
 
-            cd $(workspaces.workspace.path)
+            cd $(workspaces.source.path)
 
             source $(workspaces.source.path)/source/training/functions.sh && \
             minio_copy_artifacts
