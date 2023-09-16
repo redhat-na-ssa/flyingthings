@@ -152,6 +152,7 @@ setup_operator_nvidia(){
 setup_operator_pipelines(){
   # setup tekton operator
   oc apply -k components/operators/openshift-pipelines-operator-rh/operator/overlays/latest
+  wait_for_crd pipelines.tekton.dev
 }
 
 setup_namespaces(){
