@@ -214,8 +214,25 @@ spec:
         - name: workspace
           workspace: shared-workspace
     - name: distribute-dataset
-      taskRef:
-        name: distribute-data
+      taskSpec:
+        params:
+          - name: SCRIPT
+          - name: IMAGE
+            default: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
+        steps:
+          - name: run
+            image: $(params.IMAGE)
+            resources: {}
+            script: |
+              #!/usr/bin/env bash
+              $(params.SCRIPT)
+      params:
+        - name: IMAGE
+          value: $(params.UBI_IMAGE)
+        - name: SCRIPT
+          value: |
+            cd $(workspaces.workspace.path)
+            $(workspaces.source.path)/source/training/distribute-files.py
       runAfter:
         - image-resize
       workspaces:
