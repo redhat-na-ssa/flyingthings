@@ -12,7 +12,7 @@ MINIO_BUCKET="${MINIO_BUCKET:-project}"
 SIMPLEVIS_DATA="${SIMPLEVIS_DATA:-/opt/app-root/src/simplevis-data}"
 
 download_mc(){
-  curl "${MINIO_CLIENT_URL}/mc" -o ./mc
+  curl -s -L "${MINIO_CLIENT_URL}/mc" -o ./mc
   chmod +x ./mc
 }
 
