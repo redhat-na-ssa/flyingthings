@@ -35,6 +35,10 @@ test: test/images
 nc: ${NC}
 names: ${NAMES}
 YAML
+
+cat classes.yaml && \
+mv classes.yaml $(workspaces.workspace.path)
+
 }
 
 create_classes_yaml

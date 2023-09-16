@@ -164,9 +164,7 @@ spec:
           value: |
             cd $(workspaces.workspace.path)
             
-            $(workspaces.source.path)/source/training/create-classfile.sh && \
-            cat classes.yaml && \
-            mv classes.yaml $(workspaces.workspace.path)
+            $(workspaces.source.path)/source/training/create-classfile.sh
 
             pwd && ls -al
       runAfter:
