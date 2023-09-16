@@ -104,23 +104,8 @@ spec:
       #   - name: TIMEOUT
       #     value: 1m
     - name: get-dataset
-      taskSpec:
-        params:
-          - name: SCRIPT
-          - name: IMAGE
-            default: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
-        steps:
-          - name: debug
-            image: $(params.IMAGE)
-            script: |
-              #!/usr/bin/env bash
-              df -h && pwd && ls -al
-          - name: run
-            image: $(params.IMAGE)
-            resources: {}
-            script: |
-              #!/usr/bin/env bash
-              $(params.SCRIPT)
+      taskRef:
+        name: shell-script
       params:
         - name: IMAGE
           value: $(params.UBI_IMAGE)
@@ -149,18 +134,8 @@ spec:
         - name: workspace
           workspace: shared-workspace
     - name: create-classfile
-      taskSpec:
-        params:
-          - name: SCRIPT
-          - name: IMAGE
-            default: image-registry.openshift-image-registry.svc:5000/openshift/tools:latest
-        steps:
-          - name: run
-            image: $(params.IMAGE)
-            resources: {}
-            script: |
-              #!/usr/bin/env bash
-              $(params.SCRIPT)
+      taskRef:
+        name: shell-script
       params:
         - name: SCRIPT
           value: |
@@ -181,18 +156,8 @@ spec:
         - input: "$(params.IMG_RESIZE)"
           operator: in
           values: ["Y"]
-      taskSpec:
-        params:
-          - name: SCRIPT
-          - name: IMAGE
-            default: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
-        steps:
-          - name: run
-            image: $(params.IMAGE)
-            resources: {}
-            script: |
-              #!/usr/bin/env bash
-              $(params.SCRIPT)
+      taskRef:
+        name: shell-script
       params:
         - name: IMAGE
           value: $(params.UBI_IMAGE)
@@ -214,18 +179,8 @@ spec:
         - name: workspace
           workspace: shared-workspace
     - name: distribute-dataset
-      taskSpec:
-        params:
-          - name: SCRIPT
-          - name: IMAGE
-            default: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
-        steps:
-          - name: run
-            image: $(params.IMAGE)
-            resources: {}
-            script: |
-              #!/usr/bin/env bash
-              $(params.SCRIPT)
+      taskRef:
+        name: shell-script
       params:
         - name: IMAGE
           value: $(params.UBI_IMAGE)
@@ -292,18 +247,8 @@ spec:
         - name: workspace
           workspace: shared-workspace
     - name: export-model
-      taskSpec:
-        params:
-          - name: SCRIPT
-          - name: IMAGE
-            default: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
-        steps:
-          - name: run
-            image: $(params.IMAGE)
-            resources: {}
-            script: |
-              #!/usr/bin/env bash
-              $(params.SCRIPT)
+      taskRef:
+        name: shell-script
       params:
         - name: IMAGE
           value: $(params.MODEL_IMAGE)
@@ -323,18 +268,8 @@ spec:
         - name: workspace
           workspace: shared-workspace
     - name: push-results
-      taskSpec:
-        params:
-          - name: SCRIPT
-          - name: IMAGE
-            default: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
-        steps:
-          - name: run
-            image: $(params.IMAGE)
-            resources: {}
-            script: |
-              #!/usr/bin/env bash
-              $(params.SCRIPT)
+      taskRef:
+        name: shell-script
       params:
         # - name: IMAGE
         #   value: $(params.MODEL_IMAGE)
@@ -366,23 +301,8 @@ spec:
         - input: "$(params.DEPLOY)"
           operator: in
           values: ["Y"]
-      taskSpec:
-        params:
-          - name: SCRIPT
-          - name: IMAGE
-            default: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
-        steps:
-          - name: debug
-            image: $(params.IMAGE)
-            script: |
-              #!/usr/bin/env bash
-              df -h && pwd && ls -al
-          - name: run
-            image: $(params.IMAGE)
-            resources: {}
-            script: |
-              #!/usr/bin/env bash
-              $(params.SCRIPT)
+      taskRef:
+        name: shell-script
       workspaces:
         - name: source
           workspace: source

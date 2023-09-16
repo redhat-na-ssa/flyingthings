@@ -131,23 +131,8 @@ spec:
         - name: source
           workspace: source
     - name: create-bucket
-      taskSpec:
-        params:
-          - name: SCRIPT
-          - name: IMAGE
-            default: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
-        steps:
-          - name: debug
-            image: $(params.IMAGE)
-            script: |
-              #!/usr/bin/env bash
-              df -h && pwd && ls -al
-          - name: run
-            image: $(params.IMAGE)
-            resources: {}
-            script: |
-              #!/usr/bin/env bash
-              $(params.SCRIPT)
+      taskRef:
+        name: shell-script
       params:
         - name: SCRIPT
           value: |
@@ -164,18 +149,8 @@ spec:
         - name: source
           workspace: source
     - name: upload-artifacts
-      taskSpec:
-        params:
-          - name: SCRIPT
-          - name: IMAGE
-            default: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
-        steps:
-          - name: run
-            image: $(params.IMAGE)
-            resources: {}
-            script: |
-              #!/usr/bin/env bash
-              $(params.SCRIPT)
+      taskRef:
+        name: shell-script
       params:
         - name: SCRIPT
           value: |
@@ -194,21 +169,11 @@ spec:
       workspaces:
         - name: source
           workspace: source
-        - name: workspace
-          workspace: shared-workspace
+        - name: scratch
+          workspace: scratch
     - name: get-pretrained
-      taskSpec:
-        params:
-          - name: SCRIPT
-          - name: IMAGE
-            default: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
-        steps:
-          - name: run
-            image: $(params.IMAGE)
-            resources: {}
-            script: |
-              #!/usr/bin/env bash
-              $(params.SCRIPT)
+      taskRef:
+        name: shell-script
       params:
         - name: SCRIPT
           value: |
@@ -228,8 +193,8 @@ spec:
       workspaces:
         - name: source
           workspace: source
-        - name: workspace
-          workspace: shared-workspace
+        - name: scratch
+          workspace: scratch
     - name: build-model-server
       params:
         - name: IMAGE
@@ -247,18 +212,8 @@ spec:
         - name: source
           workspace: source
     - name: deploy-model-server
-      taskSpec:
-        params:
-          - name: SCRIPT
-          - name: IMAGE
-            default: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
-        steps:
-          - name: run
-            image: $(params.IMAGE)
-            resources: {}
-            script: |
-              #!/usr/bin/env bash
-              $(params.SCRIPT)
+      taskRef:
+        name: shell-script
       workspaces:
         - name: source
           workspace: source
@@ -314,8 +269,8 @@ spec:
     #   runAfter:
     #     - upload-artifacts
     #   workspaces:
-    #     - name: workspace
-    #       workspace: shared-workspace
+    #     - name: scratch
+    #       workspace: scratch
   workspaces:
-    - name: shared-workspace
+    - name: scratch
     - name: source
