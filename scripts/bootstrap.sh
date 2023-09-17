@@ -6,12 +6,6 @@ echo "PWD:  $(pwd)"
 echo "PATH: ${PATH}"
 }
 
-# get functions
-get_functions(){
-  echo -e "functions:\n"
-  sed -n '/(){/ s/(){$//p' "$(dirname "$0")/$(basename "$0")"
-}
-
 usage(){
   echo "
   usage: source scripts/funtions.sh
@@ -26,20 +20,6 @@ is_sourced() {
       case ${0##*/} in dash|-dash|bash|-bash|ksh|-ksh|sh|-sh) return 0;; esac
   fi
   return 1  # NOT sourced.
-}
-
-setup_venv(){
-  python3 -m venv venv
-  source venv/bin/activate
-  pip install -q -U pip
-
-  check_venv || usage
-}
-
-check_venv(){
-  # activate python venv
-  [ -d venv ] && . venv/bin/activate || setup_venv
-  [ -e requirements.txt ] && pip install -q -r requirements.txt
 }
 
 # check login
@@ -57,7 +37,7 @@ wait_for_crd(){
   done
 }
 
-aws_create_gpu_machineset(){
+ocp_aws_create_gpu_machineset(){
   # https://aws.amazon.com/ec2/instance-types/g4
   # single gpu: g4dn.{2,4,8,16}xlarge
   # multi gpu: g4dn.12xlarge
@@ -74,12 +54,18 @@ aws_create_gpu_machineset(){
 
   MACHINE_SET_GPU=$(oc -n openshift-machine-api get machinesets.machine.openshift.io -o name | grep gpu | head -n1)
 
+  # cosmetic
   oc -n openshift-machine-api \
-    patch ${MACHINE_SET_GPU} \
+    patch "${MACHINE_SET_GPU}" \
+    --type=merge --patch '{"spec":{"template":{"spec":{"metadata":{"labels":{"node-role.kubernetes.io/gpu":""}}}}}}'
+
+  # should help auto provisioner
+  oc -n openshift-machine-api \
+    patch "${MACHINE_SET_GPU}" \
     --type=merge --patch '{"spec":{"template":{"spec":{"metadata":{"labels":{"cluster-api/accelerator":"nvidia-gpu"}}}}}}'
   
     oc -n openshift-machine-api \
-    patch ${MACHINE_SET_GPU} \
+    patch "${MACHINE_SET_GPU}" \
     --type=merge --patch '{"metadata":{"labels":{"cluster-api/accelerator":"nvidia-gpu"}}}'
 
 }
@@ -108,11 +94,23 @@ YAML
   done
 }
 
+ocp_scale_all_machineset(){
+  REPLICAS=${1:-1}
+  MACHINE_SETS=${2:-$(oc -n openshift-machine-api get machineset -o name)}
+
+  # scale workers
+  echo "${MACHINE_SETS}" | \
+    xargs \
+      oc -n openshift-machine-api \
+      scale --replicas="${REPLICAS}"
+
+}
+
 setup_cluster_autoscaling(){
   # setup cluster autoscaling
   oc apply -k components/configs/autoscale/overlays/default
 
-  aws_create_gpu_machineset
+  ocp_aws_create_gpu_machineset
   ocp_create_machineset_autoscale
 }
 
