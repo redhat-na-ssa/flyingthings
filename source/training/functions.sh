@@ -139,11 +139,10 @@ model_export(){
 }
 
 model_training(){
-  mkdir -p "${SIMPLEVIS_DATA}/workspace"
-  pushd "${SIMPLEVIS_DATA}/workspace" || exit
     cp -R datasets/training/* /usr/local/lib/python3.9/site-packages/yolov5/training
-    ls -l /usr/local/lib/python3.9/site-packages/yolov5
-    ls -l /usr/local/lib/python3.9/site-packages/yolov5/training
+    # ls -l /usr/local/lib/python3.9/site-packages/yolov5
+    # ls -l /usr/local/lib/python3.9/site-packages/yolov5/training
+
     # yolo train model=$BASE_MODEL batch=$BATCH_SIZE epochs=$NUM_EPOCHS data=classes.yaml project=runs exist_ok=True
     python3 /usr/local/lib/python3.9/site-packages/yolov5/train.py \
       --epochs "${NUM_EPOCHS}" \
@@ -152,7 +151,6 @@ model_training(){
       --data classes.yaml \
       --project runs \
       --img 640
-  popd || exit
 }
 
 df -h; pwd; ls -lsa

@@ -124,8 +124,6 @@ spec:
 
             source $(workspaces.source.path)/source/training/functions.sh && \
             minio_get_dataset
-
-            pwd && ls -al
       runAfter:
         - fetch-repository
       workspaces:
@@ -142,8 +140,6 @@ spec:
             cd $(workspaces.scratch.path)
             
             $(workspaces.source.path)/source/training/create-classfile.sh
-
-            pwd && ls -al
       runAfter:
         - get-dataset
       workspaces:
@@ -165,12 +161,13 @@ spec:
           value: |
             cd $(workspaces.scratch.path)
 
-            cd datasets && \
-            mv images images_original && \
-            mkdir images && \
-            $(workspaces.source.path)/source/training/image-resize.py images_original images $(params.MAX_WIDTH)
+            # backup original images
+            mv datasets/images datasets/images_original && \            
+            $(workspaces.source.path)/source/training/image-resize.py \
+              datasets/images_original \
+              dataset/images \
+              $(params.MAX_WIDTH)
 
-            pwd && ls -al
       runAfter:
         - create-classfile
       workspaces:
