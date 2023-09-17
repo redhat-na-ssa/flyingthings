@@ -50,44 +50,48 @@ download_yolo_model(){
   curl -L -o "${MODEL_CLASSES}" "https://github.com/ultralytics/yolov5/raw/${YOLOv5_VERSION}/data/coco128.yaml"
 }
 
+load_model_from_minio(){
+  echo "attempting to load custom model..."
+  
+  minio_setup_client
+
+  # Get all model files from the latest training run
+  LATEST_MOD_FILES=$(./mc --insecure --config-dir "${MINIO_CFG}" find "${MINIO_REMOTE}/${MINIO_BUCKET}/models" --tags "training-run=latest")
+  echo "Latest model files: ${LATEST_MOD_FILES}"
+  
+  # Loop through the file list and check for the pytorch model file
+  for file in ${LATEST_MOD_FILES}; do
+    echo "${file}"
+
+    if [[ "${file}" == *.pt ]]; then
+      echo "Using pytorch model file: ${file}"
+      minio_copy "${file}" "${MODEL_WEIGHTS}"  ||
+    fi
+    if [[ "${file}" == *.yaml ]]; then
+      echo "Using pytorch model file: ${file}"
+      minio_copy "${file}" "${MODEL_CLASSES}"
+    fi
+
+  done
+
+  [ -e "${MODEL_WEIGHTS}" ] || return 1
+  [ -e "${MODEL_CLASSES}" ] || return 1
+
+  # minio_copy "${MINIO_REMOTE}/${MINIO_BUCKET}/pretrained/model_pretrained.pt" "${MODEL_WEIGHTS}"
+  # minio_copy "${MINIO_REMOTE}/${MINIO_BUCKET}/pretrained/model_pretrained_classes.yaml" "${MODEL_CLASSES}"
+}
+
 load_model(){
 
-  # If BASE_MODEL is pretrained, use the pretrained pytorch model file
-  allowed_models=("yolov8n.pt" "yolov5s.pt")
-
-  if [[ " ${allowed_models[@]} " =~ " ${BASE_MODEL} " ]]; then
-    
-    [ -e "${MODEL_WEIGHTS}" ] && [ -e "${MODEL_CLASSES}" ] && return
-
-    minio_setup_client
-    
-    minio_copy "${MINIO_REMOTE}/${MINIO_BUCKET}/pretrained/model_pretrained.pt" "${MODEL_WEIGHTS}"
-    minio_copy "${MINIO_REMOTE}/${MINIO_BUCKET}/pretrained/model_pretrained_classes.yaml" "${MODEL_CLASSES}"
+  if load_model_from_minio
+    echo "model loaded from minio"
   else
-    echo "Using custom model..."
-
-    # Get all model files from the latest training run
-    LATEST_MOD_FILES=$(./mc --insecure --config-dir "${MINIO_CFG}" find "${MINIO_REMOTE}/${MINIO_BUCKET}/models" --tags "training-run=latest")
-    echo "Latest model files: ${LATEST_MOD_FILES}"
-    
-    # Loop through the file list and check for the pytorch model file
-    for file in ${LATEST_MOD_FILES}; do
-      echo "${file}"
-
-      if [[ "${file}" == *.pt ]]; then
-        echo "Using pytorch model file: ${file}"
-        minio_copy "${file}" "${MODEL_WEIGHTS}"
-      fi
-      if [[ "${file}" == *.yaml ]]; then
-        echo "Using pytorch model file: ${file}"
-        minio_copy "${file}" "${MODEL_CLASSES}"
-      fi
-
-    done
+    cp /models/yolo*.pt "${MODEL_WEIGHTS}"
+    cp /models/*.yaml "${MODEL_CLASSES}"
   fi
 }
 
-download_yolo_model
+# download_yolo_model
 load_model
 
 popd || exit

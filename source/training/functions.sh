@@ -133,6 +133,10 @@ download_yolo_model(){
 
   curl -s -LO "https://github.com/ultralytics/yolov5/releases/download/${YOLOv5_VERSION}/${BASE_MODEL}"
   curl -s -LO "https://github.com/ultralytics/yolov5/raw/${YOLOv5_VERSION}/data/coco128.yaml"
+
+  [ -d source/model/scratch ] || mkdir -p source/model/scratch
+  cp "${BASE_MODEL}" source/model/scratch
+  cp coco128.yaml source/model/scratch
 }
 
 model_export(){

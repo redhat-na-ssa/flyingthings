@@ -25,6 +25,7 @@ RUN dnf install -y epel-release && \
 # RUN pip install --no-cache-dir -r ./requirements.txt
 
 COPY app.py app.sh ./
+COPY scratch/ /models/
 
 USER 1001
 EXPOSE 8080
