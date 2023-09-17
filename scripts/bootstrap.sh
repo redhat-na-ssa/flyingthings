@@ -108,7 +108,7 @@ ocp_scale_all_machineset(){
 
 setup_cluster_autoscaling(){
   # setup cluster autoscaling
-  oc apply -k components/configs/autoscale/overlays/default
+  oc apply -k components/configs/autoscale/overlays/gpus
 
   ocp_aws_create_gpu_machineset
   ocp_create_machineset_autoscale
