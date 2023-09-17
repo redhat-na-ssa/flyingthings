@@ -17,9 +17,13 @@ ENV PATH=${APP_ROOT}/bin:${PATH} \
 
 WORKDIR ${APP_ROOT}/src
 
+ARG MINIO_CLIENT_URL=https://dl.min.io/client/mc/release/linux-amd64
+
 RUN dnf -y --setopt=tsflags=nodocs upgrade && \
     dnf install -y git wget libGL python3-pip && \
-    dnf clean all
+    dnf clean all && \
+    curl -s -L "${MINIO_CLIENT_URL}/mc" -o /usr/local/bin/mc && \
+    chmod +x /usr/local/bin/mc
 
 # set no-cache-dir when building images
 ENV PIP_NO_CACHE_DIR=1
