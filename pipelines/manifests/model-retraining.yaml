@@ -7,82 +7,63 @@ spec:
     - name: GIT_URL
       default: https://github.com/redhat-na-ssa/flyingthings.git
       description: url of the git repo for the code of deployment
-      type: string
     - name: GIT_REVISION
       default: main
       description: revision to be used from repo of the code for deployment
-      type: string
     - name: NAMESPACE
       default: ml-demo
       description: namespace for the deployment
-      type: string
     - name: BATCH_SIZE
       description: batch size for training NOTE* for CPU use a value of 2
       default: "-1"
-      type: string
     - name: NUM_EPOCHS
       description: number of epochs for training
       default: "10"
-      type: string
     - name: IMG_RESIZE
       description: flag to resize the source images before training
       default: "N"
-      type: string
     - name: MAX_WIDTH
       description: maximum width for images when resizing
       default: "200"
-      type: string
     - name: WEIGHTS
       description: target weights file name
       default: flyingthings.pt
-      type: string
     - name: BASE_MODEL
       description: base model used to begin training
       default: yolov5s.pt
-      type: string
     - name: MINIO_ENDPOINT
       description: endpoint of minio api
       default: http://minio:9000
-      type: string
     - name: DATASET_ZIP
       description: name of the dataset zip file for training
       default: flyingthings-yolo.zip
-      type: string
     - name: MINIO_BUCKET
       description: bucket with training dataset and target of model artifacts
       default: flyingthings
-      type: string
     - name: MINIO_ACCESSKEY
       description: access key for minio NOTE* use secrets for production
       default: minioadmin
-      type: string
     - name: MINIO_SECRETKEY
       description: secret key for minio NOTE* use secrets for production
       default: minioadmin
-      type: string
     - name: IMAGE_REGISTRY
       description: default image registry
       default: image-registry.openshift-image-registry.svc:5000
     - name: UBI_IMAGE
       default: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/task-runner:latest
       description: base image for notebook
-      type: string
     - name: MODEL_IMAGE
       default: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/model-pretrain:latest
       description: model server image
-      type: string
     - name: DEPLOY
       default: 'Y'
       description: flag for deploying model server along with model
-      type: string
     - name: MODEL_NAME
       default: model
       description: name used to deploy the model and model server
-      type: string
     - name: GPU_TIMEOUT
       default: 12m
       description: autoscaling gpu nodes in aws usually takes 10 min
-      type: string
   tasks:
     - name: fetch-repository
       params:

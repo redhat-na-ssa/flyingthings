@@ -7,82 +7,69 @@ spec:
     - name: GIT_URL
       default: https://github.com/redhat-na-ssa/flyingthings.git
       description: url of the git repo for the code of deployment
-      type: string
     - name: GIT_REVISION
       default: main
       description: revision to be used from repo of the code for deployment
-      type: string
     - name: NAMESPACE
       default: ml-demo
       description: namespace for the deployment
-      type: string
     - name: IMAGE_REGISTRY
-      description: default image registry
       default: image-registry.openshift-image-registry.svc:5000
-      type: string
+      description: default image registry
     - name: YOLO_IMAGE
       default: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/model-base:latest
       description: base image for yolo
-      type: string
     - name: YOLO_CONTEXT
       default: source/yolov5
       description: dockerfile path
-      type: string
     - name: YOLO_BUILD_ARGS
       default: --build-arg env=YOLOv5_VERSION=v7.0
       description: build arguments for yolo
-      type: string
     - name: MODEL_IMAGE
       default: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/model-server:latest
       description: model server image
-      type: string
     - name: MODEL_CONTEXT
       default: source/model
       description: dockerfile path
-      type: string
     - name: MODEL_BUILD_ARGS
-      default: --build-arg WEIGHTS=flyingthings.pt --build-arg BASE_IMAGE=$(params.YOLO_IMAGE)
+      default: --build-arg WEIGHTS=$(params.WEIGHTS) --build-arg BASE_IMAGE=$(params.YOLO_IMAGE)
       description: build arguments for model server
-      type: string
     - name: UBI_IMAGE
       default: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/task-runner:latest
       description: base image for notebook
-      type: string
     - name: UBI_CONTEXT
       default: source/task-runner
       description: dockerfile path
-      type: string
     - name: BATCH_SIZE
       default: "2"
-      type: string
+      description: ""
     - name: NUM_EPOCHS
       default: "3"
-      type: string
+      description: ""
     - name: WEIGHTS
       default: "flyingthings.pt"
-      type: string
+      description: ""
     - name: BASE_MODEL
       default: "yolov5s.pt"
-      type: string
+      description: ""
     - name: MINIO_ENDPOINT
       default: "http://minio:9000"
-      type: string
+      description: ""
     - name: DATASET_ZIP
       default: "flyingthings-yolo.zip"
-      type: string
+      description: ""
     - name: MINIO_BUCKET
       default: "flyingthings"
-      type: string
+      description: ""
     - name: MINIO_ACCESSKEY
       default: "minioadmin"
-      type: string
+      description: ""
     - name: MINIO_SECRETKEY
       default: "minioadmin"
-      type: string
+      description: ""
     - name: MODEL_NAME
       default: model-pretrain
       description: name used to deploy the model and model server
-      type: string
   tasks:
     - name: fetch-repository
       params:
