@@ -211,9 +211,6 @@ spec:
             NUM_EPOCHS=$(params.NUM_EPOCHS)
             WEIGHTS=$(params.WEIGHTS)
             BASE_MODEL=$(params.BASE_MODEL)
-
-            # cpu training is slow - do less
-            [ "${NUM_EPOCHS}" -gt "10" ] && NUM_EPOCHS=10
       runAfter:
         - check-gpu
         - distribute-dataset
@@ -240,6 +237,9 @@ spec:
             NUM_EPOCHS=$(params.NUM_EPOCHS)
             WEIGHTS=$(params.WEIGHTS)
             BASE_MODEL=$(params.BASE_MODEL)
+
+            # cpu training is slow - do less
+            [ "${NUM_EPOCHS}" -gt "10" ] && NUM_EPOCHS=10
       runAfter:
         - check-gpu
         - distribute-dataset
@@ -256,11 +256,16 @@ spec:
           value: $(params.MODEL_IMAGE)
         - name: SCRIPT
           value: |
-            WEIGHTS=$(params.WEIGHTS)
+            NUM_EPOCHS=$(params.NUM_EPOCHS)
+            BATCH_SIZE=$(params.BATCH_SIZE)
             BASE_MODEL=$(params.BASE_MODEL)
 
             cd $(workspaces.scratch.path)
-            $(workspaces.source.path)/source/training/distribute-files.py
+
+            source $(workspaces.source.path)/source/training/functions.sh && \
+            model_export
+
+            pwd; find .
       runAfter:
         - train-model-cpu
         - train-model-gpu
