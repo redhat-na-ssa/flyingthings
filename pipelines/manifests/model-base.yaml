@@ -32,7 +32,7 @@ spec:
       default: source/model
       description: dockerfile path
     - name: MODEL_BUILD_ARGS
-      default: --build-arg WEIGHTS=$(params.WEIGHTS) --build-arg BASE_IMAGE=$(params.YOLO_IMAGE)
+      default: --build-arg BASE_IMAGE=$(params.YOLO_IMAGE)
       description: build arguments for model server
     - name: UBI_IMAGE
       default: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/task-runner:latest
@@ -45,9 +45,6 @@ spec:
       description: ""
     - name: NUM_EPOCHS
       default: "3"
-      description: ""
-    - name: WEIGHTS
-      default: "flyingthings.pt"
       description: ""
     - name: BASE_MODEL
       default: "yolov5s.pt"
@@ -208,7 +205,6 @@ spec:
           
           oc new-app $(params.MODEL_IMAGE) \
             --name=$(params.MODEL_NAME) \
-            --env=WEIGHTS=model_pretrained.pt \
             --env=MINIO_ENDPOINT=$(params.MINIO_ENDPOINT) \
             --env=MINIO_BUCKET=$(params.MINIO_BUCKET) \
             --env=MINIO_ACCESSKEY=$(params.MINIO_ACCESSKEY) \

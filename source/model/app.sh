@@ -9,16 +9,16 @@ MINIO_ACCESSKEY="${MINIO_ACCESSKEY:-minioadmin}"
 MINIO_SECRETKEY="${MINIO_SECRETKEY:-minioadmin}"
 MINIO_BUCKET="${MINIO_BUCKET:-flyingthings}"
 
-SIMPLEVIS_DATA="${SIMPLEVIS_DATA:-scratch}"
+DATA_PATH="${DATA_PATH:-scratch}"
+
+BASE_MODEL="${BASE_MODEL:-yolov5s.pt}"
 
 MODEL_WEIGHTS=weights.pt
 MODEL_CLASSES=classes.yaml
-BASE_MODEL="${BASE_MODEL:-yolov5s.pt}"
 
-BASEDIR=/opt/app-root/src
 
-[ -d $SIMPLEVIS_DATA ] || mkdir -p $SIMPLEVIS_DATA
-pushd $SIMPLEVIS_DATA || exit
+[ -d $DATA_PATH ] || mkdir -p $DATA_PATH
+pushd $DATA_PATH || exit
 
 BIN_PATH=bin
 [ -d "${BIN_PATH}" ] || mkdir -p "${BIN_PATH}"
@@ -80,7 +80,7 @@ load_model(){
       fi
       if [[ "${file}" == *.yaml ]]; then
         echo "Using pytorch model file: ${file}"
-        minio_copy "${file}" data.yaml
+        minio_copy "${file}" "${MODEL_CLASSES}"
       fi
 
     done
