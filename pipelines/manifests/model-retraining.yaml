@@ -166,7 +166,7 @@ spec:
             cd $(workspaces.scratch.path)
 
             source $(workspaces.source.path)/source/training/functions.sh && \
-            image_resize datasets/images $(params.MAX_WIDTH)
+            images_resize datasets/images $(params.MAX_WIDTH)
                         
       runAfter:
         - create-classfile
@@ -186,7 +186,7 @@ spec:
             cd $(workspaces.scratch.path)
 
             source $(workspaces.source.path)/source/training/functions.sh && \
-            image_distribute
+            images_distribute
       runAfter:
         - resize-image
       workspaces:

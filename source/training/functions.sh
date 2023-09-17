@@ -155,21 +155,21 @@ model_training(){
     --img 640
 }
 
-image_resize(){
+images_resize(){
   IMG_SRC=${1:-images}
   IMG_WIDTH=${2:-200}
 
   # backup original images
   mv "${IMG_SRC}" "${IMG_SRC}-orig" && \
-  python3 "${SOURCE_DIR}/training/image-resize.py" \
+  python3 "${SOURCE_DIR}/training/images-resize.py" \
     "${IMG_SRC}-orig" \
     "${IMG_SRC}" \
     "${IMG_WIDTH}"
 }
 
-image_distribute(){
+images_distribute(){
   pushd datasets || return
-    python3 "${SOURCE_DIR}/training/image-distribute.py"
+    python3 "${SOURCE_DIR}/training/images-distribute.py"
   popd || return
 }
 
