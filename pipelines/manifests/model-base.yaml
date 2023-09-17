@@ -169,8 +169,6 @@ spec:
       workspaces:
         - name: source
           workspace: source
-        - name: scratch
-          workspace: scratch
     - name: get-pretrained
       taskRef:
         name: shell-script
@@ -183,8 +181,6 @@ spec:
             MINIO_SECRETKEY=$(params.MINIO_SECRETKEY)
             BASE_MODEL=$(params.BASE_MODEL)
 
-            cd $(workspaces.workspace.path)
-
             source $(workspaces.source.path)/source/training/functions.sh && \
             download_yolo_model && \
             minio_copy_yolo_model
@@ -193,8 +189,6 @@ spec:
       workspaces:
         - name: source
           workspace: source
-        - name: scratch
-          workspace: scratch
     - name: build-model-server
       params:
         - name: IMAGE
@@ -272,5 +266,4 @@ spec:
     #     - name: scratch
     #       workspace: scratch
   workspaces:
-    - name: scratch
     - name: source
