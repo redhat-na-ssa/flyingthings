@@ -44,7 +44,6 @@ start_pipelines(){
     -p GPU_TIMEOUT="1m" \
     -p IMG_RESIZE="Y" \
     -p MAX_WIDTH="200" \
-    -p WEIGHTS=flyingthings.pt \
     -p DATASET_ZIP=flyingthings-yolo.zip \
     -p MODEL_NAME=model-flyingthings \
     -w name=source,volumeClaimTemplateFile=pvc.yaml \

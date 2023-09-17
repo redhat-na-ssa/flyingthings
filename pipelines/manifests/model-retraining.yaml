@@ -53,13 +53,13 @@ spec:
       default: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/task-runner:latest
       description: base image for notebook
     - name: MODEL_IMAGE
-      default: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/model-pretrain:latest
+      default: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/model-flyingthing:latest
       description: model server image
     - name: DEPLOY
       default: 'Y'
       description: flag for deploying model server along with model
     - name: MODEL_NAME
-      default: model
+      default: model-custom
       description: name used to deploy the model and model server
     - name: GPU_TIMEOUT
       default: 12m
@@ -326,7 +326,7 @@ spec:
               name: $(params.MODEL_NAME)
               weight: 100
             port:
-              targetPort: 8000-tcp
+              targetPort: 8080-tcp
             tls:
               termination: edge
               insecureEdgeTerminationPolicy: Allow
