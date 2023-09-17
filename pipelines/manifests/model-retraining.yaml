@@ -211,6 +211,9 @@ spec:
             NUM_EPOCHS=$(params.NUM_EPOCHS)
             WEIGHTS=$(params.WEIGHTS)
             BASE_MODEL=$(params.BASE_MODEL)
+
+            # cpu training is slow - do less
+            [ "${NUM_EPOCHS}" -gt "10" ] && NUM_EPOCHS=10
       runAfter:
         - check-gpu
         - distribute-dataset
