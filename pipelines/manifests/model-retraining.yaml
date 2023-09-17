@@ -265,7 +265,7 @@ spec:
             source $(workspaces.source.path)/source/training/functions.sh && \
             model_export
 
-            pwd; find .
+            # pwd; find runs
       runAfter:
         - train-model-cpu
         - train-model-gpu
