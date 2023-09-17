@@ -47,7 +47,7 @@ start_pipelines(){
     -p DATASET_ZIP=flyingthings-yolo.zip \
     -p MODEL_NAME=model-flyingthings \
     -w name=source,volumeClaimTemplateFile=pvc.yaml \
-    -w name=scratch,volumeClaimTemplateFile=pvc.yaml \
+    -w name=large-data,volumeClaimTemplateFile=pvc.yaml \
     --use-param-defaults --showlog
 
 }
