@@ -14,7 +14,7 @@ spec:
       script: |
         $(params.SCRIPT)
 
-        cd $(workspaces.workspace.path)
+        cd $(workspaces.scratch.path)
 
         source $(workspaces.source.path)/source/training/functions.sh && \
         model_training
@@ -32,7 +32,7 @@ spec:
     - name: training
       emptyDir: {}
   workspaces:
-    - name: workspace
-      mountPath: /opt/app-root/src/simplevis-data/workspace
+    - name: scratch
+      mountPath: /source/scratch
     - name: source
       mountPath: /source
