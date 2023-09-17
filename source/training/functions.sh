@@ -51,7 +51,7 @@ minio_tag(){
 
 minio_copy_artifacts(){
   minio_copy "artifacts/flyingthings-yolo.zip" "${MINIO_REMOTE}/${MINIO_BUCKET}"
-  minio_copy "artifacts/coco128.yaml" "${MINIO_REMOTE}/${MINIO_BUCKET}/pretrained/model_pretrained_classes.yaml"
+  # minio_copy "artifacts/coco128.yaml" "${MINIO_REMOTE}/${MINIO_BUCKET}/pretrained/model_pretrained_classes.yaml"
 }
 
 minio_push_results(){
