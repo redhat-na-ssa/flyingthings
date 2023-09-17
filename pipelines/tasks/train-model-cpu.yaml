@@ -34,5 +34,6 @@ spec:
   workspaces:
     - name: scratch
       mountPath: /source/scratch
+      optional: true
     - name: source
       mountPath: /source
