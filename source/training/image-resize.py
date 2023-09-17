@@ -3,6 +3,7 @@ import os
 import sys
 import cv2
 
+
 def resize_images(source_dir, dest_dir, max_width):
     try:
         os.makedirs(dest_dir, exist_ok=True)
@@ -22,7 +23,9 @@ def resize_images(source_dir, dest_dir, max_width):
             new_height = int(height * (max_width / width))
 
             # Resize the image while maintaining the aspect ratio
-            resized_img = cv2.resize(img, (new_width, new_height), interpolation=cv2.INTER_AREA)
+            resized_img = cv2.resize(
+                img, (new_width, new_height), interpolation=cv2.INTER_AREA
+            )
 
             # Save the resized image to the destination directory
             cv2.imwrite(dest_path, resized_img)
@@ -30,6 +33,7 @@ def resize_images(source_dir, dest_dir, max_width):
         print("Images have been resized and saved to the destination directory.")
     except Exception as e:
         print("Error:", e)
+
 
 if __name__ == "__main__":
     if len(sys.argv) != 4:

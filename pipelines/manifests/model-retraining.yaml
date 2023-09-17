@@ -151,7 +151,7 @@ spec:
           workspace: source
         - name: scratch
           workspace: large-data
-    - name: image-resize
+    - name: resize-image
       when:
         - input: "$(params.IMG_RESIZE)"
           operator: in
@@ -165,12 +165,8 @@ spec:
           value: |
             cd $(workspaces.scratch.path)
 
-            # backup original images
-            mv datasets/images datasets/images_original && \
-            $(workspaces.source.path)/source/training/image-resize.py \
-              datasets/images_original \
-              datasets/images \
-              $(params.MAX_WIDTH)
+            source $(workspaces.source.path)/source/training/functions.sh && \
+            image_resize datasets/images $(params.MAX_WIDTH)
                         
       runAfter:
         - create-classfile
@@ -187,15 +183,12 @@ spec:
           value: $(params.UBI_IMAGE)
         - name: SCRIPT
           value: |
-            set -x
-
-            pwd; find .
             cd $(workspaces.scratch.path)
 
-            pwd; find .
-            $(workspaces.source.path)/source/training/distribute-files.py
+            source $(workspaces.source.path)/source/training/functions.sh && \
+            image_distribute
       runAfter:
-        - image-resize
+        - resize-image
       workspaces:
         - name: source
           workspace: source

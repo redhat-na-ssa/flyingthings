@@ -6,10 +6,7 @@ import shutil
 path = os.getcwd()
 print("My Current Path is: " + str(path))
 
-os.chdir('datasets')
 
-path = os.getcwd()
-print("My Current Path is: " + str(path))
 def count_files(directory):
     file_count = 0
     # Iterate over all files in the directory
@@ -17,12 +14,13 @@ def count_files(directory):
         file_count += len(files)
     return file_count
 
+
 # Set the paths for the original image and label directories
-image_dir = 'images'
-label_dir = 'labels'
+image_dir = "images"
+label_dir = "labels"
 
 # Set the path for the training directory
-training_dir = 'training'
+training_dir = "training"
 
 # Set the desired proportions for train, test, and valid sets
 train_split = 0.7
@@ -33,27 +31,27 @@ valid_split = 0.15
 os.makedirs(training_dir, exist_ok=True)
 
 # Create the train, test, and valid directories within the training directory
-train_dir = os.path.join(training_dir, 'train')
-test_dir = os.path.join(training_dir, 'test')
-valid_dir = os.path.join(training_dir, 'valid')
+train_dir = os.path.join(training_dir, "train")
+test_dir = os.path.join(training_dir, "test")
+valid_dir = os.path.join(training_dir, "valid")
 
 os.makedirs(train_dir, exist_ok=True)
 os.makedirs(test_dir, exist_ok=True)
 os.makedirs(valid_dir, exist_ok=True)
 
 # Create image and label directories within train, test, and valid directories
-train_image_dir = os.path.join(train_dir, 'images')
-train_label_dir = os.path.join(train_dir, 'labels')
+train_image_dir = os.path.join(train_dir, "images")
+train_label_dir = os.path.join(train_dir, "labels")
 os.makedirs(train_image_dir, exist_ok=True)
 os.makedirs(train_label_dir, exist_ok=True)
 
-test_image_dir = os.path.join(test_dir, 'images')
-test_label_dir = os.path.join(test_dir, 'labels')
+test_image_dir = os.path.join(test_dir, "images")
+test_label_dir = os.path.join(test_dir, "labels")
 os.makedirs(test_image_dir, exist_ok=True)
 os.makedirs(test_label_dir, exist_ok=True)
 
-valid_image_dir = os.path.join(valid_dir, 'images')
-valid_label_dir = os.path.join(valid_dir, 'labels')
+valid_image_dir = os.path.join(valid_dir, "images")
+valid_label_dir = os.path.join(valid_dir, "labels")
 os.makedirs(valid_image_dir, exist_ok=True)
 os.makedirs(valid_label_dir, exist_ok=True)
 
@@ -77,36 +75,42 @@ for filename in image_filenames[:train_count]:
     dest_image_path = os.path.join(train_image_dir, filename)
     shutil.copy(src_image_path, dest_image_path)
 
-    label_filename, _ = os.path.splitext(filename)  # Use the original filename without extension
-    label_filename += '.txt'  # Append ".txt" extension
+    label_filename, _ = os.path.splitext(filename)
+
+    # Use the original filename without extension
+    label_filename += ".txt"  # Append ".txt" extension
     src_label_path = os.path.join(label_dir, label_filename)
     dest_label_path = os.path.join(train_label_dir, label_filename)
     shutil.copy(src_label_path, dest_label_path)
 
 # Copy images and labels to the test directory
-for filename in image_filenames[train_count:train_count + test_count]:
+for filename in image_filenames[train_count : train_count + test_count]:
     name, extension = os.path.splitext(filename)
 
     src_image_path = os.path.join(image_dir, filename)
     dest_image_path = os.path.join(test_image_dir, filename)
     shutil.copy(src_image_path, dest_image_path)
 
-    label_filename, _ = os.path.splitext(filename)  # Use the original filename without extension
-    label_filename += '.txt'  # Append ".txt" extension
+    label_filename, _ = os.path.splitext(filename)
+
+    # Use the original filename without extension
+    label_filename += ".txt"  # Append ".txt" extension
     src_label_path = os.path.join(label_dir, label_filename)
     dest_label_path = os.path.join(test_label_dir, label_filename)
     shutil.copy(src_label_path, dest_label_path)
 
 # Copy images and labels to the valid directory
-for filename in image_filenames[train_count + test_count:]:
+for filename in image_filenames[train_count + test_count :]:
     name, extension = os.path.splitext(filename)
 
     src_image_path = os.path.join(image_dir, filename)
     dest_image_path = os.path.join(valid_image_dir, filename)
     shutil.copy(src_image_path, dest_image_path)
 
-    label_filename, _ = os.path.splitext(filename)  # Use the original filename without extension
-    label_filename += '.txt'  # Append ".txt" extension
+    label_filename, _ = os.path.splitext(filename)
+
+    # Use the original filename without extension
+    label_filename += ".txt"  # Append ".txt" extension
     src_label_path = os.path.join(label_dir, label_filename)
     dest_label_path = os.path.join(valid_label_dir, label_filename)
     shutil.copy(src_label_path, dest_label_path)
