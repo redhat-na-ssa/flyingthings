@@ -151,12 +151,11 @@ spec:
             source $(workspaces.source.path)/source/training/functions.sh && \
             minio_copy_artifacts
       runAfter:
-        - fetch-repository
         - create-bucket
       workspaces:
         - name: source
           workspace: source
-    - name: get-pretrained
+    - name: upload-pretrained
       taskRef:
         name: shell-script
       params:
@@ -172,7 +171,7 @@ spec:
             download_yolo_model && \
             minio_copy_yolo_model
       runAfter:
-        - build-model-base
+        - create-bucket
       workspaces:
         - name: source
           workspace: source
@@ -185,7 +184,7 @@ spec:
         - name: BUILD_EXTRA_ARGS
           value: "$(params.MODEL_BUILD_ARGS)"
       runAfter:
-        - get-pretrained
+        - build-model-base
       taskRef:
         kind: ClusterTask
         name: buildah
