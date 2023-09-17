@@ -86,13 +86,14 @@ load_model(){
   if load_model_from_minio
     echo "model loaded from minio"
   else
-    cp /models/yolo*.pt "${MODEL_WEIGHTS}"
-    cp /models/*.yaml "${MODEL_CLASSES}"
+    cp /models/yolo*.pt "${MODEL_WEIGHTS}" || return 1
+    cp /models/*.yaml "${MODEL_CLASSES}" || return 1
+    echo "model loaded from container"
   fi
 }
 
 # download_yolo_model
-load_model
+load_model || echo "model failed to load"
 
 popd || exit
 
