@@ -21,7 +21,7 @@ download_mc(){
 }
 
 minio_setup_client(){
-  which mc && download_mc
+  which mc || download_mc
   mc --insecure --config-dir "${MINIO_CFG}" config host \
     add "${MINIO_REMOTE}" "${MINIO_ENDPOINT}" "${MINIO_ACCESSKEY}" "${MINIO_SECRETKEY}"
 }
