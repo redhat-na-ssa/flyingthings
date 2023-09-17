@@ -40,7 +40,8 @@ start_pipelines(){
     -p NAMESPACE="${NAMESPACE}" \
     -p BASE_MODEL="yolov5s.pt" \
     -p BATCH_SIZE="-1" \
-    -p NUM_EPOCHS="100" \
+    -p NUM_EPOCHS="10" \
+    -p GPU_TIMEOUT="1m" \
     -p IMG_RESIZE="Y" \
     -p MAX_WIDTH="200" \
     -p WEIGHTS=flyingthings.pt \
