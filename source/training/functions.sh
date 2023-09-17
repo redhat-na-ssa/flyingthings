@@ -1,5 +1,5 @@
 #!/bin/bash
-set -x
+# set -x
 
 MINIO_CLIENT_URL="${MINIO_CLIENT_URL:-https://dl.min.io/client/mc/release/linux-amd64}"
 MINIO_CFG="${MINIO_CFG:-.mc}"
@@ -9,7 +9,7 @@ MINIO_ACCESSKEY="${MINIO_ACCESSKEY:-minioadmin}"
 MINIO_SECRETKEY="${MINIO_SECRETKEY:-minioadmin}"
 MINIO_BUCKET="${MINIO_BUCKET:-project}"
 
-SIMPLEVIS_DATA="${SIMPLEVIS_DATA:-/opt/app-root/src/simplevis-data}"
+SOURCE_DIR="${SOURCE_DIR:-/source}"
 
 BIN_PATH=bin
 [ -d "${BIN_PATH}" ] || mkdir -p "${BIN_PATH}"
@@ -136,11 +136,8 @@ download_yolo_model(){
 }
 
 model_export(){
-  mkdir -p "${SIMPLEVIS_DATA}/workspace"
-  pushd "${SIMPLEVIS_DATA}/workspace" || exit
-    # yolo export model=runs/train/weights/best.pt format=onnx
-    python3 /usr/local/lib/python3.9/site-packages/yolov5/export.py --weights runs/exp/weights/best.pt --include onnx
-  popd || exit
+  # yolo export model=runs/train/weights/best.pt format=onnx
+  python3 /usr/local/lib/python3.9/site-packages/yolov5/export.py --weights runs/exp/weights/best.pt --include onnx
 }
 
 model_training(){
@@ -156,6 +153,24 @@ model_training(){
     --data classes.yaml \
     --project runs \
     --img 640
+}
+
+image_resize(){
+  IMG_SRC=${1:-images}
+  IMG_WIDTH=${2:-200}
+
+  # backup original images
+  mv "${IMG_SRC}" "${IMG_SRC}-orig" && \
+  python3 "${SOURCE_DIR}/training/image-resize.py" \
+    "${IMG_SRC}-orig" \
+    "${IMG_SRC}" \
+    "${IMG_WIDTH}"
+}
+
+image_distribute(){
+  pushd datasets || return
+    python3 "${SOURCE_DIR}/training/image-distribute.py"
+  popd || return
 }
 
 df -h; pwd; ls -lsa
