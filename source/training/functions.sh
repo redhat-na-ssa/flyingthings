@@ -173,4 +173,4 @@ images_distribute(){
   popd || return
 }
 
-df -h; pwd; ls -lsa
+# df -h; pwd; ls -lsa
