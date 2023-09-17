@@ -40,7 +40,6 @@ start_pipelines(){
     -p NAMESPACE="${NAMESPACE}" \
     -p BASE_MODEL="yolov5s.pt" \
     -w name=source,volumeClaimTemplateFile=pvc.yaml \
-    -w name=scratch,volumeClaimTemplateFile=pvc.yaml \
     --use-param-defaults --showlog
 
 }
