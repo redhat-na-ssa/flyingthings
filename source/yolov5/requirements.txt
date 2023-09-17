@@ -1,8 +1,9 @@
-fastapi
-uvicorn
-python-multipart
-pyyaml==5.3.1
-pytest-shutil
 dill
+fastapi==0.103.*
+pytest-shutil
+python-multipart
+pyyaml==5.3.*
+uvicorn
+yolov5==7.0.*
 onnx
 Pillow==9.5.*

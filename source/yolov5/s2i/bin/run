@@ -6,7 +6,4 @@ set -e
 # display usage
 $STI_SCRIPTS_PATH/usage
 
-tritonserver \
-  --model-repository=${MODEL_REPOSITORY:-$HOME/src} \
-  --model-control-mode=poll \
-  --repository-poll-secs=60
+./run.sh

@@ -24,22 +24,22 @@ RUN dnf -y --setopt=tsflags=nodocs upgrade && \
 # set no-cache-dir when building images
 ENV PIP_NO_CACHE_DIR=1
 
-ARG YOLOv5_VERSION=v7.0
-ARG SITE_PATH=/usr/local/lib/python3.9/site-packages
+# ARG YOLOv5_VERSION=v7.0
+# ARG SITE_PATH=/usr/local/lib/python3.9/site-packages
 
-RUN mkdir -p "${SITE_PATH}" && \
-    cd "${SITE_PATH}" && \
-    git clone --branch ${YOLOv5_VERSION} \
-      --depth 1 https://github.com/ultralytics/yolov5.git && \
-    pip install --no-cache-dir -U pip setuptools && \
-    pip install --no-cache-dir \
-      -r "${SITE_PATH}/yolov5/requirements.txt" && \
-    rm -rf "${SITE_PATH}/yolov5/.git"
+# RUN mkdir -p "${SITE_PATH}" && \
+#     cd "${SITE_PATH}" && \
+#     git clone --branch ${YOLOv5_VERSION} \
+#       --depth 1 https://github.com/ultralytics/yolov5.git && \
+#     pip install --no-cache-dir -U pip setuptools && \
+#     pip install --no-cache-dir \
+#       -r "${SITE_PATH}/yolov5/requirements.txt" && \
+#     rm -rf "${SITE_PATH}/yolov5/.git"
 
 COPY requirements.txt ./
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-VOLUME "${SITE_PATH}/yolov5/training"
+# VOLUME "${SITE_PATH}/yolov5/training"
 
 USER 1001
