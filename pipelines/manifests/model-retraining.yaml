@@ -275,8 +275,6 @@ spec:
 
             source $(workspaces.source.path)/source/training/functions.sh && \
             minio_push_results
-
-            pwd && ls -al
       runAfter:
         - export-model
       workspaces:

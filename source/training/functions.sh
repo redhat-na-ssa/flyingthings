@@ -72,18 +72,18 @@ minio_push_results(){
 
   # Check if any objects are returned
   if [ -n "${LATEST_MOD_FILES}" ]; then
-    first_file="${LATEST_MOD_FILES[0]}"
+    last_file="${LATEST_MOD_FILES[0]}"
 
     # Get the file extension using parameter expansion
     # This will extract everything after the last dot (.) in the filename
-    file_extension="${first_file##*_}"
+    file_extension="${last_file##*_}"
     run_number="${file_extension%.*}"
 
-    echo "First file: $first_file"
-    echo "File extension: $file_extension"
-    echo "Run number: $run_number"
+    echo "Latest file: ${last_file}"
+    echo "File extension: ${file_extension}"
+    echo "Run number: ${run_number}"
 
-    PREVIOUS_RUN=$run_number
+    PREVIOUS_RUN=${run_number}
     RUN_VALUE=$((run_number + 1))
     CURRENT_RUN=$(printf "%04d" "${RUN_VALUE}")
 
