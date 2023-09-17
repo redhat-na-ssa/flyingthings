@@ -2,7 +2,7 @@
 set -x
 
 MINIO_CLIENT_URL="${MINIO_CLIENT_URL:-https://dl.min.io/client/mc/release/linux-amd64}"
-MINIO_CFG="${MINIO_CFG:-miniocfg}"
+MINIO_CFG="${MINIO_CFG:-.mc}"
 MINIO_REMOTE="${MINIO_REMOTE:-remote}"
 MINIO_ENDPOINT="${MINIO_ENDPOINT:-http://minio:9000}"
 MINIO_ACCESSKEY="${MINIO_ACCESSKEY:-minioadmin}"
@@ -11,14 +11,18 @@ MINIO_BUCKET="${MINIO_BUCKET:-project}"
 
 SIMPLEVIS_DATA="${SIMPLEVIS_DATA:-/opt/app-root/src/simplevis-data}"
 
+BIN_PATH=bin
+[ -d "${BIN_PATH}" ] || mkdir -p "${BIN_PATH}"
+PATH=$(pwd)/bin:${PATH}
+
 download_mc(){
-  curl -s -L "${MINIO_CLIENT_URL}/mc" -o ./mc
-  chmod +x ./mc
+  curl -s -L "${MINIO_CLIENT_URL}/mc" -o ./bin/mc
+  chmod +x ./bin/mc
 }
 
 minio_setup_client(){
-  [ ! -x ./mc ] && download_mc
-  ./mc --insecure --config-dir "${MINIO_CFG}" config host \
+  which mc && download_mc
+  mc --insecure --config-dir "${MINIO_CFG}" config host \
     add "${MINIO_REMOTE}" "${MINIO_ENDPOINT}" "${MINIO_ACCESSKEY}" "${MINIO_SECRETKEY}"
 }
 
@@ -27,22 +31,22 @@ minio_create_bucket(){
   local BUCKET="${1}"
   local REMOTE="${MINIO_REMOTE}"
 
-  ./mc --insecure --config-dir "${MINIO_CFG}" mb "${REMOTE}/${BUCKET}" || true
-  ./mc --insecure --config-dir "${MINIO_CFG}" version enable "${REMOTE}/${BUCKET}" || true
+  mc --insecure --config-dir "${MINIO_CFG}" mb "${REMOTE}/${BUCKET}" || true
+  mc --insecure --config-dir "${MINIO_CFG}" version enable "${REMOTE}/${BUCKET}" || true
 }
 
 minio_copy(){
   [ ! -d "${MINIO_CFG}" ] && minio_setup_client
   local SOURCE="${1}"
   local DEST="${2}"
-  ./mc --insecure --config-dir "${MINIO_CFG}" cp "${SOURCE}" "${DEST}"
+  mc --insecure --config-dir "${MINIO_CFG}" cp "${SOURCE}" "${DEST}"
 }
 
 minio_tag(){
   [ ! -d "${MINIO_CFG}" ] && minio_setup_client
   local FILE="${1}"
   local TAG="${2}"
-  ./mc --insecure --config-dir "${MINIO_CFG}" tag set "${FILE}" "${TAG}"
+  mc --insecure --config-dir "${MINIO_CFG}" tag set "${FILE}" "${TAG}"
 }
 
 minio_copy_artifacts(){
@@ -64,7 +68,7 @@ minio_push_results(){
 
   # Get previous training run if it exists, otherwise set it to 0
   # First, list all objects with the tag "training-run=latest"
-  LATEST_MOD_FILES=$(./mc --insecure --config-dir "${MINIO_CFG}" find "${MINIO_REMOTE}/${MINIO_BUCKET}/models" --tags "training-run=latest")
+  LATEST_MOD_FILES=$(mc --insecure --config-dir "${MINIO_CFG}" find "${MINIO_REMOTE}/${MINIO_BUCKET}/models" --tags "training-run=latest")
 
   # Check if any objects are returned
   if [ -n "${LATEST_MOD_FILES}" ]; then
@@ -115,6 +119,7 @@ minio_push_results(){
 minio_get_dataset(){
   minio_copy "${MINIO_REMOTE}/${MINIO_BUCKET}/${DATASET_ZIP}" "${DATASET_ZIP}"
   unzip -d datasets "${DATASET_ZIP}"
+  rm "${DATASET_ZIP}"
 }
 
 minio_copy_yolo_model(){
@@ -139,18 +144,18 @@ model_export(){
 }
 
 model_training(){
-    cp -R datasets/training/* /usr/local/lib/python3.9/site-packages/yolov5/training
-    # ls -l /usr/local/lib/python3.9/site-packages/yolov5
-    # ls -l /usr/local/lib/python3.9/site-packages/yolov5/training
+  cp -R datasets/training/* /usr/local/lib/python3.9/site-packages/yolov5/training
+  # ls -l /usr/local/lib/python3.9/site-packages/yolov5
+  # ls -l /usr/local/lib/python3.9/site-packages/yolov5/training
 
-    # yolo train model=$BASE_MODEL batch=$BATCH_SIZE epochs=$NUM_EPOCHS data=classes.yaml project=runs exist_ok=True
-    python3 /usr/local/lib/python3.9/site-packages/yolov5/train.py \
-      --epochs "${NUM_EPOCHS}" \
-      --batch-size "${BATCH_SIZE}" \
-      --weights "${BASE_MODEL}" \
-      --data classes.yaml \
-      --project runs \
-      --img 640
+  # yolo train model=$BASE_MODEL batch=$BATCH_SIZE epochs=$NUM_EPOCHS data=classes.yaml project=runs exist_ok=True
+  python3 /usr/local/lib/python3.9/site-packages/yolov5/train.py \
+    --epochs "${NUM_EPOCHS}" \
+    --batch-size "${BATCH_SIZE}" \
+    --weights "${BASE_MODEL}" \
+    --data classes.yaml \
+    --project runs \
+    --img 640
 }
 
 df -h; pwd; ls -lsa

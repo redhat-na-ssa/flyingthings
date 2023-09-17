@@ -166,12 +166,12 @@ spec:
             cd $(workspaces.scratch.path)
 
             # backup original images
-            mv datasets/images datasets/images_original && \            
+            mv datasets/images datasets/images_original && \
             $(workspaces.source.path)/source/training/image-resize.py \
               datasets/images_original \
-              dataset/images \
+              datasets/images \
               $(params.MAX_WIDTH)
-
+                        
       runAfter:
         - create-classfile
       workspaces:
@@ -187,7 +187,12 @@ spec:
           value: $(params.UBI_IMAGE)
         - name: SCRIPT
           value: |
+            set -x
+
+            pwd; find .
             cd $(workspaces.scratch.path)
+
+            pwd; find .
             $(workspaces.source.path)/source/training/distribute-files.py
       runAfter:
         - image-resize
