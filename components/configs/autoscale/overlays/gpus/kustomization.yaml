@@ -24,7 +24,5 @@ patches:
           min: 0
           max: 256
       - op: replace
-        path: /spec/resourceLimits/gpus/0
-        value:
-          min: 0
-          max: 4
+        path: /spec/resourceLimits/gpus/0/max
+        value: 4
