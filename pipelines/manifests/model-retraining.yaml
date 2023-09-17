@@ -79,6 +79,10 @@ spec:
       default: model
       description: name used to deploy the model and model server
       type: string
+    - name: GPU_TIMEOUT
+      default: 12m
+      description: autoscaling gpu nodes in aws usually takes 10 min
+      type: string
   tasks:
     - name: fetch-repository
       params:
@@ -100,9 +104,9 @@ spec:
       taskRef:
         kind: Task
         name: check-gpu
-      # params:
-      #   - name: TIMEOUT
-      #     value: 1m
+      params:
+        - name: TIMEOUT
+          value: $(params.GPU_TIMEOUT)
     - name: get-dataset
       taskRef:
         name: shell-script
