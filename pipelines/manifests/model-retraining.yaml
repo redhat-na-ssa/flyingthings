@@ -53,7 +53,7 @@ spec:
       default: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/task-runner:latest
       description: base image for notebook
     - name: MODEL_IMAGE
-      default: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/model-flyingthing:latest
+      default: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/model-server:latest
       description: model server image
     - name: DEPLOY
       default: 'Y'
