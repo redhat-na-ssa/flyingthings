@@ -34,7 +34,7 @@ spec:
     - name: training
       emptyDir: {}
   workspaces:
-    - name: workspace
+    - name: scratch
       mountPath: /source/scratch
       optional: true
     - name: source
