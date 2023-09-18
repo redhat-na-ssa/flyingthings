@@ -4,38 +4,20 @@ metadata:
   name: train-model-gpu
 spec:
   params:
-    - name: BATCH_SIZE
+    - name: SCRIPT
       type: string
-    - name: NUM_EPOCHS
-      type: string
-    - name: WEIGHTS
-      type: string
-    - name: BASE_MODEL
-      type: string
-    - name: SIMPLEVIS_DATA
-      type: string
-    - name: ocp-tablespace
+    - name: IMAGE
       type: string
   steps:
     - name: train-model-using-gpu
-      image: image-registry.openshift-image-registry.svc:5000/$(params.ocp-tablespace)/yolo:latest
+      image: $(params.IMAGE)
       script: |
-        set -x \
-        && $(workspaces.source.path)/source/training/03-run-training.sh \
-        && ls -l $(params.SIMPLEVIS_DATA)/workspace
-      env:
-        - name: BATCH_SIZE
-          value: $(params.BATCH_SIZE)
-        - name: NUM_EPOCHS
-          value: $(params.NUM_EPOCHS)
-        - name: WEIGHTS
-          value: $(params.WEIGHTS)
-        - name: BASE_MODEL
-          value: $(params.BASE_MODEL)
-        - name: SIMPLEVIS_DATA
-          value: $(params.SIMPLEVIS_DATA)
-        - name: BASEDIR
-          value: $(workspaces.source.path)/source/training-job
+        $(params.SCRIPT)
+
+        cd $(workspaces.scratch.path)
+
+        source $(workspaces.source.path)/source/training/functions.sh && \
+        model_training
       resources:
         limits:
           nvidia.com/gpu: 1
@@ -48,10 +30,12 @@ spec:
     - name: dshm
       emptyDir:
           medium: Memory
+          sizeLimit: 4Gi
     - name: training
       emptyDir: {}
   workspaces:
-    - name: workspace
-      mountPath: /opt/app-root/src/simplevis-data/workspace
+    - name: scratch
+      mountPath: /source/scratch
+      optional: true
     - name: source
       mountPath: /source

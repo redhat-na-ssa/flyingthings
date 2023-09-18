@@ -1,0 +1,53 @@
+#!/bin/sh
+# set -e
+
+usage(){
+  cat /etc/*-release
+
+cat <<USAGE
+
+This is a S2I python-3.9 ${DISTRO} base image:
+There are multiple ways how to run the image, see documentation at:
+https://github.com/sclorg/s2i-python-container/blob/master/3.9/README.md
+
+
+What is Label Studio?
+Label Studio is an open source data labeling tool
+that supports multiple projects, users and data types in one platform.
+
+It allows you to do the following:
+
+- Perform different types of labeling with many data formats.
+- Integrate Label Studio with machine learning models to
+  supply predictions for labels (pre-labels), or perform continuous
+  active learning.
+  
+USAGE
+
+  # exec "${STI_SCRIPTS_PATH}/usage"
+
+}
+
+# fallback with sleep to debug your code
+# oc rsh / podman exec -it .. /bin/sh
+run_sleep(){
+  echo "Ponder the universe with infinate sleep..."
+  sleep infinity
+}
+
+# run normal s2i scripts
+run_s2i_default(){
+  /usr/libexec/s2i/run
+}
+
+run_s2i_override(){
+  # kludge - could change entrypoint
+  label-studio || return
+}
+
+usage
+[ "${1}" == "-h" ] && exit 0
+
+run_s2i_override
+run_s2i_default
+run_sleep

@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: label-studio
+  annotations:
+    openshift.io/description: |
+      Label Studio for OpenShift
+    openshift.io/display-name: Label Studio
+    

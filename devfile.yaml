@@ -48,7 +48,7 @@ components:
       controller.devfile.io/merge-contribution: false
       deployment/nvidia.com/gpu: '1'
     container:
-      memoryLimit: 32Gi
+      memoryLimit: 6Gi
       args:
         - '-f'
         - /dev/null
@@ -67,8 +67,6 @@ components:
           value: yolov8n.pt
         - name: DATASET_ZIP
           value: flyingthings-yolo.zip
-        - name: MINIO_CLIENT_URL
-          value: util02.davenet.local
         - name: WEIGHTS
           value: flyingthings.pt
         - name: BUILD_VER

@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: label-studio
+  annotations:
+    image.openshift.io/triggers: '[{"from":{"kind":"ImageStreamTag","name":"label-studio:s2i"},"fieldPath":"spec.template.spec.containers[?(@.name==\"label-studio\")].image","pause":"false"}]'
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: label-studio
+      deployment: label-studio
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: label-studio
+        deployment: label-studio
+    spec:
+      containers:
+      - env:
+        - name: DJANGO_DB
+          value: default
+        - name: JSON_LOG
+          value: "1"
+        image: label-studio:s2i
+        name: label-studio
+        resources:
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        volumeMounts:
+        - mountPath: /opt/app-root/src
+          name: label-studio-data
+          subPath: s2i
+      volumes:
+      - name: empty
+        emptyDir: {}
+      - name: label-studio-data
+        persistentVolumeClaim:
+          claimName: label-studio-data

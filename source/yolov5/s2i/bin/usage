@@ -1,0 +1,25 @@
+#!/bin/sh
+
+which lsb_release 2>&1 >/dev/null && lsb_release -ircd
+
+DISTRO=`cat /etc/*-release | grep ^ID= | grep -Po '".*?"' | tr -d '"'`
+NAMESPACE=centos
+[[ $DISTRO =~ rhel* ]] && NAMESPACE=rhscl || DISTRO="non RHEL"
+
+cat <<EOF
+
+This is a S2I triton server image; ${DISTRO} base image:
+
+There are multiple ways to use this image, see documentation at:
+https://github.com/codekow/s2i-patch/tree/main/s2i-triton
+
+The default directory for installing your models sources is:
+'/opt/app-root/src' 
+
+WORKDIR and HOME is set to this directory as well. 
+
+To learn more about S2I visit: 
+- https://github.com/openshift/source-to-image
+- https://github.com/sclorg/container-common-scripts
+
+EOF

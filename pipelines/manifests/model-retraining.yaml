@@ -1,0 +1,368 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: model-retraining
+spec:
+  params:
+    - name: GIT_URL
+      default: https://github.com/redhat-na-ssa/flyingthings.git
+      description: url of the git repo for the code of deployment
+    - name: GIT_REVISION
+      default: main
+      description: revision to be used from repo of the code for deployment
+    - name: NAMESPACE
+      default: ml-demo
+      description: namespace for the deployment
+    - name: BATCH_SIZE
+      description: batch size for training NOTE* for CPU use a value of 2
+      default: "-1"
+    - name: NUM_EPOCHS
+      description: number of epochs for training
+      default: "10"
+    - name: IMG_RESIZE
+      description: flag to resize the source images before training
+      default: "N"
+    - name: MAX_WIDTH
+      description: maximum width for images when resizing
+      default: "200"
+    - name: WEIGHTS
+      description: target weights file name
+      default: flyingthings.pt
+    - name: BASE_MODEL
+      description: base model used to begin training
+      default: yolov5s.pt
+    - name: MINIO_ENDPOINT
+      description: endpoint of minio api
+      default: http://minio:9000
+    - name: DATASET_ZIP
+      description: name of the dataset zip file for training
+      default: flyingthings-yolo.zip
+    - name: MINIO_BUCKET
+      description: bucket with training dataset and target of model artifacts
+      default: flyingthings
+    - name: MINIO_ACCESSKEY
+      description: access key for minio NOTE* use secrets for production
+      default: minioadmin
+    - name: MINIO_SECRETKEY
+      description: secret key for minio NOTE* use secrets for production
+      default: minioadmin
+    - name: IMAGE_REGISTRY
+      description: default image registry
+      default: image-registry.openshift-image-registry.svc:5000
+    - name: UBI_IMAGE
+      default: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/task-runner:latest
+      description: base image for notebook
+    - name: MODEL_IMAGE
+      default: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/model-server:latest
+      description: model server image
+    - name: DEPLOY
+      default: 'Y'
+      description: flag for deploying model server along with model
+    - name: MODEL_NAME
+      default: model-custom
+      description: name used to deploy the model and model server
+    - name: GPU_TIMEOUT
+      default: 12m
+      description: autoscaling gpu nodes in aws usually takes 10 min
+  tasks:
+    - name: fetch-repository
+      params:
+        - name: url
+          value: $(params.GIT_URL)
+        - name: subdirectory
+          value: ''
+        - name: deleteExisting
+          value: 'true'
+        - name: revision
+          value: $(params.GIT_REVISION)
+      taskRef:
+        kind: ClusterTask
+        name: git-clone
+      workspaces:
+        - name: output
+          workspace: source
+    - name: check-gpu
+      taskRef:
+        kind: Task
+        name: check-gpu
+      params:
+        - name: TIMEOUT
+          value: $(params.GPU_TIMEOUT)
+    - name: get-dataset
+      taskRef:
+        name: shell-script
+      params:
+        - name: IMAGE
+          value: $(params.UBI_IMAGE)
+        - name: SCRIPT
+          value: |
+            MINIO_ENDPOINT=$(params.MINIO_ENDPOINT)
+            MINIO_BUCKET=$(params.MINIO_BUCKET)
+            MINIO_ACCESSKEY=$(params.MINIO_ACCESSKEY)
+            MINIO_SECRETKEY=$(params.MINIO_SECRETKEY)
+            DATASET_ZIP=$(params.DATASET_ZIP)
+
+            cd $(workspaces.scratch.path)
+
+            SOURCE_DIR=$(workspaces.source.path)
+            BASEDIR=${SOURCE_DIR}/source/training
+
+            source $(workspaces.source.path)/source/training/functions.sh && \
+            minio_get_dataset
+      runAfter:
+        - fetch-repository
+      workspaces:
+        - name: source
+          workspace: source
+        - name: scratch
+          workspace: large-data
+    - name: create-classfile
+      taskRef:
+        name: shell-script
+      params:
+        - name: SCRIPT
+          value: |
+            cd $(workspaces.scratch.path)
+            
+            $(workspaces.source.path)/source/training/create-classfile.sh
+      runAfter:
+        - get-dataset
+      workspaces:
+        - name: source
+          workspace: source
+        - name: scratch
+          workspace: large-data
+    - name: resize-image
+      when:
+        - input: "$(params.IMG_RESIZE)"
+          operator: in
+          values: ["Y"]
+      taskRef:
+        name: shell-script
+      params:
+        - name: IMAGE
+          value: $(params.UBI_IMAGE)
+        - name: SCRIPT
+          value: |
+            cd $(workspaces.scratch.path)
+
+            source $(workspaces.source.path)/source/training/functions.sh && \
+            images_resize datasets/images $(params.MAX_WIDTH)
+                        
+      runAfter:
+        - create-classfile
+      workspaces:
+        - name: source
+          workspace: source
+        - name: scratch
+          workspace: large-data
+    - name: distribute-dataset
+      taskRef:
+        name: shell-script
+      params:
+        - name: IMAGE
+          value: $(params.UBI_IMAGE)
+        - name: SCRIPT
+          value: |
+            cd $(workspaces.scratch.path)
+
+            source $(workspaces.source.path)/source/training/functions.sh && \
+            images_distribute
+      runAfter:
+        - resize-image
+      workspaces:
+        - name: source
+          workspace: source
+        - name: scratch
+          workspace: large-data
+    - name: train-model-gpu
+      when:
+        - input: "Succeeded"
+          operator: in
+          values:
+            - "$(tasks.check-gpu.results.output)"
+      taskRef:
+        name: train-model-gpu
+      params:
+        - name: IMAGE
+          value: $(params.MODEL_IMAGE)
+        - name: SCRIPT
+          value: |
+            BATCH_SIZE=$(params.BATCH_SIZE)
+            NUM_EPOCHS=$(params.NUM_EPOCHS)
+            WEIGHTS=$(params.WEIGHTS)
+            BASE_MODEL=$(params.BASE_MODEL)
+      runAfter:
+        - check-gpu
+        - distribute-dataset
+      workspaces:
+        - name: source
+          workspace: source
+        - name: scratch
+          workspace: large-data
+    - name: train-model-cpu
+      when:
+        - input: "Succeeded"
+          operator: notin
+          values:
+            - "$(tasks.check-gpu.results.output)"
+      taskRef:
+        name: train-model-cpu
+      timeout: "2h"
+      params:
+        - name: IMAGE
+          value: $(params.MODEL_IMAGE)
+        - name: SCRIPT
+          value: |
+            BATCH_SIZE=$(params.BATCH_SIZE)
+            NUM_EPOCHS=$(params.NUM_EPOCHS)
+            WEIGHTS=$(params.WEIGHTS)
+            BASE_MODEL=$(params.BASE_MODEL)
+
+            # cpu training is slow - do less
+            [ "${NUM_EPOCHS}" -gt "10" ] && NUM_EPOCHS=10
+      runAfter:
+        - check-gpu
+        - distribute-dataset
+      workspaces:
+        - name: source
+          workspace: source
+        - name: scratch
+          workspace: large-data
+    - name: export-model
+      taskRef:
+        name: shell-script
+      params:
+        - name: IMAGE
+          value: $(params.MODEL_IMAGE)
+        - name: SCRIPT
+          value: |
+            NUM_EPOCHS=$(params.NUM_EPOCHS)
+            BATCH_SIZE=$(params.BATCH_SIZE)
+            BASE_MODEL=$(params.BASE_MODEL)
+
+            cd $(workspaces.scratch.path)
+
+            source $(workspaces.source.path)/source/training/functions.sh && \
+            model_export
+
+            # pwd; find runs
+      runAfter:
+        - train-model-cpu
+        - train-model-gpu
+      workspaces:
+        - name: source
+          workspace: source
+        - name: scratch
+          workspace: large-data
+    - name: push-results
+      taskRef:
+        name: shell-script
+      params:
+        # - name: IMAGE
+        #   value: $(params.MODEL_IMAGE)
+        - name: SCRIPT
+          value: |
+            MINIO_ENDPOINT=$(params.MINIO_ENDPOINT)
+            MINIO_BUCKET=$(params.MINIO_BUCKET)
+            MINIO_ACCESSKEY=$(params.MINIO_ACCESSKEY)
+            MINIO_SECRETKEY=$(params.MINIO_SECRETKEY)
+
+            WEIGHTS=$(params.WEIGHTS)
+            BASE_MODEL=$(params.BASE_MODEL)
+
+            cd $(workspaces.scratch.path)
+
+            source $(workspaces.source.path)/source/training/functions.sh && \
+            minio_push_results
+      runAfter:
+        - export-model
+      workspaces:
+        - name: source
+          workspace: source
+        - name: scratch
+          workspace: large-data
+    - name: deploy-model-x
+      when:
+        - input: "$(params.DEPLOY)"
+          operator: in
+          values: ["Y"]
+      taskRef:
+        name: shell-script
+      workspaces:
+        - name: source
+          workspace: source
+      runAfter:
+        - push-results
+      params:
+      - name: IMAGE
+        value: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
+      - name: SCRIPT
+        value: |
+          set -x
+          
+          oc new-app $(params.MODEL_IMAGE) \
+            --name=$(params.MODEL_NAME) \
+            --env=WEIGHTS=model_custom.pt \
+            --env=MINIO_ENDPOINT=$(params.MINIO_ENDPOINT) \
+            --env=MINIO_BUCKET=$(params.MINIO_BUCKET) \
+            --env=MINIO_ACCESSKEY=$(params.MINIO_ACCESSKEY) \
+            --env=MINIO_SECRETKEY=$(params.MINIO_SECRETKEY)
+
+          oc apply -f - <<EOF
+          apiVersion: route.openshift.io/v1
+          kind: Route
+          metadata:
+            name: $(params.MODEL_NAME)
+            labels:
+              app: $(params.MODEL_NAME)
+              app.kubernetes.io/component: $(params.MODEL_NAME)
+              app.kubernetes.io/instance: $(params.MODEL_NAME)
+          annotations:
+            openshift.io/host.generated: "true"
+          spec:
+            to:
+              kind: Service
+              name: $(params.MODEL_NAME)
+              weight: 100
+            port:
+              targetPort: 8080-tcp
+            tls:
+              termination: edge
+              insecureEdgeTerminationPolicy: Allow
+          EOF
+          exit 0
+  finally:
+    - name: summary
+      taskSpec:
+        params:
+          - name: SCRIPT
+        steps:
+          - name: run
+            image: ubi9:latest
+            script: |
+              #!/usr/bin/env bash
+              $(params.SCRIPT)
+      params:
+        - name: SCRIPT
+          value: |
+            echo "Training run parameters:"
+            echo ""
+            echo "GIT_URL: $(params.GIT_URL)"
+            echo "GIT_REVISION: $(params.GIT_REVISION)"
+            echo "BATCH_SIZE: $(params.BATCH_SIZE)"
+            echo "NUM_EPOCHS: $(params.NUM_EPOCHS)"
+            echo "IMG_RESIZE: $(params.IMG_RESIZE)"
+            echo "MAX_WIDTH: $(params.MAX_WIDTH)"
+            echo "WEIGHTS: $(params.WEIGHTS)"
+            echo "BASE_MODEL: $(params.BASE_MODEL)"
+            echo "MINIO_ENDPOINT: $(params.MINIO_ENDPOINT)"
+            echo "DATASET_ZIP: $(params.DATASET_ZIP)"
+            echo "MINIO_BUCKET: $(params.MINIO_BUCKET)"
+            echo "MINIO_ACCESSKEY: $(params.MINIO_ACCESSKEY)"
+            echo "MINIO_SECRETKEY: $(params.MINIO_SECRETKEY)"
+            echo "DEPLOY: $(params.DEPLOY)"
+            echo "MODEL_NAME: $(params.MODEL_NAME)"
+  workspaces:
+    - name: large-data
+    - name: source

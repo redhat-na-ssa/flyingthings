@@ -1,0 +1,33 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: image-resize
+spec:
+  params:
+    - name: MAX_WIDTH
+      type: string
+    - name: NAMESPACE
+      type: string
+    - name: IMAGE
+      type: string
+      default: ubi9:latest
+  steps:
+    - name: image-resize
+      image: $(params.IMAGE)
+      script: |
+        cd $(workspaces.workspace.path)
+
+        SOURCE_DIR=$(workspaces.source.path)
+        BASEDIR=${SOURCE_DIR}/source/training
+
+        cd datasets && \
+        mv images images_original && \
+        mkdir images && \
+        $(workspaces.source.path)/source/training/100-image-resize.py images_original images $(params.MAX_WIDTH)
+
+        pwd && ls -al
+  workspaces:
+    - name: workspace
+      mountPath: /opt/app-root/src/simplevis-data/workspace
+    - name: source
+      mountPath: /source
