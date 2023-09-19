@@ -31,7 +31,7 @@ minio_create_bucket(){
   local BUCKET="${1}"
   local REMOTE="${MINIO_REMOTE}"
 
-  mc --insecure --config-dir --ignore-existing "${MINIO_CFG}" mb "${REMOTE}/${BUCKET}" || true
+  mc --insecure --config-dir "${MINIO_CFG}" --ignore-existing mb "${REMOTE}/${BUCKET}" || true
   mc --insecure --config-dir "${MINIO_CFG}" version enable "${REMOTE}/${BUCKET}" || true
 }
 
