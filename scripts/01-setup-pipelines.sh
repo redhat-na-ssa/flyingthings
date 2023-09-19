@@ -14,11 +14,16 @@ check_namespace(){
   oc project "${NAMESPACE}" >/dev/null 2>&1 || oc new-project "${NAMESPACE}"
 }
 
-create_pipelines(){
+setup_pipelines(){
   # apply pipeline objects
   oc apply -f pipelines/tasks
   oc apply -f pipelines/manifests
 }
 
+setup_yolo_base(){
+  oc apply -k components/demo/yolo-api/base
+}
+
 check_namespace "$@"
-create_pipelines
+setup_yolo_base
+setup_pipelines

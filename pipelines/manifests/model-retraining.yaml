@@ -50,10 +50,10 @@ spec:
       description: default image registry
       default: image-registry.openshift-image-registry.svc:5000
     - name: UBI_IMAGE
-      default: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/task-runner:latest
+      default: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/python-custom:latest
       description: base image for notebook
     - name: MODEL_IMAGE
-      default: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/model-server:latest
+      default: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/yolo-api:latest
       description: model server image
     - name: DEPLOY
       default: 'Y'
@@ -88,6 +88,44 @@ spec:
       params:
         - name: TIMEOUT
           value: $(params.GPU_TIMEOUT)
+    - name: create-bucket
+      taskRef:
+        name: shell-script
+      params:
+        - name: SCRIPT
+          value: |
+            MINIO_ENDPOINT=$(params.MINIO_ENDPOINT)
+            MINIO_BUCKET=$(params.MINIO_BUCKET)
+            MINIO_ACCESSKEY=$(params.MINIO_ACCESSKEY)
+            MINIO_SECRETKEY=$(params.MINIO_SECRETKEY)
+
+            source $(workspaces.source.path)/source/training/functions.sh && \
+            minio_create_bucket ${MINIO_BUCKET}
+      runAfter:
+        - fetch-repository
+      workspaces:
+        - name: source
+          workspace: source
+    - name: upload-artifacts
+      taskRef:
+        name: shell-script
+      params:
+        - name: SCRIPT
+          value: |
+            MINIO_ENDPOINT=$(params.MINIO_ENDPOINT)
+            MINIO_BUCKET=$(params.MINIO_BUCKET)
+            MINIO_ACCESSKEY=$(params.MINIO_ACCESSKEY)
+            MINIO_SECRETKEY=$(params.MINIO_SECRETKEY)
+
+            cd $(workspaces.source.path)
+
+            source $(workspaces.source.path)/source/training/functions.sh && \
+            minio_copy_artifacts
+      runAfter:
+        - create-bucket
+      workspaces:
+        - name: source
+          workspace: source
     - name: get-dataset
       taskRef:
         name: shell-script
@@ -110,7 +148,7 @@ spec:
             source $(workspaces.source.path)/source/training/functions.sh && \
             minio_get_dataset
       runAfter:
-        - fetch-repository
+        - upload-artifacts
       workspaces:
         - name: source
           workspace: source
