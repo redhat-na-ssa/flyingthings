@@ -40,6 +40,7 @@ jobs:
       - name: Run ShellCheck
         uses: ludeeus/action-shellcheck@master
         with:
+          ignore_paths: dump
           version: v0.8.0
           severity: warning
 
