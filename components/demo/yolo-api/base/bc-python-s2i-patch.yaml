@@ -2,15 +2,21 @@
 apiVersion: image.openshift.io/v1
 kind: ImageStream
 metadata:
-  name: task-runner
+  name: python-custom
   annotations:
     app.openshift.io/vcs-ref: main
     app.openshift.io/vcs-uri: https://github.com/redhat-na-ssa/demo-ocp-yolo-api.git
+spec:
+  tags:
+  - name: latest
+    from:
+      kind: ImageStreamTag
+      name: python-custom:3.9-ubi9
 ---
 apiVersion: build.openshift.io/v1
 kind: BuildConfig
 metadata:
-  name: task-runner
+  name: python-custom-39
   annotations:
     app.openshift.io/vcs-ref: main
     app.openshift.io/vcs-uri: https://github.com/redhat-na-ssa/flyingthings.git
@@ -21,17 +27,17 @@ spec:
   output:
     to:
       kind: ImageStreamTag
-      name: task-runner:latest
+      name: python-custom:3.9-ubi9
   runPolicy: SerialLatestOnly
   source:
-    contextDir: source/task-runner
+    contextDir: components/demo/yolo-api/container
     git:
       ref: cory-review
       uri: https://github.com/redhat-na-ssa/flyingthings.git
     type: Git
   strategy:
     dockerStrategy:
-      dockerfilePath: Dockerfile
+      dockerfilePath: Dockerfile.python-custom
       from:
         kind: ImageStreamTag
         name: python:3.9-ubi9

@@ -13,4 +13,5 @@ resources:
 - bc-base-via-source.yaml
 # - bc-embed-model-s2i.yaml
 - bc-patch-video.yaml
+- bc-python-s2i-patch.yaml
 - is.yaml

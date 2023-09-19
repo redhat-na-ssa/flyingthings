@@ -24,8 +24,8 @@ spec:
     sourceStrategy:
       from:
         kind: ImageStreamTag
-        name: python:3.9-ubi9
-        namespace: openshift
+        name: python-custom:3.9-ubi9
+        # namespace: openshift
     type: Source
   triggers:
   - imageChange: {}
