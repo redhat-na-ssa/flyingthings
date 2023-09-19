@@ -160,9 +160,7 @@ model_training(){
     --batch-size "${BATCH_SIZE:--1}" \
     --data "${MODEL_FILE:-classes.yaml}" \
     --project runs \
-    --img 640
-
-    sleep 300
+    --img 640 || sleep 300
 
 }
 
