@@ -12,3 +12,4 @@ resources:
 - bc-base-docker.yaml
 - bc-base-source.yaml
 - bc-patch.yaml
+- is.yaml

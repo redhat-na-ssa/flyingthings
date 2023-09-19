@@ -20,5 +20,10 @@ create_pipelines(){
   oc apply -f pipelines/manifests
 }
 
+create_yolo_base(){
+  oc apply -k components/demo/yolo-api/base
+}
+
 check_namespace "$@"
 create_pipelines
+create_yolo_base

@@ -1,7 +1,7 @@
 apiVersion: build.openshift.io/v1
 kind: BuildConfig
 metadata:
-  name: yolo-api
+  name: yolo-api-patch
   annotations:
     app.openshift.io/vcs-ref: main
     app.openshift.io/vcs-uri: https://github.com/redhat-na-ssa/flyingthings.git
@@ -12,18 +12,12 @@ spec:
   output:
     to:
       kind: ImageStreamTag
-      name: yolo-api:latest
+      name: yolo-api:video
   runPolicy: SerialLatestOnly
   source:
-    contextDir: /source/yolo-api
-    git:
-      ref: cory-review
-      uri: https://github.com/redhat-na-ssa/flyingthings.git
-    type: Git
-  strategy:
-    type: Docker
-    Dockerfile: |
-      FROM empty
+    type: dockerfile
+    dockerfile: |
+      FROM scratch
       USER 0
 
       ARG BUILD_VER=0.0
@@ -33,7 +27,14 @@ spec:
           /usr/bin/crb enable && \
           dnf install -y git wget libGL python3-pip ffmpeg-free && \
           dnf clean all
+  strategy:
+    dockerStrategy:
+      from:
+        kind: ImageStreamTag
+        name: yolo-api:latest
   triggers:
   - imageChange: {}
     type: ImageChange
   - type: ConfigChange
+status:
+  lastVersion: 1336

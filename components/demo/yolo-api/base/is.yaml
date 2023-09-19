@@ -1,0 +1,22 @@
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: yolo-api
+  annotations:
+    app.openshift.io/vcs-ref: main
+    app.openshift.io/vcs-uri: https://github.com/redhat-na-ssa/demo-ocp-yolo-api.git
+spec:
+  lookupPolicy:
+    local: false
+  tags:
+  - name: base
+    from:
+      kind: DockerImage
+      name: quay.io/centos/centos:stream9
+    referencePolicy:
+      type: Local
+  - name: latest
+    from:
+      kind: ImageStreamTag
+      name: source
+    
