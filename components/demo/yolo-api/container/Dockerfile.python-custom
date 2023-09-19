@@ -8,7 +8,7 @@ USER 0
 # update base image
 # yolo needs libGL
 RUN dnf -y --setopt=tsflags=nodocs upgrade && \
-    dnf -y install libGL jq && \
+    dnf -y install libGL jq unzip && \
     dnf -y clean all --enablerepo='*'
 
 # install mc
