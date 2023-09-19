@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 get_namespace(){
   NAMESPACE=$(oc project -q 2>/dev/null)
@@ -23,12 +23,12 @@ start_pipelines(){
 
   get_namespace
 
-  IMAGE_REGISTRY=image-registry.openshift-image-registry.svc:5000
+  # IMAGE_REGISTRY=image-registry.openshift-image-registry.svc:5000
   GIT_URL=https://github.com/redhat-na-ssa/flyingthings.git
   GIT_REVISION=cory-review
 
   # kludge
-  [ "${PWD##*/}" != "scripts" ] && pushd scripts
+  [ "${PWD##*/}" != "scripts" ] && pushd scripts || exit
 
   # debug_pipeline; exit 0
 

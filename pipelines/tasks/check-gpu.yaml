@@ -46,12 +46,12 @@ spec:
           pod/gpu-operator-test \
           --for=jsonpath='{.status.phase}'=Succeeded \
           --timeout="${TIMEOUT}"
-        
+
         if [[ $? -eq 1 ]]; then
           echo "Timeout Reached - Rowing the slow boat..." | tee $(results.output.path)
         else
           oc get pod/gpu-operator-test -o jsonpath='{.status.phase}' | tee $(results.output.path)
-          # oc logs pod/gpu-operator-test | grep -o PASSED | tee $(results.output.path)            
+          # oc logs pod/gpu-operator-test | grep -o PASSED | tee $(results.output.path)
         fi
 
         exit 0

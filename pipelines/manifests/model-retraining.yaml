@@ -161,7 +161,7 @@ spec:
         - name: SCRIPT
           value: |
             cd $(workspaces.scratch.path)
-            
+
             $(workspaces.source.path)/source/training/create-classfile.sh
       runAfter:
         - get-dataset
@@ -186,7 +186,7 @@ spec:
 
             source $(workspaces.source.path)/source/training/functions.sh && \
             images_resize datasets/images $(params.MAX_WIDTH)
-                        
+
       runAfter:
         - create-classfile
       workspaces:
@@ -338,7 +338,7 @@ spec:
       - name: SCRIPT
         value: |
           set -x
-          
+
           oc new-app $(params.MODEL_IMAGE) \
             --name=$(params.MODEL_NAME) \
             --env=WEIGHTS=model_custom.pt \

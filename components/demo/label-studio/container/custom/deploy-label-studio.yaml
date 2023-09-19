@@ -22,7 +22,7 @@ spec:
       type: string
     - name: LABELSTUDIO_CONTEXT
       default: source/labelstudio
-      description: dockerfile path 
+      description: dockerfile path
       type: string
   tasks:
     - name: fetch-repository
@@ -88,10 +88,10 @@ spec:
       - name: SCRIPT
         value: |
           oc apply -f $(workspaces.source.path)/source/labelstudio/deployment.yaml \
-          
+
           # oc new-app image-registry.openshift-image-registry.svc:5000/$(params.NAMESPACE)/labelstudio:latest \
           #   --name=labelstudio
-          
+
           # oc set volume deployment/labelstudio \
           #   --add \
           #   --name=labelstudio-pvc \
@@ -99,7 +99,7 @@ spec:
           #   --claim-name=labelstudio-pvc \
           #   --mount-path=/opt/app-root/src/.local \
           #   --overwrite
-          
+
           # oc apply -f - <<EOF
           # apiVersion: route.openshift.io/v1
           # kind: Route

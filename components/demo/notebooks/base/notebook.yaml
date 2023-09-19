@@ -43,7 +43,7 @@ spec:
             claimName: notebook
         - name: dshm
           emptyDir:
-             medium: Memory
+            medium: Memory
   strategy:
     type: Recreate
 ---

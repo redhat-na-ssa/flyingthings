@@ -3,6 +3,8 @@ data/
 scratch/
 files.txt
 
+dictionary.dic
+
 # swap files
 *~
 .*~
