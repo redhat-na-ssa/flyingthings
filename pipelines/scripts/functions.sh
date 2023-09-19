@@ -147,18 +147,21 @@ model_export(){
 model_training(){
   TRAINING_PATH="${TRAINING_PATH:-/opt/app-root/lib/python3.9/site-packages/yolov5/training}"
 
+  # python debug
+  # python -m site
+
   [ -d "${TRAINING_PATH}" ] || mkdir -p "${TRAINING_PATH}"
   cp -R datasets/training/* "${TRAINING_PATH}/"
-  # ls -l /usr/local/lib/python3.9/site-packages/yolov5
-  # ls -l /usr/local/lib/python3.9/site-packages/yolov5/training
 
+  # yolov8
   # yolo checks && \
   # yolo train model=$BASE_MODEL batch=$BATCH_SIZE epochs=$NUM_EPOCHS data=classes.yaml project=runs exist_ok=True
   
+  # yologv5
   yolov5 train \
     --source "${DATA_PATH:-datasets/training}" \
     --weights "${BASE_MODEL:-yolov5s.pt}" \
-    --epochs "${NUM_EPOCHS:-10}" \
+    --epochs "${NUM_EPOCHS:-2}" \
     --batch-size "${BATCH_SIZE:--1}" \
     --data "${MODEL_FILE:-classes.yaml}" \
     --project runs \
