@@ -1,0 +1,33 @@
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: yolo-api-source-ubi
+  annotations:
+    app.openshift.io/vcs-ref: main
+    app.openshift.io/vcs-uri: https://github.com/redhat-na-ssa/flyingthings.git
+  labels:
+    app.openshift.io/runtime: python
+    app.openshift.io/runtime-version: '3.9-ubi9'
+spec:
+  output:
+    to:
+      kind: ImageStreamTag
+      name: yolo-api:source-ubi
+  runPolicy: SerialLatestOnly
+  source:
+    contextDir: components/demo/yolo-api/container/source
+    git:
+      ref: cory-review
+      uri: https://github.com/redhat-na-ssa/flyingthings.git
+    type: Git
+  strategy:
+    sourceStrategy:
+      from:
+        kind: ImageStreamTag
+        name: python-custom:3.9-ubi9
+        # namespace: openshift
+    type: Source
+  triggers:
+  - imageChange: {}
+    type: ImageChange
+  - type: ConfigChange

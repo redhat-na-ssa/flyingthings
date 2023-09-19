@@ -6,10 +6,16 @@ ENV PIP_NO_CACHE_DIR=1
 USER 0
 
 # update base image
-# (ubi images are not released that often)
+# yolo needs libGL
 RUN dnf -y --setopt=tsflags=nodocs upgrade && \
-    dnf -y install libGL jq && \
+    dnf -y install libGL jq unzip && \
     dnf -y clean all --enablerepo='*'
+
+# install mc
+ARG MINIO_CLIENT_URL="https://dl.min.io/client/mc/release/linux-amd64"
+
+RUN curl -s -L "${MINIO_CLIENT_URL}/mc" -o ${APP_ROOT}/bin/mc && \
+    chmod +x ${APP_ROOT}/bin/mc
 
 # install: oc
 ARG OC4_URL="https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/stable/openshift-client-linux.tar.gz"
@@ -19,7 +25,7 @@ RUN curl -sL "${OC4_URL}" -o oc.tgz && \
     tar -C /opt/app-root/bin -zxf oc.tgz oc && \
     /opt/app-root/bin/oc completion bash > /etc/bash_completion.d/oc && \
     rm oc.tgz && \
-    fix-permissions /opt/app-root/lib
+    fix-permissions /opt/app-root
 
 USER 1001
 

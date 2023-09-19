@@ -3,7 +3,6 @@ ARG BASE_IMAGE
 FROM ${BASE_IMAGE}
 
 USER 0
-WORKDIR /opt/app-root/src
 
 ARG BUILD_VER=0.0
 ENV BUILD_VER=${BUILD_VER}
@@ -19,15 +18,3 @@ RUN dnf install -y epel-release && \
     /usr/bin/crb enable && \
     dnf install -y git wget libGL python3-pip ffmpeg-free && \
     dnf clean all
-
-# COPY requirements.txt ./
-
-# RUN pip install --no-cache-dir -r ./requirements.txt
-
-COPY app.py app.sh ./
-COPY scratch/ /models/
-
-USER 1001
-EXPOSE 8080
-
-CMD ["/opt/app-root/src/app.sh"]

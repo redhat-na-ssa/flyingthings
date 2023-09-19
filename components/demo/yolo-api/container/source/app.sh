@@ -65,11 +65,11 @@ load_model_from_minio(){
 
     if [[ "${file}" == *.pt ]]; then
       echo "Using pytorch model file: ${file}"
-      minio_copy "${file}" "${MODEL_WEIGHTS}"  ||
+      minio_copy "${file}" "${MODEL_WEIGHTS}" || return
     fi
     if [[ "${file}" == *.yaml ]]; then
       echo "Using pytorch model file: ${file}"
-      minio_copy "${file}" "${MODEL_CLASSES}"
+      minio_copy "${file}" "${MODEL_CLASSES}" || return
     fi
 
   done
@@ -83,7 +83,7 @@ load_model_from_minio(){
 
 load_model(){
 
-  if load_model_from_minio
+  if load_model_from_minio; then
     echo "model loaded from minio"
   else
     cp /models/yolo*.pt "${MODEL_WEIGHTS}" || return 1

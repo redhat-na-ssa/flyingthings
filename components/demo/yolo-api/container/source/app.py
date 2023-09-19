@@ -13,15 +13,6 @@ import uvicorn
 import starlette.status as status
 
 
-# YOLO_DIR = Path(
-#     os.environ.get(
-#         "YOLOv5_DIR", Path("/usr/local/lib/python3.9/site-packages/yolov5")
-#     )
-# )
-
-# BASE_DIR = Path(os.environ.get("BASE_DIR", Path(__file__).parent.resolve()))
-
-
 MODEL_CLASSES = os.environ.get("MODEL_CLASSES", "classes.yaml")
 MODEL_WEIGHTS = os.environ.get("MODEL_WEIGHTS", "weights.pt")
 
@@ -37,16 +28,6 @@ VIDEO_EXTS = [".M4V", ".MOV", ".MP4"]
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 os.makedirs(DETECT_DIR, exist_ok=True)
 os.makedirs(VIDEO_DIR, exist_ok=True)
-
-# Load the classes
-with open(DATA_PATH.joinpath(MODEL_CLASSES), 'r') as f:
-    try:
-        parsed_yaml = yaml.safe_load(f)
-        OBJECT_CLASSES = parsed_yaml['names']
-    except yaml.YAMLError as exc:
-        raise RuntimeError(f"Unable to load classes from yaml: {str(exc)}")
-    except Exception as exc:
-        raise RuntimeError(f"Unable to identify class names: {str(exc)}")
 
 
 app = FastAPI()
@@ -213,6 +194,16 @@ def get_labels(filename):
 
 def read_label_file(filename):
     det_list = []
+
+    # Load the classes
+    with open(DATA_PATH.joinpath(MODEL_CLASSES), 'r') as f:
+        try:
+            parsed_yaml = yaml.safe_load(f)
+            OBJECT_CLASSES = parsed_yaml['names']
+        except yaml.YAMLError as exc:
+            raise RuntimeError(f"Unable to load classes from yaml: {str(exc)}")
+        except Exception as exc:
+            raise RuntimeError(f"Unable to identify class names: {str(exc)}")
 
     try:
         with open(filename) as file:
