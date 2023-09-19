@@ -13,15 +13,6 @@ import uvicorn
 import starlette.status as status
 
 
-# YOLO_DIR = Path(
-#     os.environ.get(
-#         "YOLOv5_DIR", Path("/usr/local/lib/python3.9/site-packages/yolov5")
-#     )
-# )
-
-# BASE_DIR = Path(os.environ.get("BASE_DIR", Path(__file__).parent.resolve()))
-
-
 MODEL_CLASSES = os.environ.get("MODEL_CLASSES", "classes.yaml")
 MODEL_WEIGHTS = os.environ.get("MODEL_WEIGHTS", "weights.pt")
 
