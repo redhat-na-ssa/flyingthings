@@ -146,20 +146,24 @@ model_export(){
 
 model_training(){
 
-  cp -R datasets/training/* /usr/local/lib/python3.9/site-packages/yolov5/training
+  # cp -R datasets/training/* /usr/local/lib/python3.9/site-packages/yolov5/training
   # ls -l /usr/local/lib/python3.9/site-packages/yolov5
   # ls -l /usr/local/lib/python3.9/site-packages/yolov5/training
 
   # yolo checks && \
   # yolo train model=$BASE_MODEL batch=$BATCH_SIZE epochs=$NUM_EPOCHS data=classes.yaml project=runs exist_ok=True
-
+  
   yolov5 train \
+    --source "${DATA_PATH:-datasets/training}" \
     --weights "${BASE_MODEL:-yolov5s.pt}" \
     --epochs "${NUM_EPOCHS:-10}" \
     --batch-size "${BATCH_SIZE:--1}" \
     --data "${MODEL_FILE:-classes.yaml}" \
     --project runs \
     --img 640
+
+    sleep 300
+
 }
 
 images_resize(){
