@@ -145,8 +145,10 @@ model_export(){
 }
 
 model_training(){
+  TRAINING_PATH="${TRAINING_PATH:-/opt/app-root/lib/python3.9/site-packages/yolov5/training}"
 
-  cp -R datasets/training/* /opt/app-root/lib/python3.9/site-packages/yolov5/training
+  [ -d "${TRAINING_PATH}" ] || mkdir -p "${TRAINING_PATH}"
+  cp -R datasets/training/* "${TRAINING_PATH}/"
   # ls -l /usr/local/lib/python3.9/site-packages/yolov5
   # ls -l /usr/local/lib/python3.9/site-packages/yolov5/training
 
