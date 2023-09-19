@@ -1,5 +1,5 @@
 #!/bin/bash
-# shellcheck disable=SC2015,SC1091
+# shellcheck disable=SC2015,SC1091,2046
 set -e
 
 usage(){
@@ -36,8 +36,7 @@ py_check_venv
 
 # chcek scripts
 which shellcheck && \
-  shellcheck scripts/*.sh && \
-  shellcheck source/training/*.sh
+  shellcheck $(find . -name "*.sh" | grep -E -v 'dump|venv')
 
 # check spelling
 which aspell && \

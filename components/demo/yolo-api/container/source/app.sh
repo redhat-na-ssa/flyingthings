@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 set -x
 
 MINIO_CLIENT_URL="${MINIO_CLIENT_URL:-https://dl.min.io/client/mc/release/linux-amd64}"
@@ -17,8 +17,8 @@ MODEL_WEIGHTS=weights.pt
 MODEL_CLASSES=classes.yaml
 
 
-[ -d $DATA_PATH ] || mkdir -p $DATA_PATH
-pushd $DATA_PATH || exit
+[ -d "${DATA_PATH}" ] || mkdir -p "${DATA_PATH}"
+pushd "${DATA_PATH}" || exit
 
 BIN_PATH=bin
 [ -d "${BIN_PATH}" ] || mkdir -p "${BIN_PATH}"
