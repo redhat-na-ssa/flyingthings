@@ -11,6 +11,12 @@ RUN dnf -y --setopt=tsflags=nodocs upgrade && \
     dnf -y install libGL jq && \
     dnf -y clean all --enablerepo='*'
 
+# install mc
+ARG MINIO_CLIENT_URL="https://dl.min.io/client/mc/release/linux-amd64"
+
+RUN curl -s -L "${MINIO_CLIENT_URL}/mc" -o ${APP_ROOT}/bin/mc && \
+    chmod +x ${APP_ROOT}/bin/mc
+
 # install: oc
 ARG OC4_URL="https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/stable/openshift-client-linux.tar.gz"
 
