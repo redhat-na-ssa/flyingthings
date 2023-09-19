@@ -31,11 +31,11 @@ RUN dnf -y --setopt=tsflags=nodocs upgrade && \
 # set no-cache-dir for pip
 ENV PIP_NO_CACHE_DIR=1
 
-COPY requirements.txt ./
+COPY source/requirements.txt ./
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY app.py app.sh ./
+COPY source/app.py source/app.sh ./
 
 VOLUME /models
 

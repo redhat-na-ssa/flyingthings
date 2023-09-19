@@ -7,12 +7,12 @@ metadata:
     app.openshift.io/vcs-uri: https://github.com/redhat-na-ssa/flyingthings.git
   labels:
     app.openshift.io/runtime: python
-    app.openshift.io/runtime-version: 3.9-ubi8
+    app.openshift.io/runtime-version: '3.9-ubi9'
 spec:
   output:
     to:
       kind: ImageStreamTag
-      name: yolo-api:source
+      name: yolo-api:custom
   runPolicy: SerialLatestOnly
   source:
     contextDir: /artifacts

@@ -9,7 +9,8 @@ commonLabels:
   app.kubernetes.io/part-of: yolo-api
 
 resources:
-- bc-base-docker.yaml
-- bc-base-source.yaml
-- bc-patch.yaml
+- bc-base-via-docker.yaml
+- bc-base-via-src.yaml
+# - bc-embed-model-s2i.yaml
+- bc-patch-video.yaml
 - is.yaml

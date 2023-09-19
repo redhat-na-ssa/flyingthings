@@ -1,26 +1,32 @@
 apiVersion: build.openshift.io/v1
 kind: BuildConfig
 metadata:
-  name: yolo-api-docker
+  name: yolo-api-base
   annotations:
     app.openshift.io/vcs-ref: main
     app.openshift.io/vcs-uri: https://github.com/redhat-na-ssa/flyingthings.git
   labels:
     app.openshift.io/runtime: python
-    app.openshift.io/runtime-version: 3.9-ubi8
+    app.openshift.io/runtime-version: '3.9-ubi9'
 spec:
   output:
     to:
       kind: ImageStreamTag
-      name: yolo-api:docker
+      name: yolo-api:source
   runPolicy: SerialLatestOnly
   source:
-    contextDir: /source/yolo-api
+    contextDir: source/yolo-api/src
     git:
       ref: cory-review
       uri: https://github.com/redhat-na-ssa/flyingthings.git
     type: Git
   strategy:
+    dockerStrategy:
+      dockerfilePath: Dockerfile
+      from:
+        kind: ImageStreamTag
+        name: python:3.9-ubi9
+        namespace: openshift
     type: Docker
   triggers:
   - imageChange: {}
