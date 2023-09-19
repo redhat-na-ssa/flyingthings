@@ -15,7 +15,7 @@ spec:
       name: yolo-api:docker-centos
   runPolicy: SerialLatestOnly
   source:
-    contextDir: source/yolo-api
+    contextDir: components/demo/yolo-api/container
     git:
       ref: cory-review
       uri: https://github.com/redhat-na-ssa/flyingthings.git
