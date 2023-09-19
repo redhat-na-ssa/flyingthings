@@ -16,7 +16,7 @@ spec:
 
         cd $(workspaces.scratch.path)
 
-        source $(workspaces.source.path)/source/training/functions.sh && \
+        source $(workspaces.source.path)/pipelines/scripts/functions.sh && \
         model_training
       resources: {}
       volumeMounts:

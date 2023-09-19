@@ -28,9 +28,9 @@ spec:
         cd $(workspaces.workspace.path)
 
         SOURCE_DIR=$(workspaces.source.path)
-        BASEDIR=${SOURCE_DIR}/source/training
+        BASEDIR=${SOURCE_DIR}/pipelines/scripts
 
-        source $(workspaces.source.path)/source/training/functions.sh && \
+        source $(workspaces.source.path)/pipelines/scripts/functions.sh && \
         download_yolo_model && \
         minio_copy_yolo_model
 
@@ -39,7 +39,7 @@ spec:
         - name: MINIO_ENDPOINT
           value: $(params.MINIO_ENDPOINT)
         - name: BASEDIR
-          value: $(workspaces.source.path)/source/training
+          value: $(workspaces.source.path)/pipelines/scripts
         - name: BASE_MODEL
           value: $(params.BASE_MODEL)
         - name: MINIO_ACCESSKEY
