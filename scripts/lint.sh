@@ -35,7 +35,9 @@ reset_wordlist(){
 py_check_venv
 
 # chcek scripts
-which shellcheck && shellcheck scripts/*.sh
+which shellcheck && \
+  shellcheck scripts/*.sh && \
+  shellcheck source/training/*.sh
 
 # check spelling
 which aspell && \

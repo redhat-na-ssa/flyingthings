@@ -1,9 +1,9 @@
-#/bin/sh
+#!/bin/bash
 # set -x
 
 pushd datasets || exit 0
 
-NC=$(cat classes.txt | wc -l)
+NC=$( wc -l < classes.txt )
 
 create_json_array(){
   NAMES=$( printf "'%s'," "${LIST[@]}" )
@@ -15,9 +15,9 @@ create_names_array(){
   LIST=()
 
   local IFS=''
-  while read ITEM
+  while read -r ITEM
   do
-    LIST+=(${ITEM})
+    LIST+=("${ITEM}")
   done < classes.txt
 }
 
@@ -42,4 +42,4 @@ mv classes.yaml ../
 }
 
 create_classes_yaml
-popd
+popd || return
