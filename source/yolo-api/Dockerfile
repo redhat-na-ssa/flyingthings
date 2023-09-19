@@ -1,3 +1,4 @@
+# hadolint global ignore=DL3041
 FROM quay.io/centos/centos:stream9
 
 ENV STI_SCRIPTS_PATH=/usr/libexec/s2i/
@@ -7,7 +8,9 @@ COPY usr/ /usr/
 ### Setup user for build execution and application runtime
 ENV APP_ROOT=/opt/app-root
 
-RUN mkdir -p ${APP_ROOT}/{bin,src} && \
+RUN mkdir -p \
+      ${APP_ROOT}/bin \
+      ${APP_ROOT}/src && \
     chmod -R u+x ${APP_ROOT}/bin && \
     chgrp -R 0 ${APP_ROOT} && \
     chmod -R g=u ${APP_ROOT}
@@ -22,28 +25,20 @@ ARG MINIO_CLIENT_URL=https://dl.min.io/client/mc/release/linux-amd64
 RUN dnf -y --setopt=tsflags=nodocs upgrade && \
     dnf install -y git wget libGL python3-pip && \
     dnf clean all && \
-    curl -s -L "${MINIO_CLIENT_URL}/mc" -o /usr/local/bin/mc && \
-    chmod +x /usr/local/bin/mc
+    curl -s -L "${MINIO_CLIENT_URL}/mc" -o ${APP_ROOT}/bin/mc && \
+    chmod +x ${APP_ROOT}/bin/mc
 
-# set no-cache-dir when building images
+# set no-cache-dir for pip
 ENV PIP_NO_CACHE_DIR=1
-
-# ARG YOLOv5_VERSION=v7.0
-# ARG SITE_PATH=/usr/local/lib/python3.9/site-packages
-
-# RUN mkdir -p "${SITE_PATH}" && \
-#     cd "${SITE_PATH}" && \
-#     git clone --branch ${YOLOv5_VERSION} \
-#       --depth 1 https://github.com/ultralytics/yolov5.git && \
-#     pip install --no-cache-dir -U pip setuptools && \
-#     pip install --no-cache-dir \
-#       -r "${SITE_PATH}/yolov5/requirements.txt" && \
-#     rm -rf "${SITE_PATH}/yolov5/.git"
 
 COPY requirements.txt ./
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-# VOLUME "${SITE_PATH}/yolov5/training"
+COPY app.py app.sh ./
+
+VOLUME /models
 
 USER 1001
+
+CMD ["/opt/app-root/src/app.sh"]
