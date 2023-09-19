@@ -2,23 +2,6 @@
 apiVersion: image.openshift.io/v1
 kind: ImageStream
 metadata:
-  name: centos
-spec:
-  tags:
-  - name: stream9
-    from:
-      kind: DockerImage
-      name: quay.io/centos/centos:stream9
-    referencePolicy:
-      type: Local
-  - name: latest
-    from:
-      kind: ImageStreamTag
-      name: centos:stream9
----
-apiVersion: image.openshift.io/v1
-kind: ImageStream
-metadata:
   name: yolo-api
   annotations:
     app.openshift.io/vcs-ref: main
