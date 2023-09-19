@@ -22,17 +22,6 @@ spec:
     type: Git
   strategy:
     type: Docker
-    Dockerfile: |
-      FROM empty
-      USER 0
-
-      ARG BUILD_VER=0.0
-      ENV BUILD_VER=${BUILD_VER}
-
-      RUN dnf install -y epel-release && \
-          /usr/bin/crb enable && \
-          dnf install -y git wget libGL python3-pip ffmpeg-free && \
-          dnf clean all
   triggers:
   - imageChange: {}
     type: ImageChange

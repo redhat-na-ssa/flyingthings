@@ -1,10 +1,10 @@
 apiVersion: build.openshift.io/v1
 kind: BuildConfig
 metadata:
-  name: label-studio-s2i
+  name: yolo-api
   annotations:
     app.openshift.io/vcs-ref: main
-    app.openshift.io/vcs-uri: https://github.com/redhat-na-ssa/demo-ocp-label-studio.git
+    app.openshift.io/vcs-uri: https://github.com/redhat-na-ssa/flyingthings.git
   labels:
     app.openshift.io/runtime: python
     app.openshift.io/runtime-version: 3.9-ubi8
@@ -12,20 +12,19 @@ spec:
   output:
     to:
       kind: ImageStreamTag
-      name: label-studio:s2i
+      name: yolo-api:latest
   runPolicy: SerialLatestOnly
   source:
-    contextDir: /container/s2i
+    contextDir: /artifacts
     git:
-      ref: main
-      uri: https://github.com/redhat-na-ssa/demo-ocp-label-studio.git
+      ref: cory-review
+      uri: https://github.com/redhat-na-ssa/flyingthings.git
     type: Git
   strategy:
     sourceStrategy:
       from:
         kind: ImageStreamTag
-        name: python:3.9-ubi8
-        namespace: openshift
+        name: yolo-api:latest
     type: Source
   triggers:
   - imageChange: {}
