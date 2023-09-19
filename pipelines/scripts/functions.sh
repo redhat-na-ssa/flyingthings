@@ -150,13 +150,14 @@ model_training(){
   # ls -l /usr/local/lib/python3.9/site-packages/yolov5/training
 
   # yolo train model=$BASE_MODEL batch=$BATCH_SIZE epochs=$NUM_EPOCHS data=classes.yaml project=runs exist_ok=True
+  yolo checks && \
   yolo train \
-    --epochs "${NUM_EPOCHS}" \
-    --batch "${BATCH_SIZE}" \
-    --weights "${BASE_MODEL}" \
-    --data classes.yaml \
-    --project runs \
-    --imgsz 640
+    epochs="${NUM_EPOCHS}" \
+    batch="${BATCH_SIZE}" \
+    model="${BASE_MODEL}" \
+    data classes.yaml \
+    project runs \
+    imgsz 640
 }
 
 images_resize(){
