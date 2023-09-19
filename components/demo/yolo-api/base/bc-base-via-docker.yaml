@@ -1,7 +1,7 @@
 apiVersion: build.openshift.io/v1
 kind: BuildConfig
 metadata:
-  name: yolo-api-centos
+  name: yolo-api-docker-centos
   annotations:
     app.openshift.io/vcs-ref: main
     app.openshift.io/vcs-uri: https://github.com/redhat-na-ssa/flyingthings.git
@@ -12,10 +12,10 @@ spec:
   output:
     to:
       kind: ImageStreamTag
-      name: yolo-api:centos
+      name: yolo-api:docker-centos
   runPolicy: SerialLatestOnly
   source:
-    contextDir: source/yolo-api/docker
+    contextDir: source/yolo-api
     git:
       ref: cory-review
       uri: https://github.com/redhat-na-ssa/flyingthings.git

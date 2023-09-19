@@ -14,7 +14,7 @@ spec:
   - name: latest
     from:
       kind: ImageStreamTag
-      name: stream9
+      name: centos:stream9
 ---
 apiVersion: image.openshift.io/v1
 kind: ImageStream
@@ -28,4 +28,4 @@ spec:
   - name: latest
     from:
       kind: ImageStreamTag
-      name: source
+      name: yolo-api:source-ubi

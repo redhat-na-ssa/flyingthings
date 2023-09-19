@@ -1,7 +1,7 @@
 apiVersion: build.openshift.io/v1
 kind: BuildConfig
 metadata:
-  name: yolo-api-patch
+  name: yolo-api-docker-patch
   annotations:
     app.openshift.io/vcs-ref: main
     app.openshift.io/vcs-uri: https://github.com/redhat-na-ssa/flyingthings.git
@@ -17,7 +17,7 @@ spec:
   source:
     type: dockerfile
     dockerfile: |
-      FROM scratch
+      FROM quay.io/centos/centos:stream9
       USER 0
 
       ARG BUILD_VER=0.0
@@ -31,7 +31,7 @@ spec:
     dockerStrategy:
       from:
         kind: ImageStreamTag
-        name: yolo-api:centos
+        name: yolo-api:docker-centos
   triggers:
   - imageChange: {}
     type: ImageChange

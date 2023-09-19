@@ -10,7 +10,7 @@ commonLabels:
 
 resources:
 - bc-base-via-docker.yaml
-- bc-base-via-src.yaml
+- bc-base-via-source.yaml
 # - bc-embed-model-s2i.yaml
 - bc-patch-video.yaml
 - is.yaml
