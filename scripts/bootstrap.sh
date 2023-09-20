@@ -153,11 +153,13 @@ check_cluster_version(){
 
   echo "Current OCP version: ${OCP_VERSION}"
   echo "Tested OCP version(s): ${TESTED_VERSIONS[*]}"
+  echo ""
 
   if [[ " ${AVOID_VERSIONS[*]} " =~ " ${OCP_VERSION} " ]]; then
     echo "OCP version ${OCP_VERSION} is known to have issues with this demo"
     echo ""
     echo 'Recommend: "oc adm upgrade --to-latest=true"'
+    echo ""
   fi
 }
 
