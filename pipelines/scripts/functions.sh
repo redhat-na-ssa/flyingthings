@@ -139,10 +139,6 @@ download_yolo_model(){
   cp coco128.yaml source/model/scratch
 }
 
-model_export(){
-
-}
-
 model_training(){
   YOLO_PATH="${YOLO_PATH:-/opt/app-root/lib/python3.9/site-packages/yolov5}"
   TRAINING_PATH="${TRAINING_PATH:-/opt/app-root/lib/python3.9/site-packages/yolov5/training}"
