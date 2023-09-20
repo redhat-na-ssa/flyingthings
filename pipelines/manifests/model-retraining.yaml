@@ -88,24 +88,24 @@ spec:
       params:
         - name: TIMEOUT
           value: $(params.GPU_TIMEOUT)
-    - name: create-bucket
-      taskRef:
-        name: shell-script
-      params:
-        - name: SCRIPT
-          value: |
-            MINIO_ENDPOINT=$(params.MINIO_ENDPOINT)
-            MINIO_BUCKET=$(params.MINIO_BUCKET)
-            MINIO_ACCESSKEY=$(params.MINIO_ACCESSKEY)
-            MINIO_SECRETKEY=$(params.MINIO_SECRETKEY)
+    # - name: create-bucket
+    #   taskRef:
+    #     name: shell-script
+    #   params:
+    #     - name: SCRIPT
+    #       value: |
+    #         MINIO_ENDPOINT=$(params.MINIO_ENDPOINT)
+    #         MINIO_BUCKET=$(params.MINIO_BUCKET)
+    #         MINIO_ACCESSKEY=$(params.MINIO_ACCESSKEY)
+    #         MINIO_SECRETKEY=$(params.MINIO_SECRETKEY)
 
-            source $(workspaces.source.path)/pipelines/scripts/functions.sh && \
-            minio_create_bucket ${MINIO_BUCKET}
-      runAfter:
-        - fetch-repository
-      workspaces:
-        - name: source
-          workspace: source
+    #         source $(workspaces.source.path)/pipelines/scripts/functions.sh && \
+
+    #   runAfter:
+    #     - fetch-repository
+    #   workspaces:
+    #     - name: source
+    #       workspace: source
     - name: upload-artifacts
       taskRef:
         name: shell-script
@@ -122,7 +122,7 @@ spec:
             source $(workspaces.source.path)/pipelines/scripts/functions.sh && \
             minio_copy_artifacts
       runAfter:
-        - create-bucket
+        - fetch-repository
       workspaces:
         - name: source
           workspace: source
