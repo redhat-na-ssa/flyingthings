@@ -1,7 +1,7 @@
 apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
-  name: model-retraining
+  name: train-model
 spec:
   params:
     - name: GIT_URL

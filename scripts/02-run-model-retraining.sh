@@ -32,7 +32,7 @@ start_pipelines(){
 
   # debug_pipeline; exit 0
 
-  check_pipeline model-retraining
+  check_pipeline train-model
   
   tkn pipeline start "${PIPELINE_NAME}" \
     -p GIT_URL="${GIT_URL}" \

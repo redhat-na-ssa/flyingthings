@@ -171,13 +171,13 @@ Alright, now it’s time to run the pipeline and get our first custom model.
 Go to the same directory as before, flyingthings/bootstrap and edit the file 10-run-model-flyingthings-training.sh to change any parameters for this run.
 
 ```
-vi scripts/03-run-model-retraining.sh
+vi scripts/03-run-train-model.sh
 ```
 
 All the supplied params should be fine, but we will want to change a few if we’re not running a GPU.  If your system has no available GPUs then set *GPU* to *N*. Also, since there is no GPU we’ll need to change the *BATCH_SIZE* as it is set to maximize if there are GPUs. You should set it to 2 to avoid any memory issues.  
 
 ```
-tkn pipeline start model-retraining \
+tkn pipeline start train-model \
   -w name=source,volumeClaimTemplateFile=pvc.yaml \
   -w name=shared-workspace,volumeClaimTemplateFile=pvc.yaml \
   -p GIT_URL=https://github.com/redhat-na-ssa/flyingthings.git \
@@ -202,7 +202,7 @@ tkn pipeline start model-retraining \
 Now execute the script on the project we’ve been using.
 
 ```
-scripts/03-run-model-retraining.sh
+scripts/03-run-train-model.sh
 ```
 
 As the job kicks off we can monitor it from the console. Here we see all the training tasks displayed for the pipeline. With GPUs it should take around 5 or 6 minutes to run. CPUs will take significantly longer.
