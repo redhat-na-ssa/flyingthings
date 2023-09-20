@@ -106,7 +106,7 @@ ocp_scale_all_machineset(){
 
 }
 
-setup_cluster_autoscaling(){
+setup_aws_cluster_autoscaling(){
   # setup cluster autoscaling
   oc apply -k components/configs/autoscale/overlays/gpus
 
@@ -164,6 +164,15 @@ check_cluster_version(){
   fi
 }
 
+print_demo_info(){
+  echo "
+  If you want to setup autoscaling in AWS remember to run the following:
+  
+    . scripts/bootstrap.sh
+    setup_aws_cluster_autoscaling
+
+  "
+}
 
 setup_demo(){
   check_cluster_version
@@ -172,6 +181,7 @@ setup_demo(){
   setup_operator_nfd
   setup_operator_nvidia
   setup_operator_devspaces
+  print_demo_info
 }
 
 is_sourced && return 0
