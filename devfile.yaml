@@ -47,8 +47,8 @@ components:
   - attributes:
       controller.devfile.io/merge-contribution: false
       deployment/nvidia.com/gpu: '1'
-      memoryLimit: 32Gi
     container:
+      memoryLimit: 6Gi
       args:
         - '-f'
         - /dev/null
