@@ -99,7 +99,7 @@ spec:
             MINIO_ACCESSKEY=$(params.MINIO_ACCESSKEY)
             MINIO_SECRETKEY=$(params.MINIO_SECRETKEY)
 
-            source $(workspaces.source.path)/source/training/functions.sh && \
+            source $(workspaces.source.path)/pipelines/scripts/functions.sh && \
             minio_create_bucket ${MINIO_BUCKET}
       runAfter:
         - fetch-repository
@@ -119,7 +119,7 @@ spec:
 
             cd $(workspaces.source.path)
 
-            source $(workspaces.source.path)/source/training/functions.sh && \
+            source $(workspaces.source.path)/pipelines/scripts/functions.sh && \
             minio_copy_artifacts
       runAfter:
         - create-bucket
@@ -143,9 +143,9 @@ spec:
             cd $(workspaces.scratch.path)
 
             SOURCE_DIR=$(workspaces.source.path)
-            BASEDIR=${SOURCE_DIR}/source/training
+            BASEDIR=${SOURCE_DIR}/pipelines/scripts
 
-            source $(workspaces.source.path)/source/training/functions.sh && \
+            source $(workspaces.source.path)/pipelines/scripts/functions.sh && \
             minio_get_dataset
       runAfter:
         - upload-artifacts
@@ -161,8 +161,8 @@ spec:
         - name: SCRIPT
           value: |
             cd $(workspaces.scratch.path)
-            
-            $(workspaces.source.path)/source/training/create-classfile.sh
+
+            $(workspaces.source.path)/pipelines/scripts/create-classfile.sh
       runAfter:
         - get-dataset
       workspaces:
@@ -184,9 +184,9 @@ spec:
           value: |
             cd $(workspaces.scratch.path)
 
-            source $(workspaces.source.path)/source/training/functions.sh && \
+            source $(workspaces.source.path)/pipelines/scripts/functions.sh && \
             images_resize datasets/images $(params.MAX_WIDTH)
-                        
+
       runAfter:
         - create-classfile
       workspaces:
@@ -204,7 +204,7 @@ spec:
           value: |
             cd $(workspaces.scratch.path)
 
-            source $(workspaces.source.path)/source/training/functions.sh && \
+            source $(workspaces.source.path)/pipelines/scripts/functions.sh && \
             images_distribute
       runAfter:
         - resize-image
@@ -281,7 +281,7 @@ spec:
 
             cd $(workspaces.scratch.path)
 
-            source $(workspaces.source.path)/source/training/functions.sh && \
+            source $(workspaces.source.path)/pipelines/scripts/functions.sh && \
             model_export
 
             # pwd; find runs
@@ -311,7 +311,7 @@ spec:
 
             cd $(workspaces.scratch.path)
 
-            source $(workspaces.source.path)/source/training/functions.sh && \
+            source $(workspaces.source.path)/pipelines/scripts/functions.sh && \
             minio_push_results
       runAfter:
         - export-model
@@ -338,7 +338,7 @@ spec:
       - name: SCRIPT
         value: |
           set -x
-          
+
           oc new-app $(params.MODEL_IMAGE) \
             --name=$(params.MODEL_NAME) \
             --env=WEIGHTS=model_custom.pt \

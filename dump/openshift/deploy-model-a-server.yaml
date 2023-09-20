@@ -35,7 +35,7 @@ spec:
           volumeMounts:
             - mountPath: /opt/app-root/src/simplevis-data
               name: simplevis-data
-          resources: {}            
+          resources: {}
       volumes:
         - name: simplevis-data
           emptyDir: {}

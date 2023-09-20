@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 check_namespace(){
   DEFAULT_NAMESPACE=ml-demo

@@ -46,7 +46,7 @@ run_s2i_override(){
 }
 
 usage
-[ "${1}" == "-h" ] && exit 0
+[ "${1}" = "-h" ] && exit 0
 
 run_s2i_override
 run_s2i_default

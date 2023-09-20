@@ -26,9 +26,9 @@ spec:
         cd $(workspaces.workspace.path)
 
         SOURCE_DIR=$(workspaces.source.path)
-        BASEDIR=${SOURCE_DIR}/source/training
+        BASEDIR=${SOURCE_DIR}/pipelines/scripts
 
-        source $(workspaces.source.path)/source/training/functions.sh && \
+        source $(workspaces.source.path)/pipelines/scripts/functions.sh && \
         minio_push_results
 
         pwd && ls -al

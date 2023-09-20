@@ -16,7 +16,7 @@ spec:
 
         cd $(workspaces.scratch.path)
 
-        source $(workspaces.source.path)/source/training/functions.sh && \
+        source $(workspaces.source.path)/pipelines/scripts/functions.sh && \
         model_training
       resources:
         limits:
@@ -29,8 +29,8 @@ spec:
   volumes:
     - name: dshm
       emptyDir:
-          medium: Memory
-          sizeLimit: 4Gi
+        medium: Memory
+        sizeLimit: 4Gi
     - name: training
       emptyDir: {}
   workspaces:

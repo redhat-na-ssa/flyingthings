@@ -1,0 +1,3 @@
+yamllint
+pyspelling
+awscli

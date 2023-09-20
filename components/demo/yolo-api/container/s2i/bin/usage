@@ -1,10 +1,6 @@
-#!/bin/sh
-
-which lsb_release 2>&1 >/dev/null && lsb_release -ircd
+#!/bin/bash
 
 DISTRO=`cat /etc/*-release | grep ^ID= | grep -Po '".*?"' | tr -d '"'`
-NAMESPACE=centos
-[[ $DISTRO =~ rhel* ]] && NAMESPACE=rhscl || DISTRO="non RHEL"
 
 cat <<EOF
 

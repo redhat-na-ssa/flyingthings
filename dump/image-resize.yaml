@@ -18,12 +18,12 @@ spec:
         cd $(workspaces.workspace.path)
 
         SOURCE_DIR=$(workspaces.source.path)
-        BASEDIR=${SOURCE_DIR}/source/training
+        BASEDIR=${SOURCE_DIR}/pipelines/scripts
 
         cd datasets && \
         mv images images_original && \
         mkdir images && \
-        $(workspaces.source.path)/source/training/100-image-resize.py images_original images $(params.MAX_WIDTH)
+        $(workspaces.source.path)/pipelines/scripts/100-image-resize.py images_original images $(params.MAX_WIDTH)
 
         pwd && ls -al
   workspaces:

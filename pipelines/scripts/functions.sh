@@ -31,7 +31,7 @@ minio_create_bucket(){
   local BUCKET="${1}"
   local REMOTE="${MINIO_REMOTE}"
 
-  mc --insecure --config-dir --ignore-existing "${MINIO_CFG}" mb "${REMOTE}/${BUCKET}" || true
+  mc --insecure --config-dir "${MINIO_CFG}" mb "${REMOTE}/${BUCKET}" || true
   mc --insecure --config-dir "${MINIO_CFG}" version enable "${REMOTE}/${BUCKET}" || true
 }
 
@@ -145,18 +145,28 @@ model_export(){
 }
 
 model_training(){
-  cp -R datasets/training/* /usr/local/lib/python3.9/site-packages/yolov5/training
-  # ls -l /usr/local/lib/python3.9/site-packages/yolov5
-  # ls -l /usr/local/lib/python3.9/site-packages/yolov5/training
+  TRAINING_PATH="${TRAINING_PATH:-/opt/app-root/lib/python3.9/site-packages/yolov5/training}"
 
+  # python debug
+  # python -m site
+
+  [ -d "${TRAINING_PATH}" ] || mkdir -p "${TRAINING_PATH}"
+  cp -R datasets/training/* "${TRAINING_PATH}/"
+
+  # yolov8
+  # yolo checks && \
   # yolo train model=$BASE_MODEL batch=$BATCH_SIZE epochs=$NUM_EPOCHS data=classes.yaml project=runs exist_ok=True
-  python3 /usr/local/lib/python3.9/site-packages/yolov5/train.py \
-    --epochs "${NUM_EPOCHS}" \
-    --batch-size "${BATCH_SIZE}" \
-    --weights "${BASE_MODEL}" \
-    --data classes.yaml \
+  
+  # yologv5
+  yolov5 train \
+    --source "${DATA_PATH:-datasets/training}" \
+    --weights "${BASE_MODEL:-yolov5s.pt}" \
+    --epochs "${NUM_EPOCHS:-2}" \
+    --batch-size "${BATCH_SIZE:--1}" \
+    --data "${MODEL_FILE:-classes.yaml}" \
     --project runs \
     --img 640
+
 }
 
 images_resize(){
@@ -165,7 +175,7 @@ images_resize(){
 
   # backup original images
   mv "${IMG_SRC}" "${IMG_SRC}-orig" && \
-  python3 "${SOURCE_DIR}/source/training/images-resize.py" \
+  python3 "${SOURCE_DIR}/pipelines/scripts/images-resize.py" \
     "${IMG_SRC}-orig" \
     "${IMG_SRC}" \
     "${IMG_WIDTH}"
@@ -173,7 +183,7 @@ images_resize(){
 
 images_distribute(){
   pushd datasets || return
-    python3 "${SOURCE_DIR}/source/training/images-distribute.py"
+    python3 "${SOURCE_DIR}/pipelines/scripts/images-distribute.py"
   popd || return
 }
 

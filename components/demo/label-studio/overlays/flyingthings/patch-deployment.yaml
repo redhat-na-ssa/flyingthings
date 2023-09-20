@@ -1,5 +1,5 @@
 - op: replace
-  path:  /spec/template/spec/containers/0/env
+  path: /spec/template/spec/containers/0/env
   value:
     - name: JSON_LOG
       value: "1"
@@ -22,14 +22,14 @@
             cd "${CONFIG_PATH}"
 
             [ -e label-studio/label_studio.sqlite3 ] && return
-            
+
             fileid="16qq4YFPmU2rQ7ZPRfqL0oBmOCz_Dnbp7"
             filename="label-studio.tar.gz"
             url="https://drive.google.com/uc?export=download"
 
             curl -s -c ./cookie -L "${url}&id=${fileid}" > /dev/null
             curl -s -b ./cookie -L "${url}&confirm=$(awk '/download/ {print $NF}' ./cookie)&id=${fileid}" -o ${filename}
-            
+
             tar vzxf label-studio.tar.gz
             rm label-studio.tar.gz
           }

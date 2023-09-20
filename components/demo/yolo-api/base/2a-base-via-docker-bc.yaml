@@ -35,7 +35,7 @@ spec:
   source:
     contextDir: components/demo/yolo-api/container
     git:
-      ref: cory-review
+      ref: develop
       uri: https://github.com/redhat-na-ssa/flyingthings.git
     type: Git
   strategy:

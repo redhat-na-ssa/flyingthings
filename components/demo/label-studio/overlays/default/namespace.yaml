@@ -6,4 +6,3 @@ metadata:
     openshift.io/description: |
       Label Studio for OpenShift
     openshift.io/display-name: Label Studio
-    

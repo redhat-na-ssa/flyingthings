@@ -1,5 +1,5 @@
 #!/bin/bash
-# shellcheck disable=SC2015,SC1091
+# shellcheck disable=SC2015,SC1091,SC2119,SC2120
 
 debug(){
 echo "PWD:  $(pwd)"
@@ -110,7 +110,7 @@ setup_cluster_autoscaling(){
   # setup cluster autoscaling
   oc apply -k components/configs/autoscale/overlays/gpus
 
-  ocp_aws_create_gpu_machineset
+  ocp_aws_create_gpu_machineset g4ad.4xlarge
   ocp_create_machineset_autoscale
 }
 

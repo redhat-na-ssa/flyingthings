@@ -95,7 +95,7 @@ We then annotate, as before, and repeat the process until we have acceptable con
   - OpenShift Pipelines Operator
   - Dynamic Storage Provisioning (ODF, LVM Storage, etc)
   - Cluster Admin
-- Workstation with terminal (RHEL or Centos Streams with bash or zsh)
+- Workstation with terminal (RHEL or CentOS Streams with bash or zsh)
   - Git client
   - Tekton client
 - Optional

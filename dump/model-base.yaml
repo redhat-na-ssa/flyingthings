@@ -125,7 +125,7 @@ spec:
             MINIO_ACCESSKEY=$(params.MINIO_ACCESSKEY)
             MINIO_SECRETKEY=$(params.MINIO_SECRETKEY)
 
-            source $(workspaces.source.path)/source/training/functions.sh && \
+            source $(workspaces.source.path)/pipelines/scripts/functions.sh && \
             minio_create_bucket ${MINIO_BUCKET}
       runAfter:
         - fetch-repository
@@ -145,7 +145,7 @@ spec:
 
             cd $(workspaces.source.path)
 
-            source $(workspaces.source.path)/source/training/functions.sh && \
+            source $(workspaces.source.path)/pipelines/scripts/functions.sh && \
             minio_copy_artifacts
       runAfter:
         - create-bucket
@@ -164,7 +164,7 @@ spec:
             MINIO_SECRETKEY=$(params.MINIO_SECRETKEY)
             BASE_MODEL=$(params.BASE_MODEL)
 
-            source $(workspaces.source.path)/source/training/functions.sh && \
+            source $(workspaces.source.path)/pipelines/scripts/functions.sh && \
             download_yolo_model && \
             minio_copy_yolo_model
       runAfter:
@@ -202,7 +202,7 @@ spec:
       - name: SCRIPT
         value: |
           set -x
-          
+
           oc new-app $(params.MODEL_IMAGE) \
             --name=$(params.MODEL_NAME) \
             --env=MINIO_ENDPOINT=$(params.MINIO_ENDPOINT) \
@@ -210,7 +210,7 @@ spec:
             --env=MINIO_ACCESSKEY=$(params.MINIO_ACCESSKEY) \
             --env=MINIO_SECRETKEY=$(params.MINIO_SECRETKEY) \
             --env=BASE_MODEL=$(params.BASE_MODEL)
-          
+
           oc apply -f - <<EOF
           apiVersion: route.openshift.io/v1
           kind: Route
