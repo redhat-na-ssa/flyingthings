@@ -25,7 +25,7 @@ patches:
         value: components/demo/label-studio/container/s2i
       - op: replace
         path: /spec/source/git/ref
-        value: merge-other-git
+        value: develop
   - target:
       group: apps
       kind: Deployment

@@ -32,7 +32,7 @@ spec:
   source:
     contextDir: components/demo/yolo-api/container
     git:
-      ref: merge-other-git
+      ref: develop
       uri: https://github.com/redhat-na-ssa/flyingthings.git
     type: Git
   strategy:
