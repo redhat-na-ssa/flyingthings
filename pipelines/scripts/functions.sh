@@ -140,11 +140,11 @@ download_yolo_model(){
 }
 
 model_export(){
-  # yolo export model=runs/train/weights/best.pt format=onnx
-  python3 /usr/local/lib/python3.9/site-packages/yolov5/export.py --weights runs/exp/weights/best.pt --include onnx
+
 }
 
 model_training(){
+  YOLO_PATH="${YOLO_PATH:-/opt/app-root/lib/python3.9/site-packages/yolov5}"
   TRAINING_PATH="${TRAINING_PATH:-/opt/app-root/lib/python3.9/site-packages/yolov5/training}"
 
   # python debug
@@ -166,6 +166,9 @@ model_training(){
     --data "${MODEL_FILE:-classes.yaml}" \
     --project runs \
     --img 640
+
+  # yolo export model=runs/train/weights/best.pt format=onnx
+  python3 "${YOLO_PATH}/export.py" --weights runs/exp/weights/best.pt --include onnx
 
 }
 

@@ -267,32 +267,32 @@ spec:
           workspace: source
         - name: scratch
           workspace: large-data
-    - name: export-model
-      taskRef:
-        name: shell-script
-      params:
-        - name: IMAGE
-          value: $(params.MODEL_IMAGE)
-        - name: SCRIPT
-          value: |
-            NUM_EPOCHS=$(params.NUM_EPOCHS)
-            BATCH_SIZE=$(params.BATCH_SIZE)
-            BASE_MODEL=$(params.BASE_MODEL)
+    # - name: export-model
+    #   taskRef:
+    #     name: shell-script
+    #   params:
+    #     - name: IMAGE
+    #       value: $(params.MODEL_IMAGE)
+    #     - name: SCRIPT
+    #       value: |
+    #         NUM_EPOCHS=$(params.NUM_EPOCHS)
+    #         BATCH_SIZE=$(params.BATCH_SIZE)
+    #         BASE_MODEL=$(params.BASE_MODEL)
 
-            cd $(workspaces.scratch.path)
+    #         cd $(workspaces.scratch.path)
 
-            source $(workspaces.source.path)/pipelines/scripts/functions.sh && \
-            model_export
+    #         source $(workspaces.source.path)/pipelines/scripts/functions.sh && \
+    #         model_export
 
-            # pwd; find runs
-      runAfter:
-        - train-model-cpu
-        - train-model-gpu
-      workspaces:
-        - name: source
-          workspace: source
-        - name: scratch
-          workspace: large-data
+    #         # pwd; find runs
+    #   runAfter:
+    #     - train-model-cpu
+    #     - train-model-gpu
+    #   workspaces:
+    #     - name: source
+    #       workspace: source
+    #     - name: scratch
+    #       workspace: large-data
     - name: push-results
       taskRef:
         name: shell-script
@@ -314,7 +314,8 @@ spec:
             source $(workspaces.source.path)/pipelines/scripts/functions.sh && \
             minio_push_results
       runAfter:
-        - export-model
+        - train-model-cpu
+        - train-model-gpu
       workspaces:
         - name: source
           workspace: source
