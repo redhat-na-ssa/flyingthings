@@ -50,7 +50,7 @@ minio_tag(){
 }
 
 minio_copy_artifacts(){
-  minio_create_bucket ${MINIO_BUCKET}
+  minio_create_bucket "${MINIO_BUCKET}"
   minio_copy "artifacts/flyingthings-yolo.zip" "${MINIO_REMOTE}/${MINIO_BUCKET}"
 }
 

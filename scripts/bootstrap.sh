@@ -155,6 +155,7 @@ check_cluster_version(){
   echo "Tested OCP version(s): ${TESTED_VERSIONS[*]}"
   echo ""
 
+  # shellcheck disable=SC2076
   if [[ " ${AVOID_VERSIONS[*]} " =~ " ${OCP_VERSION} " ]]; then
     echo "OCP version ${OCP_VERSION} is known to have issues with this demo"
     echo ""
