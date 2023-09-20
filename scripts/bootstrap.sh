@@ -146,7 +146,24 @@ setup_namespaces(){
   oc apply -k components/configs/namespaces/overlays/default
 }
 
+check_cluster_version(){
+  OCP_VERSION=$(oc version | sed -n '/Server Version: / s/Server Version: //p')
+  AVOID_VERSIONS=("4.12.12")
+  TESTED_VERSIONS=("4.12.32" "4.12.33")
+
+  echo "Current OCP version: ${OCP_VERSION}"
+  echo "Tested OCP version(s): ${TESTED_VERSIONS[*]}"
+
+  if [[ " ${AVOID_VERSIONS[*]} " =~ " ${OCP_VERSION} " ]]; then
+    echo "OCP version ${OCP_VERSION} is known to have issues with this demo"
+    echo ""
+    echo 'Recommend: "oc adm upgrade --to-latest=true"'
+  fi
+}
+
+
 setup_demo(){
+  check_cluster_version
   setup_namespaces
   setup_operator_pipelines
   setup_operator_nfd
