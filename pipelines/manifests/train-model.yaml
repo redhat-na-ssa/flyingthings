@@ -257,8 +257,17 @@ spec:
             WEIGHTS=$(params.WEIGHTS)
             BASE_MODEL=$(params.BASE_MODEL)
 
-            # cpu training is slow - do less
+            # cpu training is slow...
             [ "${NUM_EPOCHS}" -gt "10" ] && NUM_EPOCHS=10
+
+            echo "
+              CPU training is (usually) significantly slower than GPU...
+
+              To avoid you wasting your life
+              epochs are limited to ${NUM_EPOCHS}
+
+              NOTICE: This model will NOT predict accurately!
+            "
       runAfter:
         - check-gpu
         - distribute-dataset
