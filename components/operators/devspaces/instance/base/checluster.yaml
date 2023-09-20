@@ -41,7 +41,7 @@ spec:
   containerRegistry: {}
   devEnvironments:
     startTimeoutSeconds: 180
-    secondsOfRunBeforeIdling: 300
+    secondsOfRunBeforeIdling: -1
     maxNumberOfRunningWorkspacesPerUser: 2
     maxNumberOfWorkspacesPerUser: -1
     containerBuildConfiguration:
