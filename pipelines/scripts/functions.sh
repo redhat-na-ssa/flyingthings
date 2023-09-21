@@ -186,13 +186,13 @@ images_distribute(){
   popd || return
 }
 
-check_base_images(){
-  echo "Waiting for base images..."
+check_base_image(){
+  IS_TAG="${1}"
+  echo "Waiting for ${IS_TAG}..."
 
   while [ -z "${READY}" ]
   do
-    oc get istag yolo-api:latest -o name 2>/dev/null && \
-    oc get istag python-custom:latest -o name 2>/dev/null && \
+    oc get "${IS_TAG}" -o name 2>/dev/null && \
     READY=true && continue
     sleep 10
   done

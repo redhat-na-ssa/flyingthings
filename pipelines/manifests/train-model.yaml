@@ -50,10 +50,10 @@ spec:
       description: default image registry
       default: image-registry.openshift-image-registry.svc:5000
     - name: UBI_IMAGE
-      default: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/python-custom:latest
+      default: python-custom:latest
       description: base image for notebook
     - name: MODEL_IMAGE
-      default: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/yolo-api:latest
+      default: yolo-api:latest
       description: model server image
     - name: DEPLOY
       default: 'Y'
@@ -97,7 +97,8 @@ spec:
         - name: SCRIPT
           value: |
             source $(workspaces.source.path)/pipelines/scripts/functions.sh && \
-            check_base_images
+            check_base_image $(params.MODEL_IMAGE)
+            check_base_image $(params.UBI_IMAGE)
       runAfter:
         - fetch-repository
       workspaces:
@@ -128,7 +129,7 @@ spec:
         name: shell-script
       params:
         - name: IMAGE
-          value: $(params.UBI_IMAGE)
+          value: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/$(params.UBI_IMAGE)
         - name: SCRIPT
           value: |
             MINIO_ENDPOINT=$(params.MINIO_ENDPOINT)
@@ -176,7 +177,7 @@ spec:
         name: shell-script
       params:
         - name: IMAGE
-          value: $(params.UBI_IMAGE)
+          value: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/$(params.UBI_IMAGE)
         - name: SCRIPT
           value: |
             cd $(workspaces.scratch.path)
@@ -196,7 +197,7 @@ spec:
         name: shell-script
       params:
         - name: IMAGE
-          value: $(params.UBI_IMAGE)
+          value: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/$(params.UBI_IMAGE)
         - name: SCRIPT
           value: |
             cd $(workspaces.scratch.path)
@@ -220,7 +221,7 @@ spec:
         name: train-model-gpu
       params:
         - name: IMAGE
-          value: $(params.MODEL_IMAGE)
+          value: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/$(params.MODEL_IMAGE)
         - name: SCRIPT
           value: |
             BATCH_SIZE=$(params.BATCH_SIZE)
@@ -246,7 +247,7 @@ spec:
       timeout: "2h"
       params:
         - name: IMAGE
-          value: $(params.MODEL_IMAGE)
+          value: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/$(params.MODEL_IMAGE)
         - name: SCRIPT
           value: |
             BATCH_SIZE=$(params.BATCH_SIZE)
@@ -278,7 +279,7 @@ spec:
         name: shell-script
       params:
         # - name: IMAGE
-        #   value: $(params.MODEL_IMAGE)
+        #   value: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/$(params.MODEL_IMAGE)
         - name: SCRIPT
           value: |
             MINIO_ENDPOINT=$(params.MINIO_ENDPOINT)
