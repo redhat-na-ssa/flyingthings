@@ -187,8 +187,18 @@ images_distribute(){
 }
 
 check_base_images(){
-  oc get is
-  echo "TODO"
+  echo "Waiting for base images..."
+
+  while [ -z "${READY}" ]
+  do
+    oc get istag yolo-api:latest -o name 2>/dev/null && \
+    oc get istag python-custom:latest -o name 2>/dev/null && \
+    READY=true && continue
+    sleep 10
+  done
+
+  echo "[ OK ]"
+  unset READY
 }
 
 # df -h; pwd; ls -lsa

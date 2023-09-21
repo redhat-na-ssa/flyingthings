@@ -43,7 +43,7 @@ spec:
         echo "
           !!! NOTICE !!!
 
-          A TIMEOUT of at least 12m is needed to give the 
+          A TIMEOUT of at least 12m is needed to give the
           cluster autoscaler and GPU operator time to configure
           new nodes.
         "
