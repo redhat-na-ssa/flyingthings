@@ -75,7 +75,7 @@ ocp_create_machineset_autoscale(){
   MACHINE_MAX=${2:-4}
   MACHINE_SETS=${3:-$(oc -n openshift-machine-api get machinesets.machine.openshift.io -o name | sed 's@.*/@@' )}
 
-  for set in IFS=' ' ${MACHINE_SETS}
+  for set in ${MACHINE_SETS}
   do
 cat << YAML | oc apply -f -
 apiVersion: "autoscaling.openshift.io/v1beta1"
