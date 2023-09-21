@@ -5,6 +5,16 @@ This workshop is designed to showcase OpenShift as a platform for developing and
 I've created a video series explaining the workshop and a runthrough of the setup and use cases here.
 [![WorkshopSeries](docs/images/youtube-channel.png)](https://www.youtube.com/playlist?list=PLWGcJxV1EWOCQWd1aRss4zUT4zgZCSQ19)
 
+
+## Quickstart
+
+```
+scripts/bootstrap.sh
+
+scripts/00-setup-components.sh
+scripts/01-setup-pipelines.sh
+scripts/02-run-train-model.sh
+```
 ## Workshop Components
 
 ![alt text](docs/images/workshopcomponents.png "Workshop Components")
@@ -108,20 +118,19 @@ We then annotate, as before, and repeat the process until we have acceptable con
 2. Clone the repository to your workstation.
 
 ```
-git clone https://github.com/davwhite/flyingthings.git
+git clone < repo >
 ```
 
 3. Go to the directory flyingthings/bootstrap and run script 01-create-pipelines.sh with the name of the project where you will be deploying the workshop.
 
 ```
-cd flyingthings/bootstrap
-./01-create-pipelines.sh <yourproject>
+scripts/01-create-pipelines.sh
 ```
 
 4. Run script 02-build-images-tkn.sh with the same project used for the previous step.
 
 ```
-./02-build-images-tkn.sh <yourproject>
+scripts/02-build-images-tkn.sh
 ```
 
 This process will take some time as the images for the workshop are created. Allow 10 to 30 minutes to complete.
@@ -182,7 +191,6 @@ tkn pipeline start train-model \
   -w name=shared-workspace,volumeClaimTemplateFile=pvc.yaml \
   -p GIT_URL=https://github.com/redhat-na-ssa/flyingthings.git \
   -p GIT_REVISION=main \
-  -p GPU="Y" \
   -p BASE_MODEL="yolov5s.pt" \
   -p BATCH_SIZE="-1" \
   -p NUM_EPOCHS="100" \
@@ -195,7 +203,6 @@ tkn pipeline start train-model \
   -p MINIO_SECRETKEY=minioadmin \
   -p MINIO_BUCKET=flyingthings \
   -p MODEL_NAME=model-flyingthings \
-  -p DEPLOY="Y" \
   --use-param-defaults --showlog
 ```
 
