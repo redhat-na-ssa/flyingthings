@@ -186,4 +186,9 @@ images_distribute(){
   popd || return
 }
 
+check_base_images(){
+  oc get is
+  echo "TODO"
+}
+
 # df -h; pwd; ls -lsa

@@ -90,6 +90,21 @@ spec:
       params:
         - name: TIMEOUT
           value: $(params.GPU_TIMEOUT)
+    - name: check-base-images
+      taskRef:
+        name: shell-script
+      params:
+        - name: IMAGE
+          value: $(params.UBI_IMAGE)
+        - name: SCRIPT
+          value: |
+            source $(workspaces.source.path)/pipelines/scripts/functions.sh && \
+            check_base_images
+      runAfter:
+        - fetch-repository
+      workspaces:
+        - name: source
+          workspace: source
     - name: upload-artifacts
       taskRef:
         name: shell-script
@@ -107,6 +122,7 @@ spec:
             minio_copy_artifacts
       runAfter:
         - fetch-repository
+        - check-base-images
       workspaces:
         - name: source
           workspace: source
