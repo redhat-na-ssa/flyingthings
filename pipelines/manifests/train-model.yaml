@@ -94,8 +94,6 @@ spec:
       taskRef:
         name: shell-script
       params:
-        - name: IMAGE
-          value: $(params.UBI_IMAGE)
         - name: SCRIPT
           value: |
             source $(workspaces.source.path)/pipelines/scripts/functions.sh && \
@@ -121,7 +119,6 @@ spec:
             source $(workspaces.source.path)/pipelines/scripts/functions.sh && \
             minio_copy_artifacts
       runAfter:
-        - fetch-repository
         - check-base-images
       workspaces:
         - name: source
