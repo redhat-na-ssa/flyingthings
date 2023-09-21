@@ -1,6 +1,16 @@
 #!/bin/bash
 # shellcheck disable=SC2015,SC1091,SC2119,SC2120
 
+set -e
+
+check_shell(){
+  [ "${SHELL}" = "/bin/bash" ] && return
+  echo "Please verify you are running this script in bash shell"
+}
+
+check_shell
+
+
 debug(){
 echo "PWD:  $(pwd)"
 echo "PATH: ${PATH}"
@@ -8,9 +18,11 @@ echo "PATH: ${PATH}"
 
 usage(){
   echo "
-  usage: source scripts/funtions.sh
+  If you want to setup autoscaling in AWS run the following:
+  
+    . scripts/bootstrap.sh && setup_aws_cluster_autoscaling
+
   "
-  # get_functions
 }
 
 is_sourced() {
@@ -164,16 +176,6 @@ check_cluster_version(){
   fi
 }
 
-print_demo_info(){
-  echo "
-  If you want to setup autoscaling in AWS remember to run the following:
-  
-    . scripts/bootstrap.sh
-    setup_aws_cluster_autoscaling
-
-  "
-}
-
 setup_demo(){
   check_cluster_version
   setup_namespaces
@@ -181,10 +183,10 @@ setup_demo(){
   setup_operator_nfd
   setup_operator_nvidia
   setup_operator_devspaces
-  print_demo_info
+  usage
 }
 
-is_sourced && return 0
+is_sourced && check_shell && return
 
 check_oc_login
 
