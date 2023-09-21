@@ -75,6 +75,8 @@ spec:
           value: 'true'
         - name: revision
           value: $(params.GIT_REVISION)
+        - name: verbose
+          value: 'false'
       taskRef:
         kind: ClusterTask
         name: git-clone
@@ -88,24 +90,6 @@ spec:
       params:
         - name: TIMEOUT
           value: $(params.GPU_TIMEOUT)
-    # - name: create-bucket
-    #   taskRef:
-    #     name: shell-script
-    #   params:
-    #     - name: SCRIPT
-    #       value: |
-    #         MINIO_ENDPOINT=$(params.MINIO_ENDPOINT)
-    #         MINIO_BUCKET=$(params.MINIO_BUCKET)
-    #         MINIO_ACCESSKEY=$(params.MINIO_ACCESSKEY)
-    #         MINIO_SECRETKEY=$(params.MINIO_SECRETKEY)
-
-    #         source $(workspaces.source.path)/pipelines/scripts/functions.sh && \
-
-    #   runAfter:
-    #     - fetch-repository
-    #   workspaces:
-    #     - name: source
-    #       workspace: source
     - name: upload-artifacts
       taskRef:
         name: shell-script
@@ -276,32 +260,6 @@ spec:
           workspace: source
         - name: scratch
           workspace: large-data
-    # - name: export-model
-    #   taskRef:
-    #     name: shell-script
-    #   params:
-    #     - name: IMAGE
-    #       value: $(params.MODEL_IMAGE)
-    #     - name: SCRIPT
-    #       value: |
-    #         NUM_EPOCHS=$(params.NUM_EPOCHS)
-    #         BATCH_SIZE=$(params.BATCH_SIZE)
-    #         BASE_MODEL=$(params.BASE_MODEL)
-
-    #         cd $(workspaces.scratch.path)
-
-    #         source $(workspaces.source.path)/pipelines/scripts/functions.sh && \
-    #         model_export
-
-    #         # pwd; find runs
-    #   runAfter:
-    #     - train-model-cpu
-    #     - train-model-gpu
-    #   workspaces:
-    #     - name: source
-    #       workspace: source
-    #     - name: scratch
-    #       workspace: large-data
     - name: push-results
       taskRef:
         name: shell-script

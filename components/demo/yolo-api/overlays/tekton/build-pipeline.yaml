@@ -1,0 +1,78 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: build-model-images
+spec:
+  params:
+    - name: GIT_URL
+      default: https://github.com/redhat-na-ssa/flyingthings.git
+      description: url of the git repo for the code of deployment
+    - name: GIT_REVISION
+      default: develop
+      description: revision to be used from repo of the code for deployment
+    - name: GIT_CONTEXT
+      default: components/demo/yolo-api/container
+      description: dockerfile path
+    - name: IMAGE_REGISTRY
+      description: default image registry
+      default: image-registry.openshift-image-registry.svc:5000
+    - name: NAMESPACE
+      default: ml-demo
+      description: namespace
+  tasks:
+    - name: fetch-repository
+      params:
+        - name: url
+          value: $(params.GIT_URL)
+        - name: subdirectory
+          value: ''
+        - name: deleteExisting
+          value: 'true'
+        - name: revision
+          value: $(params.GIT_REVISION)
+        - name: verbose
+          value: 'false'
+      taskRef:
+        kind: ClusterTask
+        name: git-clone
+      workspaces:
+        - name: output
+          workspace: source
+    - name: build-python-custom
+      params:
+        - name: IMAGE
+          value: python-custom:latest
+        - name: DOCKERFILE
+          value: ./Dockerfile.python-custom
+        - name: CONTEXT
+          value: $(params.GIT_CONTEXT)
+        # - name: BUILDER_IMAGE
+        #   value: "$(params.IMAGE_REGISTRY)/openshift/python:3.9-ubi9"
+      runAfter:
+        - fetch-repository
+      taskRef:
+        kind: ClusterTask
+        name: buildah
+      workspaces:
+        - name: source
+          workspace: source
+    - name: build-yolo-api-source-ubi
+      params:
+        - name: VERSION
+          value: 3.9-ubi9
+        - name: PATH_CONTEXT
+          value: $(params.GIT_CONTEXT)/source
+        - name: IMAGE
+          value: 'yolo-api'
+        # - name: BUILDER_IMAGE
+        #   value: "$(params.IMAGE_REGISTRY)/openshift/python:3.9-ubi9"
+      runAfter:
+        - fetch-repository
+      taskRef:
+        kind: ClusterTask
+        name: s2i-python
+      workspaces:
+        - name: source
+          workspace: source
+  workspaces:
+    - name: source
