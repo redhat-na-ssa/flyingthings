@@ -50,7 +50,7 @@ spec:
 
         echo "Waiting up to ${TIMEOUT} for pod to run..."
 
-        oc wait \
+        time oc wait \
           pod/gpu-operator-test \
           --for=jsonpath='{.status.phase}'=Succeeded \
           --timeout="${TIMEOUT}"
