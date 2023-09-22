@@ -4,7 +4,7 @@ metadata:
   name: get-pretrained
 spec:
   params:
-    - name: WEIGHTS
+    - name:MODEL_WEIGHTS
       type: string
     - name: MODEL_BASE
       type: string

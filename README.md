@@ -198,7 +198,7 @@ tkn pipeline start train-model \
   -p NUM_EPOCHS="100" \
   -p IMG_RESIZE="Y" \
   -p MAX_WIDTH="200" \
-  -p WEIGHTS=flyingthings.pt \
+  -pMODEL_WEIGHTS=flyingthings.pt \
   -p DATASET_ZIP=flyingthings-yolo.zip \
   -p MINIO_ENDPOINT=http://minio:9000 \
   -p MINIO_ACCESSKEY=minioadmin \

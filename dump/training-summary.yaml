@@ -18,7 +18,7 @@ spec:
       type: string
     - name: MAX_WIDTH
       type: string
-    - name: WEIGHTS
+    - name:MODEL_WEIGHTS
       type: string
     - name: MODEL_BASE
       type: string
@@ -74,8 +74,8 @@ spec:
         value: $(params.IMG_RESIZE)
       - name: MAX_WIDTH
         value: $(params.MAX_WIDTH)
-      - name: WEIGHTS
-        value: $(params.WEIGHTS)
+      - name:MODEL_WEIGHTS
+        value: $(params.MODEL_WEIGHTS)
       - name: MODEL_BASE
         value: $(params.MODEL_BASE)
       - name: MINIO_ENDPOINT

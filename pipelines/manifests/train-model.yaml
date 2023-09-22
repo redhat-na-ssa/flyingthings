@@ -10,6 +10,9 @@ spec:
     - name: GIT_REVISION
       default: main
       description: revision to be used from repo of the code for deployment
+    - name: GPU_TIMEOUT
+      default: 12m
+      description: autoscaling gpu nodes in aws usually takes 10 min
     - name: NAMESPACE
       default: ml-demo
       description: namespace for the deployment
@@ -18,19 +21,16 @@ spec:
       default: "-1"
     - name: NUM_EPOCHS
       description: number of epochs for training
-      default: "10"
+      default: "100"
     - name: IMG_RESIZE
       description: flag to resize the source images before training
       default: "N"
     - name: MAX_WIDTH
       description: maximum width for images when resizing
       default: "200"
-    - name: WEIGHTS
+    - name:MODEL_WEIGHTS
       description: target weights file name
       default: flyingthings.pt
-    - name: MODEL_BASE
-      description: base model used to begin training
-      default: yolov5s.pt
     - name: MINIO_ENDPOINT
       description: endpoint of minio api
       default: http://minio:9000
@@ -52,6 +52,9 @@ spec:
     - name: UBI_IMAGE
       default: python-custom:latest
       description: base image for notebook
+    - name: MODEL_BASE
+      description: base model used to begin training
+      default: yolov5s.pt
     - name: MODEL_IMAGE
       default: yolo-api:latest
       description: model server image
@@ -61,9 +64,6 @@ spec:
     - name: MODEL_NAME
       default: model-custom
       description: name used to deploy the model and model server
-    - name: GPU_TIMEOUT
-      default: 12m
-      description: autoscaling gpu nodes in aws usually takes 10 min
   tasks:
     - name: fetch-repository
       params:
@@ -226,7 +226,7 @@ spec:
           value: |
             BATCH_SIZE=$(params.BATCH_SIZE)
             NUM_EPOCHS=$(params.NUM_EPOCHS)
-            WEIGHTS=$(params.WEIGHTS)
+           MODEL_WEIGHTS=$(params.MODEL_WEIGHTS)
             MODEL_BASE=$(params.MODEL_BASE)
       runAfter:
         - check-gpu
@@ -252,7 +252,7 @@ spec:
           value: |
             BATCH_SIZE=$(params.BATCH_SIZE)
             NUM_EPOCHS=$(params.NUM_EPOCHS)
-            WEIGHTS=$(params.WEIGHTS)
+           MODEL_WEIGHTS=$(params.MODEL_WEIGHTS)
             MODEL_BASE=$(params.MODEL_BASE)
 
             # cpu training is slow...
@@ -287,7 +287,7 @@ spec:
             MINIO_ACCESSKEY=$(params.MINIO_ACCESSKEY)
             MINIO_SECRETKEY=$(params.MINIO_SECRETKEY)
 
-            WEIGHTS=$(params.WEIGHTS)
+           MODEL_WEIGHTS=$(params.MODEL_WEIGHTS)
             MODEL_BASE=$(params.MODEL_BASE)
 
             cd $(workspaces.scratch.path)
@@ -374,7 +374,7 @@ spec:
             echo "NUM_EPOCHS: $(params.NUM_EPOCHS)"
             echo "IMG_RESIZE: $(params.IMG_RESIZE)"
             echo "MAX_WIDTH: $(params.MAX_WIDTH)"
-            echo "WEIGHTS: $(params.WEIGHTS)"
+            echo "WEIGHTS: $(params.MODEL_WEIGHTS)"
             echo "MODEL_BASE: $(params.MODEL_BASE)"
             echo "MINIO_ENDPOINT: $(params.MINIO_ENDPOINT)"
             echo "DATASET_ZIP: $(params.DATASET_ZIP)"
