@@ -20,9 +20,9 @@ MODEL_CLASSES=classes.yaml
 [ -d "${DATA_PATH}" ] || mkdir -p "${DATA_PATH}"
 pushd "${DATA_PATH}" || exit
 
-BIN_PATH=bin
+BIN_PATH=$(pwd)/bin
 [ -d "${BIN_PATH}" ] || mkdir -p "${BIN_PATH}"
-PATH=$(pwd)/bin:${PATH}
+PATH="${BIN_PATH}:${PATH}"
 
 
 download_mc(){
@@ -44,10 +44,7 @@ minio_copy(){
 }
 
 download_yolo_model(){
-  YOLOv5_VERSION="${YOLOv5_VERSION:-v7.0}"  
-
-  curl -L -o "${MODEL_WEIGHTS}" "https://github.com/ultralytics/yolov5/releases/download/${YOLOv5_VERSION}/yolov5s.pt"
-  curl -L -o "${MODEL_CLASSES}" "https://github.com/ultralytics/yolov5/raw/${YOLOv5_VERSION}/data/coco128.yaml"
+  yolov5 detect
 }
 
 load_model_from_minio(){
@@ -56,7 +53,7 @@ load_model_from_minio(){
   minio_setup_client
 
   # Get all model files from the latest training run
-  LATEST_MOD_FILES=$(./mc --insecure --config-dir "${MINIO_CFG}" find "${MINIO_REMOTE}/${MINIO_BUCKET}/models" --tags "training-run=latest")
+  LATEST_MOD_FILES=$("${BIN_PATH}/mc" --insecure --config-dir "${MINIO_CFG}" find "${MINIO_REMOTE}/${MINIO_BUCKET}/models" --tags "training-run=latest")
   echo "Latest model files: ${LATEST_MOD_FILES}"
   
   # Loop through the file list and check for the pytorch model file
@@ -77,8 +74,6 @@ load_model_from_minio(){
   [ -e "${MODEL_WEIGHTS}" ] || return 1
   [ -e "${MODEL_CLASSES}" ] || return 1
 
-  # minio_copy "${MINIO_REMOTE}/${MINIO_BUCKET}/pretrained/model_pretrained.pt" "${MODEL_WEIGHTS}"
-  # minio_copy "${MINIO_REMOTE}/${MINIO_BUCKET}/pretrained/model_pretrained_classes.yaml" "${MODEL_CLASSES}"
 }
 
 load_model(){
@@ -86,8 +81,14 @@ load_model(){
   if load_model_from_minio; then
     echo "model loaded from minio"
   else
-    cp /models/yolo*.pt "${MODEL_WEIGHTS}" || return 1
-    cp /models/*.yaml "${MODEL_CLASSES}" || return 1
+
+    SITE_PATH=$(python -m site | grep -v -E 'lib64|USER' | grep site-packages | sed "s/[ ,\']*//g")
+
+    export MODEL_WEIGHTS=yolov5s.pt
+    export MODEL_CLASSES="${SITE_PATH}/yolov5/data/coco128.yaml"
+
+    [ -e "${MODEL_WEIGHTS}" ] || download_yolo_model || return
+    [ -e "${MODEL_CLASSES}" ] || return
     echo "model loaded from container"
   fi
 }
