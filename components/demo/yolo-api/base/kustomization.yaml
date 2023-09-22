@@ -13,5 +13,6 @@ resources:
 - 1b-base-via-source-bc.yaml
 - 2a-base-via-docker-bc.yaml
 - 2b-add-ffmpeg-bc.yaml
-# - 4a-embed-model-s2i-bc.yaml
+- udi-custom.yaml
+# - 3a-embed-model-s2i-bc.yaml
 - is.yaml
