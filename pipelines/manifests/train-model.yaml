@@ -374,15 +374,15 @@ spec:
             echo "NUM_EPOCHS: $(params.NUM_EPOCHS)"
             echo "IMG_RESIZE: $(params.IMG_RESIZE)"
             echo "MAX_WIDTH: $(params.MAX_WIDTH)"
-            echo "WEIGHTS: $(params.MODEL_WEIGHTS)"
+            echo "MODEL_NAME: $(params.MODEL_NAME)"
             echo "MODEL_BASE: $(params.MODEL_BASE)"
+            echo "MODEL_WEIGHTS: $(params.MODEL_WEIGHTS)"
             echo "MINIO_ENDPOINT: $(params.MINIO_ENDPOINT)"
-            echo "DATASET_ZIP: $(params.DATASET_ZIP)"
             echo "MINIO_BUCKET: $(params.MINIO_BUCKET)"
             echo "MINIO_ACCESSKEY: $(params.MINIO_ACCESSKEY)"
             echo "MINIO_SECRETKEY: $(params.MINIO_SECRETKEY)"
+            echo "DATASET_ZIP: $(params.DATASET_ZIP)"
             echo "DEPLOY: $(params.DEPLOY)"
-            echo "MODEL_NAME: $(params.MODEL_NAME)"
   workspaces:
     - name: large-data
     - name: source
