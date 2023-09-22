@@ -34,7 +34,7 @@ start_pipelines(){
 
   check_pipeline train-model
   
-  if which takn; then
+  if which tkn; then
     tkn pipeline start "${PIPELINE_NAME}" \
       -p GIT_URL="${GIT_URL}" \
       -p GIT_REVISION="${GIT_REVISION}" \
@@ -48,7 +48,6 @@ start_pipelines(){
       -p DATASET_ZIP=flyingthings-yolo.zip \
       -p MODEL_NAME=model-flyingthings \
       -w name=source,volumeClaimTemplateFile=pvc.yaml \
-      -w name=large-data,volumeClaimTemplateFile=pvc.yaml \
       --use-param-defaults --showlog
   else
     oc create -f task-run.yaml

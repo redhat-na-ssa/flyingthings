@@ -148,8 +148,6 @@ spec:
       workspaces:
         - name: source
           workspace: source
-        - name: scratch
-          workspace: large-data
     - name: create-classfile
       taskRef:
         name: shell-script
@@ -166,8 +164,6 @@ spec:
       workspaces:
         - name: source
           workspace: source
-        - name: scratch
-          workspace: large-data
     - name: resize-image
       when:
         - input: "$(params.IMG_RESIZE)"
@@ -191,8 +187,6 @@ spec:
       workspaces:
         - name: source
           workspace: source
-        - name: scratch
-          workspace: large-data
     - name: distribute-dataset
       taskRef:
         name: shell-script
@@ -211,8 +205,6 @@ spec:
       workspaces:
         - name: source
           workspace: source
-        - name: scratch
-          workspace: large-data
     - name: train-model-gpu
       when:
         - input: "Succeeded"
@@ -236,8 +228,6 @@ spec:
       workspaces:
         - name: source
           workspace: source
-        - name: scratch
-          workspace: large-data
     - name: train-model-cpu
       when:
         - input: "Succeeded"
@@ -274,8 +264,6 @@ spec:
       workspaces:
         - name: source
           workspace: source
-        - name: scratch
-          workspace: large-data
     - name: push-results
       taskRef:
         name: shell-script
@@ -303,8 +291,6 @@ spec:
       workspaces:
         - name: source
           workspace: source
-        - name: scratch
-          workspace: large-data
     - name: deploy-model-x
       when:
         - input: "$(params.DEPLOY)"

@@ -146,7 +146,7 @@ download_yolo_model(){
 
 model_training(){
   YOLO_DIR="${YOLO_DIR:-/opt/app-root/lib/python3.9/site-packages/yolov5}"
-  TRAINING_DIR="${TRAINING_DIR:-/opt/app-root/lib/python3.9/site-packages/yolov5/training}"
+  TRAINING_DIR="${TRAINING_DIR:-${YOLO_DIR}/training}"
 
   # python debug
   # python -m site
@@ -179,7 +179,7 @@ images_resize(){
 
   # backup original images
   mv "${IMG_SRC}" "${IMG_SRC}-orig" && \
-  python3 "pipelines/scripts/images-resize.py" \
+  python3 "../pipelines/scripts/images-resize.py" \
     "${IMG_SRC}-orig" \
     "${IMG_SRC}" \
     "${IMG_WIDTH}"
