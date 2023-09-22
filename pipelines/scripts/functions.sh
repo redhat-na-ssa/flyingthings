@@ -187,7 +187,7 @@ images_resize(){
 
 images_distribute(){
   pushd datasets || return
-    python3 "pipelines/scripts/images-distribute.py"
+    python3 "../pipelines/scripts/images-distribute.py"
   popd || return
 }
 
