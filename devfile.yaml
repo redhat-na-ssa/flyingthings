@@ -5,10 +5,6 @@ metadata:
     metadata-name-original-value: flyingthings
   name: flyingthings
 attributes:
-  che-theia.eclipse.org/sidecar-policy: mergeImage
-  controller.devfile.io/devworkspace-config:
-    name: devworkspace-config
-    namespace: devspaces
   controller.devfile.io/scc: container-build
   controller.devfile.io/storage-type: per-user
   dw.metadata.annotations:
@@ -29,76 +25,64 @@ components:
       memoryLimit: 2Gi
     container:
       env:
-        - name: CHE_DASHBOARD_URL
-          value: https://devspaces.apps.ocpsno2.davenet.local
-        - name: CHE_PLUGIN_REGISTRY_URL
-          value: https://devspaces.apps.ocpsno2.davenet.local/plugin-registry/v3
-        - name: CHE_PLUGIN_REGISTRY_INTERNAL_URL
-          value: http://plugin-registry.devspaces.svc:8080/v3
-        - name: CLUSTER_CONSOLE_URL
-          value: https://console-openshift-console.apps.ocpsno2.davenet.local
-        - name: CLUSTER_CONSOLE_TITLE
-          value: OpenShift console
-        - name: OPENVSX_REGISTRY_URL
-          value: ''
-      image: registry.redhat.io/devspaces/udi-rhel8@sha256:a5a67003870daf10f941b0279a065358dd1ace6d40826462b91bae9868216eff
+        - name: PATH
+          value: /home/user/.local/bin:/home/user/.java/current/bin:/home/user/node_modules/.bin/:/home/user/.npm-global/bin/:/opt/app-root/src/.npm-global/bin/:/usr/share/maven/bin:/bin:/usr/bin"
+      image: registry.redhat.io/devspaces/udi-rhel8:latest
       sourceMapping: /projects
     name: universal-developer-image
-  - attributes:
-      controller.devfile.io/merge-contribution: false
-      deployment/nvidia.com/gpu: '1'
-    container:
-      memoryLimit: 6Gi
-      args:
-        - '-f'
-        - /dev/null
-      command:
-        - tail
-      env:
-        - name: BATCH_SIZE
-          value: '-1'
-        - name: NUM_EPOCHS
-          value: '10'
-        - name: IMG_RESIZE
-          value: 'N'
-        - name: IMG_WIDTH
-          value: '200'
-        - name: BASE_MODEL
-          value: yolov8n.pt
-        - name: DATASET_ZIP
-          value: flyingthings-yolo.zip
-        - name: MINIO_CLIENT_URL
-          value: util02.davenet.local
-        - name: WEIGHTS
-          value: flyingthings.pt
-        - name: BUILD_VER
-          value: '0.0'
-        - name: MODEL_CLASSES
-          value: flyingthings.yaml
-        - name: SIMPLEVIS_DATA
-          value: /opt/app-root/src/simplevis-data
-        - name: BASEDIR
-          value: /opt/app-root/src
-        - name: MINIO_ENDPOINT
-          value: http://minio:9000
-        - name: MINIO_BUCKET
-          value: flyingthings
-        - name: MINIO_ACCESSKEY
-          value: minioadmin
-        - name: MINIO_SECRETKEY
-          value: minioadmin
-        - name: CHE_DASHBOARD_URL
-          value: https://devspaces.apps.ocpsno2.davenet.local
-        - name: CHE_PLUGIN_REGISTRY_URL
-          value: https://devspaces.apps.ocpsno2.davenet.local/plugin-registry/v3
-        - name: CHE_PLUGIN_REGISTRY_INTERNAL_URL
-          value: http://plugin-registry.devspaces.svc:8080/v3
-        - name: CLUSTER_CONSOLE_URL
-          value: https://console-openshift-console.apps.ocpsno2.davenet.local
-        - name: CLUSTER_CONSOLE_TITLE
-          value: OpenShift console
-        - name: OPENVSX_REGISTRY_URL
-          value: ''
-      image: quay.io/dawhite20910/devspace-tkn:latest
-      sourceMapping: /projects
-    name: my-custom
+  # - attributes:
+  #     controller.devfile.io/merge-contribution: false
+  #     deployment/nvidia.com/gpu: '1'
+  #   container:
+  #     memoryLimit: 6Gi
+  #     args:
+  #       - '-f'
+  #       - /dev/null
+  #     command:
+  #       - tail
+  #     env:
+  #       - name: BATCH_SIZE
+  #         value: '-1'
+  #       - name: NUM_EPOCHS
+  #         value: '10'
+  #       - name: IMG_RESIZE
+  #         value: 'N'
+  #       - name: IMG_WIDTH
+  #         value: '200'
+  #       - name: MODEL_BASE
+  #         value: yolov8n.pt
+  #       - name: DATASET_ZIP
+  #         value: flyingthings-yolo.zip
+  #       - name: MODEL_WEIGHTS
+  #         value: flyingthings.pt
+  #       - name: BUILD_VER
+  #         value: '0.0'
+  #       - name: MODEL_CLASSES
+  #         value: flyingthings.yaml
+  #       - name: SIMPLEVIS_DATA
+  #         value: /opt/app-root/src/simplevis-data
+  #       - name: BASEDIR
+  #         value: /opt/app-root/src
+  #       - name: MINIO_ENDPOINT
+  #         value: http://minio:9000
+  #       - name: MINIO_BUCKET
+  #         value: flyingthings
+  #       - name: MINIO_ACCESSKEY
+  #         value: minioadmin
+  #       - name: MINIO_SECRETKEY
+  #         value: minioadmin
+  #       - name: CHE_DASHBOARD_URL
+  #         value: https://devspaces.apps.ocpsno2.davenet.local
+  #       - name: CHE_PLUGIN_REGISTRY_URL
+  #         value: https://devspaces.apps.ocpsno2.davenet.local/plugin-registry/v3
+  #       - name: CHE_PLUGIN_REGISTRY_INTERNAL_URL
+  #         value: http://plugin-registry.devspaces.svc:8080/v3
+  #       - name: CLUSTER_CONSOLE_URL
+  #         value: https://console-openshift-console.apps.ocpsno2.davenet.local
+  #       - name: CLUSTER_CONSOLE_TITLE
+  #         value: OpenShift console
+  #       - name: OPENVSX_REGISTRY_URL
+  #         value: ''
+  #     image: quay.io/dawhite20910/devspace-tkn:latest
+  #     sourceMapping: /projects
+  #   name: my-custom
