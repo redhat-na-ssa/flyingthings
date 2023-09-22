@@ -46,7 +46,6 @@ spec:
         spec:
           accessModes:
             - ReadWriteOnce
-            - ReadWriteMany
           resources:
             requests:
               storage: 2Gi
@@ -59,7 +58,6 @@ spec:
         spec:
           accessModes:
             - ReadWriteOnce
-            - ReadWriteMany
           resources:
             requests:
               storage: 2Gi
