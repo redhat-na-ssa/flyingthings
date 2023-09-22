@@ -1,6 +1,8 @@
 #!/bin/bash
 # set -x
 
+# kludges: everywhere
+
 MINIO_CFG="${MINIO_CFG:-.mc}"
 MINIO_REMOTE="${MINIO_REMOTE:-remote}"
 MINIO_ENDPOINT="${MINIO_ENDPOINT:-http://minio:9000}"
