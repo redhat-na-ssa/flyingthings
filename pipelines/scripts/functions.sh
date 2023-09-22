@@ -179,7 +179,7 @@ images_resize(){
 
   # backup original images
   mv "${IMG_SRC}" "${IMG_SRC}-orig" && \
-  python3 "../pipelines/scripts/images-resize.py" \
+  python3 "/source/pipelines/scripts/images-resize.py" \
     "${IMG_SRC}-orig" \
     "${IMG_SRC}" \
     "${IMG_WIDTH}"
@@ -187,7 +187,7 @@ images_resize(){
 
 images_distribute(){
   pushd datasets || return
-    python3 "../pipelines/scripts/images-distribute.py"
+    python3 "/source/pipelines/scripts/images-distribute.py"
   popd || return
 }
 
