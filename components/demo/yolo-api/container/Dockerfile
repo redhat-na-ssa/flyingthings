@@ -33,12 +33,13 @@ ENV PIP_NO_CACHE_DIR=1
 
 COPY source/requirements.txt ./
 
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt && \
+    yolov5 detect
 
 COPY source/app.py source/app.sh ./
 
-VOLUME /models
-
 USER 1001
+
+VOLUME /models
 
 CMD ["/opt/app-root/src/app.sh"]
