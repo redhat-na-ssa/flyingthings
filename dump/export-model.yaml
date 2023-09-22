@@ -6,7 +6,7 @@ spec:
   params:
     - name: WEIGHTS
       type: string
-    - name: BASE_MODEL
+    - name: MODEL_BASE
       type: string
     - name: NAMESPACE
       type: string
@@ -26,8 +26,8 @@ spec:
       env:
         - name: WEIGHTS
           value: $(params.WEIGHTS)
-        - name: BASE_MODEL
-          value: $(params.BASE_MODEL)
+        - name: MODEL_BASE
+          value: $(params.MODEL_BASE)
   workspaces:
     - name: workspace
       mountPath: /opt/app-root/src/simplevis-data/workspace

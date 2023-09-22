@@ -34,22 +34,25 @@ start_pipelines(){
 
   check_pipeline train-model
   
-  tkn pipeline start "${PIPELINE_NAME}" \
-    -p GIT_URL="${GIT_URL}" \
-    -p GIT_REVISION="${GIT_REVISION}" \
-    -p NAMESPACE="${NAMESPACE}" \
-    -p BASE_MODEL="yolov5s.pt" \
-    -p BATCH_SIZE="-1" \
-    -p NUM_EPOCHS="100" \
-    -p GPU_TIMEOUT="12m" \
-    -p IMG_RESIZE="Y" \
-    -p MAX_WIDTH="200" \
-    -p DATASET_ZIP=flyingthings-yolo.zip \
-    -p MODEL_NAME=model-flyingthings \
-    -w name=source,volumeClaimTemplateFile=pvc.yaml \
-    -w name=large-data,volumeClaimTemplateFile=pvc.yaml \
-    --use-param-defaults --showlog
-
+  if which takn; then
+    tkn pipeline start "${PIPELINE_NAME}" \
+      -p GIT_URL="${GIT_URL}" \
+      -p GIT_REVISION="${GIT_REVISION}" \
+      -p NAMESPACE="${NAMESPACE}" \
+      -p MODEL_BASE="yolov5s.pt" \
+      -p BATCH_SIZE="-1" \
+      -p NUM_EPOCHS="100" \
+      -p GPU_TIMEOUT="12m" \
+      -p IMG_RESIZE="Y" \
+      -p MAX_WIDTH="200" \
+      -p DATASET_ZIP=flyingthings-yolo.zip \
+      -p MODEL_NAME=model-flyingthings \
+      -w name=source,volumeClaimTemplateFile=pvc.yaml \
+      -w name=large-data,volumeClaimTemplateFile=pvc.yaml \
+      --use-param-defaults --showlog
+  else
+    oc create -f task-run.yaml
+  fi
 }
 
 start_pipelines

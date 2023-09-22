@@ -46,7 +46,7 @@ spec:
     - name: NUM_EPOCHS
       default: "3"
       description: ""
-    - name: BASE_MODEL
+    - name: MODEL_BASE
       default: "yolov5s.pt"
       description: ""
     - name: MINIO_ENDPOINT
@@ -162,7 +162,7 @@ spec:
             MINIO_BUCKET=$(params.MINIO_BUCKET)
             MINIO_ACCESSKEY=$(params.MINIO_ACCESSKEY)
             MINIO_SECRETKEY=$(params.MINIO_SECRETKEY)
-            BASE_MODEL=$(params.BASE_MODEL)
+            MODEL_BASE=$(params.MODEL_BASE)
 
             source $(workspaces.source.path)/pipelines/scripts/functions.sh && \
             download_yolo_model && \
@@ -209,7 +209,7 @@ spec:
             --env=MINIO_BUCKET=$(params.MINIO_BUCKET) \
             --env=MINIO_ACCESSKEY=$(params.MINIO_ACCESSKEY) \
             --env=MINIO_SECRETKEY=$(params.MINIO_SECRETKEY) \
-            --env=BASE_MODEL=$(params.BASE_MODEL)
+            --env=MODEL_BASE=$(params.MODEL_BASE)
 
           oc apply -f - <<EOF
           apiVersion: route.openshift.io/v1

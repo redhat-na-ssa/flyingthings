@@ -9,8 +9,10 @@ I've created a video series explaining the workshop and a runthrough of the setu
 ## Quickstart
 
 ```
+# cluster tasks
 scripts/bootstrap.sh
 
+# namespace tasks
 scripts/00-setup-components.sh
 scripts/01-setup-pipelines.sh
 scripts/02-run-train-model.sh
@@ -191,7 +193,7 @@ tkn pipeline start train-model \
   -w name=shared-workspace,volumeClaimTemplateFile=pvc.yaml \
   -p GIT_URL=https://github.com/redhat-na-ssa/flyingthings.git \
   -p GIT_REVISION=main \
-  -p BASE_MODEL="yolov5s.pt" \
+  -p MODEL_BASE="yolov5s.pt" \
   -p BATCH_SIZE="-1" \
   -p NUM_EPOCHS="100" \
   -p IMG_RESIZE="Y" \

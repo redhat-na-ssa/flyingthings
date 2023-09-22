@@ -20,7 +20,7 @@ spec:
       type: string
     - name: WEIGHTS
       type: string
-    - name: BASE_MODEL
+    - name: MODEL_BASE
       type: string
     - name: MINIO_ENDPOINT
       type: string
@@ -50,7 +50,7 @@ spec:
         && echo "IMG_RESIZE: $IMG_RESIZE" \
         && echo "MAX_WIDTH: $MAX_WIDTH" \
         && echo "WEIGHTS: $WEIGHTS" \
-        && echo "BASE_MODEL: $BASE_MODEL" \
+        && echo "MODEL_BASE: $MODEL_BASE" \
         && echo "MINIO_ENDPOINT: $MINIO_ENDPOINT" \
         && echo "DATASET_ZIP: $DATASET_ZIP" \
         && echo "SIMPLEVIS_DATA: $SIMPLEVIS_DATA" \
@@ -76,8 +76,8 @@ spec:
         value: $(params.MAX_WIDTH)
       - name: WEIGHTS
         value: $(params.WEIGHTS)
-      - name: BASE_MODEL
-        value: $(params.BASE_MODEL)
+      - name: MODEL_BASE
+        value: $(params.MODEL_BASE)
       - name: MINIO_ENDPOINT
         value: $(params.MINIO_ENDPOINT)
       - name: DATASET_ZIP

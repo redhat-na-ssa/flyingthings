@@ -6,7 +6,7 @@ spec:
   params:
     - name: WEIGHTS
       type: string
-    - name: BASE_MODEL
+    - name: MODEL_BASE
       type: string
     - name: MINIO_ENDPOINT
       type: string
@@ -40,8 +40,8 @@ spec:
           value: $(params.MINIO_ENDPOINT)
         - name: BASEDIR
           value: $(workspaces.source.path)/pipelines/scripts
-        - name: BASE_MODEL
-          value: $(params.BASE_MODEL)
+        - name: MODEL_BASE
+          value: $(params.MODEL_BASE)
         - name: MINIO_ACCESSKEY
           value: $(params.MINIO_ACCESSKEY)
         - name: MINIO_SECRETKEY

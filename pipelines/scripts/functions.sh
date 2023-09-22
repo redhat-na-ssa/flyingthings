@@ -123,19 +123,19 @@ minio_get_dataset(){
 }
 
 minio_copy_yolo_model(){
-  minio_copy "${BASE_MODEL}" "${MINIO_REMOTE}/${MINIO_BUCKET}/pretrained/model_pretrained.pt"
+  minio_copy "${MODEL_BASE}" "${MINIO_REMOTE}/${MINIO_BUCKET}/pretrained/model_pretrained.pt"
   minio_copy coco128.yaml "${MINIO_REMOTE}/${MINIO_BUCKET}/pretrained/model_pretrained_classes.yaml"
 }
 
 download_yolo_model(){
   YOLOv5_VERSION="${YOLOv5_VERSION:-v7.0}"  
-  BASE_MODEL="${BASE_MODEL:-yolov5s.pt}"
+  MODEL_BASE="${MODEL_BASE:-yolov5s.pt}"
 
-  curl -s -LO "https://github.com/ultralytics/yolov5/releases/download/${YOLOv5_VERSION}/${BASE_MODEL}"
+  curl -s -LO "https://github.com/ultralytics/yolov5/releases/download/${YOLOv5_VERSION}/${MODEL_BASE}"
   curl -s -LO "https://github.com/ultralytics/yolov5/raw/${YOLOv5_VERSION}/data/coco128.yaml"
 
   [ -d source/model/scratch ] || mkdir -p source/model/scratch
-  cp "${BASE_MODEL}" source/model/scratch
+  cp "${MODEL_BASE}" source/model/scratch
   cp coco128.yaml source/model/scratch
 }
 
@@ -151,12 +151,12 @@ model_training(){
 
   # yolov8
   # yolo checks && \
-  # yolo train model=$BASE_MODEL batch=$BATCH_SIZE epochs=$NUM_EPOCHS data=classes.yaml project=runs exist_ok=True
+  # yolo train model=$MODEL_BASE batch=$BATCH_SIZE epochs=$NUM_EPOCHS data=classes.yaml project=runs exist_ok=True
   
   # yologv5
   yolov5 train \
     --source "${DATA_PATH:-datasets/training}" \
-    --weights "${BASE_MODEL:-yolov5s.pt}" \
+    --weights "${MODEL_BASE:-yolov5s.pt}" \
     --epochs "${NUM_EPOCHS:-2}" \
     --batch-size "${BATCH_SIZE:--1}" \
     --data "${MODEL_FILE:-classes.yaml}" \

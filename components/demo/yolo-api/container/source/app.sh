@@ -11,7 +11,7 @@ MINIO_BUCKET="${MINIO_BUCKET:-flyingthings}"
 
 DATA_PATH="${DATA_PATH:-scratch}"
 
-BASE_MODEL="${BASE_MODEL:-yolov5s.pt}"
+MODEL_BASE="${MODEL_BASE:-yolov5s.pt}"
 
 MODEL_WEIGHTS=weights.pt
 MODEL_CLASSES=classes.yaml

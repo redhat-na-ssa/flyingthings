@@ -28,7 +28,7 @@ spec:
     - name: WEIGHTS
       description: target weights file name
       default: flyingthings.pt
-    - name: BASE_MODEL
+    - name: MODEL_BASE
       description: base model used to begin training
       default: yolov5s.pt
     - name: MINIO_ENDPOINT
@@ -227,7 +227,7 @@ spec:
             BATCH_SIZE=$(params.BATCH_SIZE)
             NUM_EPOCHS=$(params.NUM_EPOCHS)
             WEIGHTS=$(params.WEIGHTS)
-            BASE_MODEL=$(params.BASE_MODEL)
+            MODEL_BASE=$(params.MODEL_BASE)
       runAfter:
         - check-gpu
         - distribute-dataset
@@ -253,7 +253,7 @@ spec:
             BATCH_SIZE=$(params.BATCH_SIZE)
             NUM_EPOCHS=$(params.NUM_EPOCHS)
             WEIGHTS=$(params.WEIGHTS)
-            BASE_MODEL=$(params.BASE_MODEL)
+            MODEL_BASE=$(params.MODEL_BASE)
 
             # cpu training is slow...
             [ "${NUM_EPOCHS}" -gt "10" ] && NUM_EPOCHS=10
@@ -288,7 +288,7 @@ spec:
             MINIO_SECRETKEY=$(params.MINIO_SECRETKEY)
 
             WEIGHTS=$(params.WEIGHTS)
-            BASE_MODEL=$(params.BASE_MODEL)
+            MODEL_BASE=$(params.MODEL_BASE)
 
             cd $(workspaces.scratch.path)
 
@@ -375,7 +375,7 @@ spec:
             echo "IMG_RESIZE: $(params.IMG_RESIZE)"
             echo "MAX_WIDTH: $(params.MAX_WIDTH)"
             echo "WEIGHTS: $(params.WEIGHTS)"
-            echo "BASE_MODEL: $(params.BASE_MODEL)"
+            echo "MODEL_BASE: $(params.MODEL_BASE)"
             echo "MINIO_ENDPOINT: $(params.MINIO_ENDPOINT)"
             echo "DATASET_ZIP: $(params.DATASET_ZIP)"
             echo "MINIO_BUCKET: $(params.MINIO_BUCKET)"
