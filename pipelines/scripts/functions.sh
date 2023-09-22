@@ -1,7 +1,6 @@
 #!/bin/bash
 # set -x
 
-MINIO_CLIENT_URL="${MINIO_CLIENT_URL:-https://dl.min.io/client/mc/release/linux-amd64}"
 MINIO_CFG="${MINIO_CFG:-.mc}"
 MINIO_REMOTE="${MINIO_REMOTE:-remote}"
 MINIO_ENDPOINT="${MINIO_ENDPOINT:-http://minio:9000}"
@@ -9,19 +8,25 @@ MINIO_ACCESSKEY="${MINIO_ACCESSKEY:-minioadmin}"
 MINIO_SECRETKEY="${MINIO_SECRETKEY:-minioadmin}"
 MINIO_BUCKET="${MINIO_BUCKET:-project}"
 
-SOURCE_DIR="${SOURCE_DIR:-/source}"
+SCRATCH_DIR="${SCRATCH_DIR:-scratch}"
+BIN_DIR="${SCRATCH_DIR}/bin"
 
-BIN_PATH=bin
-[ -d "${BIN_PATH}" ] || mkdir -p "${BIN_PATH}"
-PATH=$(pwd)/bin:${PATH}
+[ -d "${BIN_DIR}" ] || mkdir -p "${BIN_DIR}"
+PATH="${BIN_DIR}:${PATH}"
+
+cd_to_scratch(){
+  [ -d "${SCRATCH_DIR}" ] || mkdir -p "${SCRATCH_DIR}"
+  pushd "${SCRATCH_DIR}" || return
+}
 
 download_mc(){
-  curl -s -L "${MINIO_CLIENT_URL}/mc" -o ./bin/mc
-  chmod +x ./bin/mc
+  MINIO_CLIENT_URL="${MINIO_CLIENT_URL:-https://dl.min.io/client/mc/release/linux-amd64}"
+  curl -s -L "${MINIO_CLIENT_URL}/mc" -o "${BIN_DIR}/mc"
+  chmod +x "${BIN_DIR}/mc"
 }
 
 minio_setup_client(){
-  which mc 2>/dev/null || download_mc
+  which mc 2>/dev/null || download_mc || exit 0
   mc --insecure --config-dir "${MINIO_CFG}" config host \
     add "${MINIO_REMOTE}" "${MINIO_ENDPOINT}" "${MINIO_ACCESSKEY}" "${MINIO_SECRETKEY}"
 }
@@ -140,14 +145,14 @@ download_yolo_model(){
 }
 
 model_training(){
-  YOLO_PATH="${YOLO_PATH:-/opt/app-root/lib/python3.9/site-packages/yolov5}"
-  TRAINING_PATH="${TRAINING_PATH:-/opt/app-root/lib/python3.9/site-packages/yolov5/training}"
+  YOLO_DIR="${YOLO_DIR:-/opt/app-root/lib/python3.9/site-packages/yolov5}"
+  TRAINING_DIR="${TRAINING_DIR:-/opt/app-root/lib/python3.9/site-packages/yolov5/training}"
 
   # python debug
   # python -m site
 
-  [ -d "${TRAINING_PATH}" ] || mkdir -p "${TRAINING_PATH}"
-  cp -R datasets/training/* "${TRAINING_PATH}/"
+  [ -d "${TRAINING_DIR}" ] || mkdir -p "${TRAINING_DIR}"
+  cp -R datasets/training/* "${TRAINING_DIR}/"
 
   # yolov8
   # yolo checks && \
@@ -155,7 +160,7 @@ model_training(){
   
   # yologv5
   yolov5 train \
-    --source "${DATA_PATH:-datasets/training}" \
+    --source "${DATA_DIR:-datasets/training}" \
     --weights "${MODEL_BASE:-yolov5s.pt}" \
     --epochs "${NUM_EPOCHS:-2}" \
     --batch-size "${BATCH_SIZE:--1}" \
@@ -164,7 +169,7 @@ model_training(){
     --img 640
 
   # yolo export model=runs/train/weights/best.pt format=onnx
-  python3 "${YOLO_PATH}/export.py" --weights runs/exp/weights/best.pt --include onnx
+  python3 "${YOLO_DIR}/export.py" --weights runs/exp/weights/best.pt --include onnx
 
 }
 
@@ -174,7 +179,7 @@ images_resize(){
 
   # backup original images
   mv "${IMG_SRC}" "${IMG_SRC}-orig" && \
-  python3 "${SOURCE_DIR}/pipelines/scripts/images-resize.py" \
+  python3 "pipelines/scripts/images-resize.py" \
     "${IMG_SRC}-orig" \
     "${IMG_SRC}" \
     "${IMG_WIDTH}"
@@ -182,7 +187,7 @@ images_resize(){
 
 images_distribute(){
   pushd datasets || return
-    python3 "${SOURCE_DIR}/pipelines/scripts/images-distribute.py"
+    python3 "pipelines/scripts/images-distribute.py"
   popd || return
 }
 

@@ -12,7 +12,6 @@ spec:
       type: string
       default: |
         pwd && ls -l && id
-        echo "SOURCE_DIR: ${SOURCE_DIR}" && ls -l "${SOURCE_DIR}"
         date | tee $(results.output.path)
     - name: IMAGE
       description: The image used to run the script

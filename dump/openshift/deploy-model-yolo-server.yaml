@@ -20,7 +20,7 @@ spec:
             - containerPort: 8000
               protocol: TCP
           env:
-            - name:MODEL_WEIGHTS
+            - name: MODEL_WEIGHTS
               value: model_pretrained.pt
             - name: BUILD_VER
               value: "0.0"

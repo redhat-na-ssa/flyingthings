@@ -28,7 +28,7 @@ spec:
     - name: MAX_WIDTH
       description: maximum width for images when resizing
       default: "200"
-    - name:MODEL_WEIGHTS
+    - name: MODEL_WEIGHTS
       description: target weights file name
       default: flyingthings.pt
     - name: MINIO_ENDPOINT
@@ -138,12 +138,10 @@ spec:
             MINIO_SECRETKEY=$(params.MINIO_SECRETKEY)
             DATASET_ZIP=$(params.DATASET_ZIP)
 
-            cd $(workspaces.scratch.path)
-
-            SOURCE_DIR=$(workspaces.source.path)
-            BASEDIR=${SOURCE_DIR}/pipelines/scripts
+            cd $(workspaces.source.path)
 
             source $(workspaces.source.path)/pipelines/scripts/functions.sh && \
+            cd_to_scratch && \
             minio_get_dataset
       runAfter:
         - upload-artifacts
@@ -158,8 +156,10 @@ spec:
       params:
         - name: SCRIPT
           value: |
-            cd $(workspaces.scratch.path)
+            cd $(workspaces.source.path)
 
+            source $(workspaces.source.path)/pipelines/scripts/functions.sh && \
+            cd_to_scratch && \
             $(workspaces.source.path)/pipelines/scripts/create-classfile.sh
       runAfter:
         - get-dataset
@@ -180,9 +180,10 @@ spec:
           value: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/$(params.UBI_IMAGE)
         - name: SCRIPT
           value: |
-            cd $(workspaces.scratch.path)
+            cd $(workspaces.source.path)
 
             source $(workspaces.source.path)/pipelines/scripts/functions.sh && \
+            cd_to_scratch && \
             images_resize datasets/images $(params.MAX_WIDTH)
 
       runAfter:
@@ -200,9 +201,10 @@ spec:
           value: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/$(params.UBI_IMAGE)
         - name: SCRIPT
           value: |
-            cd $(workspaces.scratch.path)
+            cd $(workspaces.source.path)
 
             source $(workspaces.source.path)/pipelines/scripts/functions.sh && \
+            cd_to_scratch && \
             images_distribute
       runAfter:
         - resize-image
@@ -226,7 +228,7 @@ spec:
           value: |
             BATCH_SIZE=$(params.BATCH_SIZE)
             NUM_EPOCHS=$(params.NUM_EPOCHS)
-           MODEL_WEIGHTS=$(params.MODEL_WEIGHTS)
+            MODEL_WEIGHTS=$(params.MODEL_WEIGHTS)
             MODEL_BASE=$(params.MODEL_BASE)
       runAfter:
         - check-gpu
@@ -252,8 +254,8 @@ spec:
           value: |
             BATCH_SIZE=$(params.BATCH_SIZE)
             NUM_EPOCHS=$(params.NUM_EPOCHS)
-           MODEL_WEIGHTS=$(params.MODEL_WEIGHTS)
             MODEL_BASE=$(params.MODEL_BASE)
+            MODEL_WEIGHTS=$(params.MODEL_WEIGHTS)
 
             # cpu training is slow...
             [ "${NUM_EPOCHS}" -gt "10" ] && NUM_EPOCHS=10
@@ -287,12 +289,13 @@ spec:
             MINIO_ACCESSKEY=$(params.MINIO_ACCESSKEY)
             MINIO_SECRETKEY=$(params.MINIO_SECRETKEY)
 
-           MODEL_WEIGHTS=$(params.MODEL_WEIGHTS)
             MODEL_BASE=$(params.MODEL_BASE)
+            MODEL_WEIGHTS=$(params.MODEL_WEIGHTS)
 
-            cd $(workspaces.scratch.path)
+            cd $(workspaces.source.path)
 
             source $(workspaces.source.path)/pipelines/scripts/functions.sh && \
+            cd_to_scratch && \
             minio_push_results
       runAfter:
         - train-model-cpu
@@ -384,5 +387,4 @@ spec:
             echo "DATASET_ZIP: $(params.DATASET_ZIP)"
             echo "DEPLOY: $(params.DEPLOY)"
   workspaces:
-    - name: large-data
     - name: source

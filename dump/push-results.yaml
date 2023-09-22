@@ -4,7 +4,7 @@ metadata:
   name: push-results
 spec:
   params:
-    - name:MODEL_WEIGHTS
+    - name: MODEL_WEIGHTS
       type: string
     - name: MINIO_ENDPOINT
       type: string
@@ -33,7 +33,7 @@ spec:
 
         pwd && ls -al
       env:
-        - name:MODEL_WEIGHTS
+        - name: MODEL_WEIGHTS
           value: $(params.MODEL_WEIGHTS)
         - name: MINIO_ENDPOINT
           value: $(params.MINIO_ENDPOINT)

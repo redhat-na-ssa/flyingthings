@@ -4,7 +4,7 @@ metadata:
   name: export-model
 spec:
   params:
-    - name:MODEL_WEIGHTS
+    - name: MODEL_WEIGHTS
       type: string
     - name: MODEL_BASE
       type: string
@@ -24,7 +24,7 @@ spec:
 
         pwd && ls -al
       env:
-        - name:MODEL_WEIGHTS
+        - name: MODEL_WEIGHTS
           value: $(params.MODEL_WEIGHTS)
         - name: MODEL_BASE
           value: $(params.MODEL_BASE)
