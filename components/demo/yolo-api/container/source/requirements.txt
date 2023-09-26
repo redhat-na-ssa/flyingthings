@@ -7,3 +7,4 @@ uvicorn
 yolov5==7.0.*
 onnx
 Pillow==9.5.*
+ultralytics==8.0.180
