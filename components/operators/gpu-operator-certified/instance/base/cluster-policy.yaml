@@ -53,7 +53,7 @@ spec:
   devicePlugin:
     enabled: true
     config:
-      name: 'device-plugin-config'
+      name: ''
       default: ''
   gfd:
     enabled: true

@@ -141,14 +141,14 @@ setup_operator_nfd(){
   # setup nfd operator
   oc apply -k components/operators/nfd/operator/overlays/stable
   wait_for_crd nodefeaturediscoveries.nfd.openshift.io
-  oc apply -k components/operators/nfd/instance/overlays/default
+  oc apply -k components/operators/nfd/instance/overlays/only-nvidia
 }
 
 setup_operator_nvidia(){
   # setup nvidia gpu operator
   oc apply -k components/operators/gpu-operator-certified/operator/overlays/stable
   wait_for_crd clusterpolicies.nvidia.com
-  oc apply -k components/operators/gpu-operator-certified/instance/overlays/default
+  oc apply -k components/operators/gpu-operator-certified/instance/overlays/time-slicing
 }
 
 setup_operator_pipelines(){

@@ -3,20 +3,17 @@ apiVersion: nfd.openshift.io/v1
 metadata:
   name: nfd-instance
 spec:
-  # customConfig:
-  #   configData: |
-  #     #    - name: "more.kernel.features"
-  #     #      matchOn:
-  #     #      - loadedKMod: ["example_kmod3"]
-  #     #    - name: "more.features.by.nodename"
-  #     #      value: customValue
-  #     #      matchOn:
-  #     #      - nodename: ["special-.*-node-.*"]
+  customConfig:
+    configData: |
+      #    - name: "more.kernel.features"
+      #      matchOn:
+      #      - loadedKMod: ["example_kmod3"]
+      #    - name: "more.features.by.nodename"
+      #      value: customValue
+      #      matchOn:
+      #      - nodename: ["special-.*-node-.*"]
   operand:
-    # bug: an image has to be defined otherwise the deployment fails
-    # bug: this behavior recently changed
-    image: >-
-      registry.redhat.io/openshift4/ose-node-feature-discovery@sha256:91f0305a203c404a0426b8c4ff4d7cce49b901f017604805e2b47967573d559d
+    image: registry.redhat.io/openshift4/ose-node-feature-discovery:latest
     servicePort: 12000
   workerConfig:
     configData: |
@@ -34,7 +31,7 @@ spec:
       #    stderrthreshold: 2
       #    v: 0
       #    vmodule:
-      ##   NOTE: the following options are not dynamically run-time
+      ##   NOTE: the following options are not dynamically run-time 
       ##          configurable and require a nfd-worker restart to take effect
       ##          after being changed
       #    logDir:
