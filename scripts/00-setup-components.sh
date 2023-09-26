@@ -2,7 +2,7 @@
 
 check_namespace(){
   DEFAULT_NAMESPACE=ml-demo
-  NAMESPACE=${1:-$(oc project -q 2>/dev/null || echo "${DEFAULT_NAMESPACE}")}
+  NAMESPACE=${1:-${DEFAULT_NAMESPACE}}
   
   echo "Deploying in NAMESPACE: ${NAMESPACE}"
   echo ""
