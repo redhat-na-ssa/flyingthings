@@ -16,11 +16,11 @@ BIN_DIR="${SCRATCH_DIR}/bin"
 UMASK=007
 
 create_bin(){
-  [ -d "${BIN_DIR}" ] || mkdir -p "${BIN_DIR}"
+  mkdir -p "${BIN_DIR}"
   chmod g+w "${SCRATCH_DIR}" "${BIN_DIR}"
 }
-create_bin
 
+[ -d "${BIN_DIR}" ] || create_bin
 PATH="${BIN_DIR}:${PATH}"
 
 cd_to_scratch(){
