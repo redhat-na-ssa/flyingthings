@@ -35,7 +35,7 @@ download_mc(){
 }
 
 minio_setup_client(){
-  which mc 2>/dev/null || download_mc || exit 0
+  which mc 2>/dev/null || download_mc || return
   mc --insecure --config-dir "${MINIO_CFG}" config host \
     add "${MINIO_REMOTE}" "${MINIO_ENDPOINT}" "${MINIO_ACCESSKEY}" "${MINIO_SECRETKEY}"
   chmod g+rwx "${MINIO_CFG}"
@@ -70,6 +70,7 @@ copy_artifacts(){
 }
 
 push_results(){
+  set -x
   echo "*************** Training Run Results*************************"
   cat runs/exp/results.csv
   echo "************************************************************"
