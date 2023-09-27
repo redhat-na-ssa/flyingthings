@@ -26,7 +26,7 @@ create_classes_yaml(){
   create_names_array
   create_json_array
 
-cat > classes.yaml <<YAML
+cat > ../classes.yaml <<YAML
 path: training
 train: train/images
 val: valid/images
@@ -36,8 +36,7 @@ nc: ${NC}
 names: ${NAMES}
 YAML
 
-cat classes.yaml && \
-mv classes.yaml ../
+cat ../classes.yaml
 
 }
 
