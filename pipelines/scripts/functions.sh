@@ -13,25 +13,31 @@ MINIO_BUCKET="${MINIO_BUCKET:-project}"
 SCRATCH_DIR="${SCRATCH_DIR:-scratch}"
 BIN_DIR="${SCRATCH_DIR}/bin"
 
-# [ -d "${BIN_DIR}" ] || mkdir -p "${BIN_DIR}"
+UMASK=007
+
+create_bin(){
+  [ -d "${BIN_DIR}" ] || mkdir -p "${BIN_DIR}"
+  chmod g+w -R "${SCRATCH_DIR}"
+}
+create_bin
+
 PATH="${BIN_DIR}:${PATH}"
 
 cd_to_scratch(){
-  [ -d "${SCRATCH_DIR}" ] || mkdir -p "${SCRATCH_DIR}"
-  chmod g+w "${SCRATCH_DIR}"
   pushd "${SCRATCH_DIR}" || return
 }
 
 download_mc(){
   MINIO_CLIENT_URL="${MINIO_CLIENT_URL:-https://dl.min.io/client/mc/release/linux-amd64}"
-  curl -s -L "${MINIO_CLIENT_URL}/mc" -o "${BIN_DIR}/mc"
-  chmod +x "${BIN_DIR}/mc"
+  curl -s -L "${MINIO_CLIENT_URL}/mc" -o "${BIN_DIR}/mc" && \
+    chmod +x "${BIN_DIR}/mc"
 }
 
 minio_setup_client(){
   which mc 2>/dev/null || download_mc || exit 0
   mc --insecure --config-dir "${MINIO_CFG}" config host \
     add "${MINIO_REMOTE}" "${MINIO_ENDPOINT}" "${MINIO_ACCESSKEY}" "${MINIO_SECRETKEY}"
+  chmod g+w "${MINIO_CFG}"
 }
 
 minio_create_bucket(){
