@@ -70,11 +70,10 @@ copy_artifacts(){
 }
 
 push_results(){
-  umask
   echo "*************** Training Run Results*************************"
   cat runs/exp/results.csv
   echo "************************************************************"
-  tar vzcf runs/training-results.tgz runs/exp/
+  tar vzcf training-results.tgz runs/exp/
   ls -l ../
 
   minio_setup_client
@@ -116,7 +115,7 @@ push_results(){
 
   # Push the results to minio
   # Push the training results to a training run folder
-  minio_copy "runs/training-results.tgz" "${MINIO_REMOTE}/${MINIO_BUCKET}/training-run-${CURRENT_RUN}/training-results.tgz"
+  minio_copy "training-results.tgz" "${MINIO_REMOTE}/${MINIO_BUCKET}/training-run-${CURRENT_RUN}/training-results.tgz"
   minio_copy "runs/exp/weights/best.pt" "${MINIO_REMOTE}/${MINIO_BUCKET}/training-run-${CURRENT_RUN}/${WEIGHTS}"
 
   # Push the latest model files to the root of the bucket
