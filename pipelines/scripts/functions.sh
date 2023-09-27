@@ -13,7 +13,8 @@ MINIO_BUCKET="${MINIO_BUCKET:-project}"
 SCRATCH_DIR="${SCRATCH_DIR:-scratch}"
 BIN_DIR="${SCRATCH_DIR}/bin"
 
-UMASK=007
+# kludge due to different storage types
+export UMASK=0002
 
 create_bin(){
   mkdir -p "${BIN_DIR}"
@@ -69,6 +70,7 @@ copy_artifacts(){
 }
 
 push_results(){
+  umask
   echo "*************** Training Run Results*************************"
   cat runs/exp/results.csv
   echo "************************************************************"
