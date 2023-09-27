@@ -17,7 +17,7 @@ UMASK=007
 
 create_bin(){
   [ -d "${BIN_DIR}" ] || mkdir -p "${BIN_DIR}"
-  chmod g+w -R "${SCRATCH_DIR}"
+  chmod g+w "${SCRATCH_DIR}" "${BIN_DIR}"
 }
 create_bin
 
@@ -37,7 +37,7 @@ minio_setup_client(){
   which mc 2>/dev/null || download_mc || exit 0
   mc --insecure --config-dir "${MINIO_CFG}" config host \
     add "${MINIO_REMOTE}" "${MINIO_ENDPOINT}" "${MINIO_ACCESSKEY}" "${MINIO_SECRETKEY}"
-  chmod g+rw "${MINIO_CFG}"
+  chmod g+rwx "${MINIO_CFG}"
 }
 
 minio_create_bucket(){
