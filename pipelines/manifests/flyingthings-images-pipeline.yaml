@@ -378,6 +378,7 @@ spec:
           - name: VERSION
             default: latest
             description: The OpenShift Version to use
+            type: string
           - name: BASE_MODEL            
             type: string
             description: Base model for training
