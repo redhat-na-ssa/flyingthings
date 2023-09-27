@@ -70,8 +70,6 @@ copy_artifacts(){
 }
 
 push_results(){
-  set -x
-  echo $PATH
   echo "*************** Training Run Results*************************"
   cat runs/exp/results.csv
   echo "************************************************************"
