@@ -18,6 +18,7 @@ PATH="${BIN_DIR}:${PATH}"
 
 cd_to_scratch(){
   [ -d "${SCRATCH_DIR}" ] || mkdir -p "${SCRATCH_DIR}"
+  chmod g+w "${SCRATCH_DIR}"
   pushd "${SCRATCH_DIR}" || return
 }
 
@@ -56,12 +57,12 @@ minio_tag(){
   mc --insecure --config-dir "${MINIO_CFG}" tag set "${FILE}" "${TAG}"
 }
 
-minio_copy_artifacts(){
+copy_artifacts(){
   minio_create_bucket "${MINIO_BUCKET}"
   minio_copy "artifacts/flyingthings-yolo.zip" "${MINIO_REMOTE}/${MINIO_BUCKET}"
 }
 
-minio_push_results(){
+push_results(){
   echo "*************** Training Run Results*************************"
   cat runs/exp/results.csv
   echo "************************************************************"
@@ -123,7 +124,7 @@ minio_push_results(){
   minio_tag "${MINIO_REMOTE}/${MINIO_BUCKET}/models/classes_${CURRENT_RUN}.yaml" "training-run=latest"
 }
 
-minio_get_dataset(){
+get_dataset(){
   minio_copy "${MINIO_REMOTE}/${MINIO_BUCKET}/${DATASET_ZIP}" "${DATASET_ZIP}"
   unzip -d datasets "${DATASET_ZIP}"
   rm "${DATASET_ZIP}"
@@ -175,7 +176,7 @@ model_training(){
 
 }
 
-images_resize(){
+resize_images(){
   IMG_SRC=${1:-images}
   IMG_WIDTH=${2:-200}
 
@@ -191,6 +192,10 @@ images_distribute(){
   pushd datasets || return
     python3 "/source/pipelines/scripts/images-distribute.py"
   popd || return
+}
+
+distribute_dataset(){
+  images_distribute
 }
 
 check_base_image(){

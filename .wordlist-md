@@ -11,6 +11,7 @@ config
 CPUs
 CReferenceEvaluator
 CUDA
+curation
 datasetcard
 dev
 Dev

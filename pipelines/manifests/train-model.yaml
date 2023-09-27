@@ -90,7 +90,7 @@ spec:
       params:
         - name: TIMEOUT
           value: $(params.GPU_TIMEOUT)
-    - name: check-base-images
+    - name: check-base-image
       taskRef:
         name: shell-script
       params:
@@ -104,7 +104,7 @@ spec:
       workspaces:
         - name: source
           workspace: source
-    - name: upload-artifacts
+    - name: copy-artifacts
       taskRef:
         name: shell-script
       params:
@@ -118,9 +118,9 @@ spec:
             cd $(workspaces.source.path)
 
             source $(workspaces.source.path)/pipelines/scripts/functions.sh && \
-            minio_copy_artifacts
+            copy_artifacts
       runAfter:
-        - check-base-images
+        - check-base-image
       workspaces:
         - name: source
           workspace: source
@@ -142,9 +142,9 @@ spec:
 
             source $(workspaces.source.path)/pipelines/scripts/functions.sh && \
             cd_to_scratch && \
-            minio_get_dataset
+            get_dataset
       runAfter:
-        - upload-artifacts
+        - copy-artifacts
       workspaces:
         - name: source
           workspace: source
@@ -164,7 +164,7 @@ spec:
       workspaces:
         - name: source
           workspace: source
-    - name: resize-image
+    - name: resize-images
       when:
         - input: "$(params.IMG_RESIZE)"
           operator: in
@@ -180,7 +180,7 @@ spec:
 
             source $(workspaces.source.path)/pipelines/scripts/functions.sh && \
             cd_to_scratch && \
-            images_resize datasets/images $(params.MAX_WIDTH)
+            resize_images datasets/images $(params.MAX_WIDTH)
 
       runAfter:
         - create-classfile
@@ -199,9 +199,9 @@ spec:
 
             source $(workspaces.source.path)/pipelines/scripts/functions.sh && \
             cd_to_scratch && \
-            images_distribute
+            distribute_dataset
       runAfter:
-        - resize-image
+        - resize-images
       workspaces:
         - name: source
           workspace: source
@@ -284,7 +284,7 @@ spec:
 
             source $(workspaces.source.path)/pipelines/scripts/functions.sh && \
             cd_to_scratch && \
-            minio_push_results
+            push_results
       runAfter:
         - train-model-cpu
         - train-model-gpu
