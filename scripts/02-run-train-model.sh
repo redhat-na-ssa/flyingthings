@@ -50,6 +50,7 @@ start_pipelines(){
       -w name=source,volumeClaimTemplateFile=pvc.yaml \
       --use-param-defaults --showlog
   else
+    echo "View logs in the OpenShift Console => Pipelines"
     oc create -f task-run.yaml
   fi
 }
