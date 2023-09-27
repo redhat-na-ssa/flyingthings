@@ -13,7 +13,7 @@ MINIO_BUCKET="${MINIO_BUCKET:-project}"
 SCRATCH_DIR="${SCRATCH_DIR:-scratch}"
 BIN_DIR="${SCRATCH_DIR}/bin"
 
-[ -d "${BIN_DIR}" ] || mkdir -p "${BIN_DIR}"
+# [ -d "${BIN_DIR}" ] || mkdir -p "${BIN_DIR}"
 PATH="${BIN_DIR}:${PATH}"
 
 cd_to_scratch(){
