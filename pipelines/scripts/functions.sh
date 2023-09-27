@@ -10,11 +10,11 @@ MINIO_ACCESSKEY="${MINIO_ACCESSKEY:-minioadmin}"
 MINIO_SECRETKEY="${MINIO_SECRETKEY:-minioadmin}"
 MINIO_BUCKET="${MINIO_BUCKET:-project}"
 
-SCRATCH_DIR="${SCRATCH_DIR:-scratch}"
+SCRATCH_DIR="${SCRATCH_DIR:-$(pwd)/scratch}"
 BIN_DIR="${SCRATCH_DIR}/bin"
 
 # kludge due to different storage types
-export UMASK=0002
+UMASK=0002
 
 create_bin(){
   mkdir -p "${BIN_DIR}"
@@ -22,7 +22,7 @@ create_bin(){
 }
 
 [ -d "${BIN_DIR}" ] || create_bin
-export PATH="${BIN_DIR}:${PATH}"
+PATH="${BIN_DIR}:${PATH}"
 
 cd_to_scratch(){
   pushd "${SCRATCH_DIR}" || return
