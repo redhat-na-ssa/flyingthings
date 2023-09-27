@@ -74,7 +74,7 @@ push_results(){
   cat runs/exp/results.csv
   echo "************************************************************"
   tar vzcf training-results.tgz runs/exp/
-  ls -l ../
+  ls -lsa
 
   minio_setup_client
 
