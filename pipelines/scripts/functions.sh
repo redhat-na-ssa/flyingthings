@@ -22,7 +22,7 @@ create_bin(){
 }
 
 [ -d "${BIN_DIR}" ] || create_bin
-PATH="${BIN_DIR}:${PATH}"
+export PATH="${BIN_DIR}:${PATH}"
 
 cd_to_scratch(){
   pushd "${SCRATCH_DIR}" || return
@@ -71,6 +71,7 @@ copy_artifacts(){
 
 push_results(){
   set -x
+  echo $PATH
   echo "*************** Training Run Results*************************"
   cat runs/exp/results.csv
   echo "************************************************************"
