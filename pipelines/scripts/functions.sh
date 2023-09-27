@@ -70,6 +70,7 @@ copy_artifacts(){
 }
 
 push_results(){
+  id
   echo "*************** Training Run Results*************************"
   cat runs/exp/results.csv
   echo "************************************************************"
