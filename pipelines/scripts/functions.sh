@@ -70,7 +70,6 @@ copy_artifacts(){
 }
 
 push_results(){
-  id
   echo "*************** Training Run Results*************************"
   cat runs/exp/results.csv
   echo "************************************************************"
@@ -221,4 +220,5 @@ check_base_image(){
   unset READY
 }
 
+id
 # df -h; pwd; ls -lsa
