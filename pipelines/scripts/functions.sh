@@ -220,5 +220,6 @@ check_base_image(){
   unset READY
 }
 
-id
+# debug
+id; umask
 # df -h; pwd; ls -lsa
