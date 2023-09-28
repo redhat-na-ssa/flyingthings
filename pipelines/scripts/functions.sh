@@ -38,7 +38,7 @@ minio_setup_client(){
   which mc 2>/dev/null || download_mc || return
   mc --insecure --config-dir "${MINIO_CFG}" config host \
     add "${MINIO_REMOTE}" "${MINIO_ENDPOINT}" "${MINIO_ACCESSKEY}" "${MINIO_SECRETKEY}"
-  chmod g+rwx "${MINIO_CFG}"
+  chmod g+rwx -R "${MINIO_CFG}"
 }
 
 minio_create_bucket(){
