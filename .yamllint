@@ -17,3 +17,7 @@ rules:
   empty-lines:
     ignore: |
       components/operators/ack-controllers/base/adoptedresources-crd.yaml
+
+ignore:
+  - 'venv/'
+  - '.venv/'

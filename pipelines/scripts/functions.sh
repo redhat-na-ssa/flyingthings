@@ -14,7 +14,7 @@ SCRATCH_DIR="${SCRATCH_DIR:-$(pwd)/scratch}"
 BIN_DIR="${SCRATCH_DIR}/bin"
 
 # kludge due to different storage types
-UMASK=0002
+umask 0002
 
 create_bin(){
   mkdir -p "${BIN_DIR}"
