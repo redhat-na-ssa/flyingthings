@@ -49,15 +49,15 @@ spec:
           resources:
             requests:
               storage: 2Gi
-    - name: large-data
-      volumeClaimTemplate:
-        apiVersion: v1
-        kind: PersistentVolumeClaim
-        metadata:
-          name: tekton
-        spec:
-          accessModes:
-            - ReadWriteOnce
-          resources:
-            requests:
-              storage: 2Gi
+    # - name: large-data
+    #   volumeClaimTemplate:
+    #     apiVersion: v1
+    #     kind: PersistentVolumeClaim
+    #     metadata:
+    #       name: tekton
+    #     spec:
+    #       accessModes:
+    #         - ReadWriteOnce
+    #       resources:
+    #         requests:
+    #           storage: 2Gi
