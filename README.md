@@ -58,7 +58,7 @@ We then annotate, as before, and repeat the process until we have acceptable con
 - Get Dataset pulls our zip file into the workspace and unzips it.
 - Create Classfile picks up the classes.txt file and converts it to a YAML file that can be - consumed by YOLO. This is a template which also identifies the folder structure for the - training.
 - If the image resize flag is set, the images will be resized to a maximum width. This module - can be used in the future for other image pre-processing that help improve accuracy.
-- Distribute Dataset groups the files into 3 groups. 70% go to training, 30% go to test, and - 30% go to validation. The groups are then moved to their respective directories for training. - This grouping is done randomly each run.
+- Distribute Dataset groups the files into 3 groups. 70% go to training, and the remaining 30% are split beterrn test and validation. The groups are then moved to their respective directories for training. - This grouping is done randomly each run.
 - If the GPU flag is set the training requests a node with GPU and runs the actual training on - that node. If GPU is not set, the training is done with CPUs.
 - Once training is complete the resulting model is exported to onnx format for consumption by - other model serving solutions.
 - Now, all the artifacts from the training including the reports, model, class file, and - exports are written to object storage where they are tagged and propagated to appropriate - folders.
