@@ -333,24 +333,24 @@ spec:
           workspace: source
         - name: workspace
           workspace: shared-workspace
-    # - name: build-model-server
-    #   params:
-    #     - name: IMAGE
-    #       value: $(params.MODEL_IMAGE)
-    #     - name: DOCKERFILE_PATH
-    #       value: $(params.MODEL_DOCKERFILE)          
-    #     - name: DOCKERFILE
-    #       value: $(workspaces.path)/$(params.MODEL_DOCKERFILE)/Dockerfile
-    #     - name: BUILD_EXTRA_ARGS
-    #       value: "$(params.MODEL_BUILD_ARGS)"
-    #   runAfter:
-    #     - get-pretrained
-    #   taskRef:
-    #     kind: ClusterTask
-    #     name: buildah
-    #   workspaces:
-    #     - name: source
-    #       workspace: source
+    - name: build-model-server
+      params:
+        - name: IMAGE
+          value: $(params.MODEL_IMAGE)
+        - name: DOCKERFILE_PATH
+          value: $(params.MODEL_DOCKERFILE)          
+        - name: DOCKERFILE
+          value: $(workspaces.path)/$(params.MODEL_DOCKERFILE)/Dockerfile
+        - name: BUILD_EXTRA_ARGS
+          value: "$(params.MODEL_BUILD_ARGS)"
+      runAfter:
+        - get-pretrained
+      taskRef:
+        kind: ClusterTask
+        name: buildah
+      workspaces:
+        - name: source
+          workspace: source
     - name: deploy-model-server
       taskSpec:
         metadata:
@@ -418,7 +418,7 @@ spec:
         - name: source
           workspace: source
       runAfter:
-        - get-pretrained
+        - build-model-server
       params:
       - name: ocp-tablespace
         value: $(params.ocp-tablespace)
@@ -436,7 +436,7 @@ spec:
         value: $(params.BASE_MODEL)
       - name: SCRIPT
         value: |
-          oc new-app image-registry.openshift-image-registry.svc:5000/$(params.ocp-tablespace)/$(params.YOLO_IMAGE):latest \
+          oc new-app image-registry.openshift-image-registry.svc:5000/$(params.ocp-tablespace)/custom-model:latest \
             --name=model-yolo \
             --env=WEIGHTS=model_pretrained.pt \
             --env=SIMPLEVIS_DATA=/opt/app-root/src/simplevis-data \
