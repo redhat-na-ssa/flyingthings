@@ -53,7 +53,7 @@ load_model_from_minio(){
   minio_setup_client
 
   # Get all model files from the latest training run
-  LATEST_MOD_FILES=$("${BIN_PATH}/mc" --insecure --config-dir "${MINIO_CFG}" find "${MINIO_REMOTE}/${MINIO_BUCKET}/models" --tags "training-run=latest")
+  LATEST_MOD_FILES=$(mc --insecure --config-dir "${MINIO_CFG}" find "${MINIO_REMOTE}/${MINIO_BUCKET}/models" --tags "training-run=latest")
   echo "Latest model files: ${LATEST_MOD_FILES}"
   
   # Loop through the file list and check for the pytorch model file
