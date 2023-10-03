@@ -6,6 +6,19 @@ I've created a video series explaining the workshop and a runthrough of the setu
 [![WorkshopSeries](docs/images/youtube-channel.png)](https://www.youtube.com/playlist?list=PLWGcJxV1EWOCQWd1aRss4zUT4zgZCSQ19)
 
 
+## Prerequisites
+
+- Nvidia GPU hardware
+- OpenShift 4.11+ w/ cluster admin
+- AWS (auto scaling, optional)
+- OpenShift Dev Spaces 3.8.0+ (optional)
+- Internet access
+
+Red Hat Demo Platform Catalog (RHDP) options:
+
+- `MLOps Demo: Data Science & Edge Practice`
+- `Red Hat OpenShift Container Platform 4 Demo`
+
 ## Quickstart
 
 ```
