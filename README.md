@@ -5,7 +5,6 @@ This workshop is designed to showcase OpenShift as a platform for developing and
 I've created a video series explaining the workshop and a runthrough of the setup and use cases here.
 [![WorkshopSeries](docs/images/youtube-channel.png)](https://www.youtube.com/playlist?list=PLWGcJxV1EWOCQWd1aRss4zUT4zgZCSQ19)
 
-
 ## Prerequisites
 
 - Nvidia GPU hardware
