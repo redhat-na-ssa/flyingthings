@@ -200,7 +200,7 @@ nvidia_setup_mig_config(){
 }
 
 ocp_aws_cluster_autoscaling(){
-  oc apply -k components/configs/autoscale/overlays/gpus
+  oc apply -k components/configs/autoscale/overlays/gpus-accelerator-label
 
   ocp_aws_create_gpu_machineset g4dn.4xlarge
   ocp_create_machineset_autoscale 0 3
