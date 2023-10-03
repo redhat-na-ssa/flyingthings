@@ -37,10 +37,6 @@ usage(){
   
   . scripts/bootstrap.sh && ocp_aws_cluster_autoscaling
 
-  Run the following to setup devspaces:
-
-  . scripts/bootstrap.sh && setup_operator_devspaces
-
   "
 }
 
