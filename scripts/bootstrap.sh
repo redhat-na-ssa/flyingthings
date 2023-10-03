@@ -222,7 +222,7 @@ setup_operator_devspaces(){
   # setup devspaces operator
   oc apply -k components/operators/devspaces/operator/overlays/stable
   k8s_wait_for_crd checlusters.org.eclipse.che
-  k8s_wait_for_crd devworkspaceoperatorconfig.controller.devfile.iom
+  k8s_wait_for_crd devworkspaceoperatorconfig.controller.devfile.io
   oc apply -k components/operators/devspaces/instance/overlays/timeout-12m
 }
 
