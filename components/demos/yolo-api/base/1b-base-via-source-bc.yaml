@@ -15,7 +15,7 @@ spec:
       name: yolo-api:source-ubi
   runPolicy: SerialLatestOnly
   source:
-    contextDir: components/demo/yolo-api/container/source
+    contextDir: components/demos/yolo-api/container/source
     git:
       ref: develop
       uri: https://github.com/redhat-na-ssa/flyingthings.git

@@ -30,7 +30,7 @@ spec:
       name: python-custom:3.9-ubi9
   runPolicy: SerialLatestOnly
   source:
-    contextDir: components/demo/yolo-api/container
+    contextDir: components/demos/yolo-api/container
     git:
       ref: develop
       uri: https://github.com/redhat-na-ssa/flyingthings.git

@@ -15,11 +15,11 @@ check_namespace(){
 }
 
 setup_minio(){
-  oc apply -k components/demo/minio
+  oc apply -k components/demos/minio
 }
 
 setup_label_studio(){
-  oc apply -k components/demo/label-studio/overlays/flyingthings
+  oc apply -k components/demos/label-studio/overlays/flyingthings
 }
 
 check_namespace "$@"
