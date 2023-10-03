@@ -8,4 +8,5 @@ namespace: devspaces
 
 resources:
   - checluster.yaml
+  - devworkspace-config.yaml
   - namespace.yaml
