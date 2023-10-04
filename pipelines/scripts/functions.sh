@@ -56,7 +56,7 @@ minio_create_bucket(){
 }
 
 minio_copy(){
-  echo "Copying to MinIO..."
+  echo "Copying ${SOURCE} to MinIO..."
   [ ! -d "${MINIO_CFG}" ] && minio_setup_client
   local SOURCE="${1}"
   local DEST="${2}"
