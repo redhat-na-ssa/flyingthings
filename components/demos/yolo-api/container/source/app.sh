@@ -40,7 +40,7 @@ minio_copy(){
   [ ! -d "${MINIO_CFG}" ] && minio_setup_client
   local SOURCE="${1}"
   local DEST="${2}"
-  ./mc --insecure --config-dir "${MINIO_CFG}" cp "${SOURCE}" "${DEST}"
+  mc --insecure --config-dir "${MINIO_CFG}" cp "${SOURCE}" "${DEST}"
 }
 
 download_yolo_model(){
