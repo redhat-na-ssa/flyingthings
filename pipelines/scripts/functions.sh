@@ -66,7 +66,7 @@ minio_tag(){
 
 copy_artifacts(){
   minio_create_bucket "${MINIO_BUCKET}"
-  minio_copy "artifacts/flyingthings-yolo.zip" "${MINIO_REMOTE}/${MINIO_BUCKET}"
+  minio_copy "artifacts/${DATASET_ZIP}" "${MINIO_REMOTE}/${MINIO_BUCKET}"
 }
 
 push_results(){
