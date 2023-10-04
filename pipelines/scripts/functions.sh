@@ -17,7 +17,7 @@ BIN_DIR="${SCRATCH_DIR}/bin"
 umask 0002
 
 create_bin(){
-  echo "Creating ${BIN_DIR}"
+  echo "Creating ${BIN_DIR}..."
   mkdir -p "${BIN_DIR}"
   chmod g+w "${SCRATCH_DIR}" "${BIN_DIR}"
 }
@@ -26,19 +26,19 @@ create_bin(){
 PATH="${BIN_DIR}:${PATH}"
 
 cd_to_scratch(){
-  echo "Changing to ${SCRATCH_DIR}"
+  echo "Changing to ${SCRATCH_DIR}..."
   pushd "${SCRATCH_DIR}" || return
 }
 
 download_mc(){
-  echo "Downloading MinIO Client"
+  echo "Downloading MinIO Client..."
   MINIO_CLIENT_URL="${MINIO_CLIENT_URL:-https://dl.min.io/client/mc/release/linux-amd64}"
   curl -s -L "${MINIO_CLIENT_URL}/mc" -o "${BIN_DIR}/mc" && \
     chmod +x "${BIN_DIR}/mc"
 }
 
 minio_setup_client(){
-  echo "Setting up MinIO Client"
+  echo "Setting up MinIO Client..."
   which mc 2>/dev/null || download_mc || return
   mc --insecure --config-dir "${MINIO_CFG}" config host \
     add "${MINIO_REMOTE}" "${MINIO_ENDPOINT}" "${MINIO_ACCESSKEY}" "${MINIO_SECRETKEY}"
@@ -46,7 +46,7 @@ minio_setup_client(){
 }
 
 minio_create_bucket(){
-  echo "Creating MinIO Bucket"
+  echo "Creating MinIO Bucket..."
   [ ! -d "${MINIO_CFG}" ] && minio_setup_client
   local BUCKET="${1}"
   local REMOTE="${MINIO_REMOTE}"
@@ -56,7 +56,7 @@ minio_create_bucket(){
 }
 
 minio_copy(){
-  echo "Copying to MinIO"
+  echo "Copying to MinIO..."
   [ ! -d "${MINIO_CFG}" ] && minio_setup_client
   local SOURCE="${1}"
   local DEST="${2}"
@@ -64,7 +64,7 @@ minio_copy(){
 }
 
 minio_tag(){
-  echo "Tagging MinIO Object"
+  echo "Tagging MinIO Object..."
   [ ! -d "${MINIO_CFG}" ] && minio_setup_client
   local FILE="${1}"
   local TAG="${2}"
@@ -72,7 +72,7 @@ minio_tag(){
 }
 
 copy_artifacts(){
-  echo "Copying artifacts to MinIO"
+  echo "Copying artifacts to MinIO..."
   minio_create_bucket "${MINIO_BUCKET}"
   minio_copy "artifacts/${DATASET_ZIP}" "${MINIO_REMOTE}/${MINIO_BUCKET}"
 }
@@ -140,20 +140,20 @@ push_results(){
 }
 
 get_dataset(){
-  echo "Getting dataset from MinIO"
+  echo "Getting dataset from MinIO..."
   minio_copy "${MINIO_REMOTE}/${MINIO_BUCKET}/${DATASET_ZIP}" "${DATASET_ZIP}"
   unzip -d datasets "${DATASET_ZIP}"
   rm "${DATASET_ZIP}"
 }
 
 minio_copy_yolo_model(){
-  echo "Copying YOLO model to MinIO"
+  echo "Copying YOLO model to MinIO..."
   minio_copy "${MODEL_BASE}" "${MINIO_REMOTE}/${MINIO_BUCKET}/pretrained/model_pretrained.pt"
   minio_copy coco128.yaml "${MINIO_REMOTE}/${MINIO_BUCKET}/pretrained/model_pretrained_classes.yaml"
 }
 
 download_yolo_model(){
-  echo "Downloading YOLO model"
+  echo "Downloading YOLO model..."
   YOLOv5_VERSION="${YOLOv5_VERSION:-v7.0}"  
   MODEL_BASE="${MODEL_BASE:-yolov5s.pt}"
 
@@ -166,7 +166,7 @@ download_yolo_model(){
 }
 
 model_training(){
-  echo "Training model"
+  echo "Training model..."
   YOLO_DIR="${YOLO_DIR:-/opt/app-root/lib/python3.9/site-packages/yolov5}"
   TRAINING_DIR="${TRAINING_DIR:-${YOLO_DIR}/training}"
 
@@ -196,7 +196,7 @@ model_training(){
 }
 
 resize_images(){
-  echo "Resizing images"
+  echo "Resizing images..."
   IMG_SRC=${1:-images}
   IMG_WIDTH=${2:-200}
 
@@ -209,19 +209,19 @@ resize_images(){
 }
 
 images_distribute(){
-  echo "Distributing images"
+  echo "Distributing images..."
   pushd datasets || return
     python3 "/source/pipelines/scripts/images-distribute.py"
   popd || return
 }
 
 distribute_dataset(){
-  echo "Distributing dataset"
+  echo "Distributing dataset..."
   images_distribute
 }
 
 check_base_image(){
-  echo "Checking base image"
+  echo "Checking base image..."
   IS_TAG="${1}"
   echo "Waiting for ${IS_TAG}..."
 
