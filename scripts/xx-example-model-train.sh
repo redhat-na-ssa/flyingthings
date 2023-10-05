@@ -45,10 +45,10 @@ start_pipelines(){
       -p GPU_TIMEOUT="12m" \
       -p IMG_RESIZE="Y" \
       -p MAX_WIDTH="200" \
-      -p DATASET_ZIP=flyingthings-yolo.zip \
-      -p MODEL_NAME=model-flyingthings \
-      -p DEPLOY_ARTIFACTS="Y" \
-      -p MINIO_BUCKET=flyingthings \
+      -p DATASET_ZIP=<your-yolo-zipfile.zip> \
+      -p MODEL_NAME=<your-model-name> \
+      -p MODEL_WEIGHTS=<your-model-weights.pt> \
+      -p MINIO_BUCKET=<your-model-bucket> \
       -w name=source,volumeClaimTemplateFile=pvc.yaml \
       --use-param-defaults --showlog
   else
