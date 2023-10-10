@@ -63,6 +63,7 @@ import ai.djl.repository.zoo.ZooModel;
 import ai.djl.training.util.ProgressBar;
 import ai.djl.translate.TranslateException;
 
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
 import com.sun.security.auth.module.UnixSystem;
@@ -138,6 +139,15 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
 
     @ConfigProperty(name = "org.acme.objectdetection.include.prediction.dump.in.corrections.message", defaultValue = "True")
     boolean includePredictionDumpInCorrectionsMessage;
+
+    @ConfigProperty(name = "mp.messaging.outgoing.liveObjectDetection.max-message-size")
+    int payloadImageMaxSizeBytes;
+
+    @ConfigProperty(name = "org.acme.objectdetection.resize.image.width", defaultValue = "640")
+    int resizedWidth;
+
+    @ConfigProperty(name = "org.acme.objectdetection.resize.image.height", defaultValue = "480")
+    int resizedHeight;
 
     @Inject
     CriteriaFilter cFilters;
@@ -392,14 +402,19 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
                     // Consider over-riding the following function so as to include the predictions for each detected object:
                     //   https://github.com/deepjavalibrary/djl/blob/master/extensions/opencv/src/main/java/ai/djl/opencv/OpenCVImage.java#L158-L200
                     img.drawBoundingBoxes(detections);
+
                     // Encode binary image to Base64 string and add to payload
                     Mat boxedImage = (Mat)img.getWrappedImage();
                     BufferedImage bBoxedImage = toBufferedImage(boxedImage);
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    ImageIO.write(bBoxedImage, "png", baos);
-                    byte[] bytes = baos.toByteArray();
+                    byte[] bytes = toPngByteArray(bBoxedImage);
+                    if(this.payloadImageMaxSizeBytes < bytes.length) {
+                        int originalBytesLength = bytes.length;
+                        bytes = resizeImage(bBoxedImage);
+                        log.warnv("Resized image due to exceeding max bytes: {0} : {1} : {2}", this.payloadImageMaxSizeBytes, originalBytesLength, bytes.length);
+                    }
                     String stringEncodedImage = Base64.getEncoder().encodeToString(bytes);
                     capturePayload.setBase64EncodedImage(stringEncodedImage);
+
                     if(writeModifiedImageToDisk) {
                         File boxedImageFile = new File(rawAndBoxedImageFileDir,  "boxedImage-"+ startCaptureTime.getEpochSecond()+".png");
                         ImageIO.write(bBoxedImage, "png", boxedImageFile);
@@ -516,6 +531,13 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
         return false;
     }
 
+
+    private byte[] resizeImage(BufferedImage bBoxedImage) throws IOException {
+        java.awt.Image resizedImage = bBoxedImage.getScaledInstance(this.resizedWidth, this.resizedHeight, java.awt.Image.SCALE_SMOOTH);
+        BufferedImage resizedBImage = toBufferedImage(resizedImage);
+        return toPngByteArray(resizedBImage);
+    }
+
     private static void drawBoundingBoxWithCustomizedDetections(Image img, DetectedObjects detections){
         List<BoundingBox> boxes = new ArrayList<>();
         List<String> names = new ArrayList<>();
@@ -556,6 +578,33 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
         ret.getRaster().setDataElements(0, 0, width, height, data);
 
         return ret;
+    }
+
+    private static BufferedImage toBufferedImage(java.awt.Image img) {
+
+        if (img instanceof BufferedImage) {
+            return (BufferedImage) img;
+        }
+
+        // Create a buffered image with transparency
+        BufferedImage bi = new BufferedImage(
+                img.getWidth(null), img.getHeight(null),
+                BufferedImage.TYPE_INT_ARGB);
+
+        Graphics2D graphics2D = bi.createGraphics();
+        graphics2D.drawImage(img, 0, 0, null);
+        graphics2D.dispose();
+
+        return bi;
+    }
+
+    
+    private static byte[] toPngByteArray(BufferedImage bImage) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ImageIO.write(bImage, "png", baos);
+        byte[] pngBytes = baos.toByteArray();
+        baos.close();
+        return pngBytes;
     }
     
     private void refreshVideoCapture() {

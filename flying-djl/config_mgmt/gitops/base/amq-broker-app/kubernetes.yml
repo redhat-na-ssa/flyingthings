@@ -44,6 +44,22 @@ spec:
     - name: amqp
       port: 5672
       protocols: amqp
+
+  addressSettings:
+    applyRule: merge_all # merge_replace| replace_all
+    addressSetting:
+    - match: 'liveObjectDetection'
+
+      # max memory the address could have before triggering addressFullPolicy
+      maxSizeBytes: '1m'
+
+      # DROP:  silent drop
+      # FAIL:  drop messages and also throw an exception on the client-side when address is full
+      # BLOCK: block producers from sending further messages when the address if full, thus preventing the memory being exhausted on the server
+      #        When memory is freed up on the server, producers will automatically unblock and be able to continue sending
+      # PAGE:  https://activemq.apache.org/components/artemis/documentation/latest/paging#paging-mode
+      addressFullPolicy: FAIL
+
   env:
     - name: JAVA_ARGS_APPEND
       value: -Djavax.net.debug=all

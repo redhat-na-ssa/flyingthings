@@ -2,11 +2,10 @@
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
 metadata:
-  labels:
-    operators.coreos.com/amq-streams.openshift-operators: ""
   name: grafana-operator
   namespace: user1-flying-djl
-
+  labels:
+    operators.coreos.com/grafana-operator.user1-flying-djl: ""
 spec:
   name: grafana-operator
 
