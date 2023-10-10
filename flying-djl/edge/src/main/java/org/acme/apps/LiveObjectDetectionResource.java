@@ -141,13 +141,16 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
     boolean includePredictionDumpInCorrectionsMessage;
 
     @ConfigProperty(name = "mp.messaging.outgoing.liveObjectDetection.max-message-size")
-    int payloadImageMaxSizeBytes;
+    int payloadMaxSizeBytes;
+
+    @ConfigProperty(name = "mp.messaging.outgoing.liveObjectDetection.payloadTextSize", defaultValue = "240000")
+    int payloadTextSizeBytes;
 
     @ConfigProperty(name = "org.acme.objectdetection.resize.image.width", defaultValue = "640")
-    int resizedWidth;
+    int resizedImageWidth;
 
     @ConfigProperty(name = "org.acme.objectdetection.resize.image.height", defaultValue = "480")
-    int resizedHeight;
+    int resizedImageHeight;
 
     @Inject
     CriteriaFilter cFilters;
@@ -415,11 +418,12 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
                         log.infov("Path to boxedImageFile = {0}", boxedImageFile.getAbsolutePath());
                     }
 
-                    // If image size exceeds a configurable amount, resize it to a lower resolution to allow for it to be sent as payload of MQTT message
-                    if(this.payloadImageMaxSizeBytes < bytes.length) {
+                    // If image size exceeds ( max-message-size - payloadTextSize), then resize the image to a lower resolution
+                    // In this calculation, will also account for an approximate amount of text in the payload
+                    if((this.payloadMaxSizeBytes - this.payloadTextSizeBytes) < bytes.length) {
                         int originalBytesLength = bytes.length;
                         bytes = resizeImage(bBoxedImage);
-                        log.warnv("Resized image due to exceeding max bytes: {0} : {1} : {2}", this.payloadImageMaxSizeBytes, originalBytesLength, bytes.length);
+                        log.warnv("Resized image due to exceeding max bytes: {0} : {1} : {2}", this.payloadMaxSizeBytes, originalBytesLength, bytes.length);
                     }
 
                     String stringEncodedImage = Base64.getEncoder().encodeToString(bytes);
@@ -538,7 +542,7 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
 
 
     private byte[] resizeImage(BufferedImage bBoxedImage) throws IOException {
-        java.awt.Image resizedImage = bBoxedImage.getScaledInstance(this.resizedWidth, this.resizedHeight, java.awt.Image.SCALE_SMOOTH);
+        java.awt.Image resizedImage = bBoxedImage.getScaledInstance(this.resizedImageWidth, this.resizedImageHeight, java.awt.Image.SCALE_SMOOTH);
         BufferedImage resizedBImage = toBufferedImage(resizedImage);
         return toPngByteArray(resizedBImage);
     }

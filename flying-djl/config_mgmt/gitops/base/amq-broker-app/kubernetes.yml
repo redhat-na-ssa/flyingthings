@@ -48,10 +48,12 @@ spec:
   addressSettings:
     applyRule: merge_all # merge_replace| replace_all
     addressSetting:
+    
+    # https://activemq.apache.org/components/artemis/documentation/latest/mqtt.html#wildcard-subscriptions
     - match: 'liveObjectDetection'
 
       # max memory the address could have before triggering addressFullPolicy
-      maxSizeBytes: '1m'
+      maxSizeBytes: '10m'
 
       # DROP:  silent drop
       # FAIL:  drop messages and also throw an exception on the client-side when address is full
