@@ -95,7 +95,7 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
     @ConfigProperty(name = "org.acme.objectdetection.write.unadultered.image.to.disk", defaultValue = "True")
     boolean writeUnAdulateredImageToDisk;
 
-    @ConfigProperty(name = "org.acme.objectdetection.write.modified.image.to.disk", defaultValue = "False")
+    @ConfigProperty(name = "org.acme.objectdetection.write.modified.image.to.disk", defaultValue = "True")
     boolean writeModifiedImageToDisk;
 
     @ConfigProperty(name = "org.acme.objectdetection.prediction.change.threshold", defaultValue = "0.1")
@@ -403,23 +403,28 @@ public class LiveObjectDetectionResource extends BaseResource implements ILiveOb
                     //   https://github.com/deepjavalibrary/djl/blob/master/extensions/opencv/src/main/java/ai/djl/opencv/OpenCVImage.java#L158-L200
                     img.drawBoundingBoxes(detections);
 
-                    // Encode binary image to Base64 string and add to payload
+                    // Encode binary image to Base64 string
                     Mat boxedImage = (Mat)img.getWrappedImage();
                     BufferedImage bBoxedImage = toBufferedImage(boxedImage);
                     byte[] bytes = toPngByteArray(bBoxedImage);
-                    if(this.payloadImageMaxSizeBytes < bytes.length) {
-                        int originalBytesLength = bytes.length;
-                        bytes = resizeImage(bBoxedImage);
-                        log.warnv("Resized image due to exceeding max bytes: {0} : {1} : {2}", this.payloadImageMaxSizeBytes, originalBytesLength, bytes.length);
-                    }
-                    String stringEncodedImage = Base64.getEncoder().encodeToString(bytes);
-                    capturePayload.setBase64EncodedImage(stringEncodedImage);
-
+                    
+                    // Optionally, write image to disk
                     if(writeModifiedImageToDisk) {
                         File boxedImageFile = new File(rawAndBoxedImageFileDir,  "boxedImage-"+ startCaptureTime.getEpochSecond()+".png");
                         ImageIO.write(bBoxedImage, "png", boxedImageFile);
                         log.infov("Path to boxedImageFile = {0}", boxedImageFile.getAbsolutePath());
                     }
+
+                    // If image size exceeds a configurable amount, resize it to a lower resolution to allow for it to be sent as payload of MQTT message
+                    if(this.payloadImageMaxSizeBytes < bytes.length) {
+                        int originalBytesLength = bytes.length;
+                        bytes = resizeImage(bBoxedImage);
+                        log.warnv("Resized image due to exceeding max bytes: {0} : {1} : {2}", this.payloadImageMaxSizeBytes, originalBytesLength, bytes.length);
+                    }
+
+                    String stringEncodedImage = Base64.getEncoder().encodeToString(bytes);
+                    capturePayload.setBase64EncodedImage(stringEncodedImage);
+
                 }catch(NoSuchElementException x) {
                     log.warn("Caught NoSuchElementException when attempting to classify objects in image");
                     this.previousCapture = null;
