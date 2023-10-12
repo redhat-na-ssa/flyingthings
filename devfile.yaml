@@ -5,10 +5,6 @@ metadata:
     metadata-name-original-value: flyingthings
   name: flyingthings-djw
 attributes:
-  che-theia.eclipse.org/sidecar-policy: mergeImage
-  controller.devfile.io/devworkspace-config:
-    name: devworkspace-config
-    namespace: devspaces
   controller.devfile.io/scc: container-build
   controller.devfile.io/storage-type: per-user
   dw.metadata.annotations:
