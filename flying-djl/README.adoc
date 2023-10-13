@@ -549,7 +549,9 @@ $ podman run \
 Open a browser tab and navigate to:  `localhost:8080/q/swagger-ui`
 
 
+=== Image Resizing
 
+The original higher resolution boxed image remains on the disk of the edge device.  Also, the absolute path to that boxed image is mentioned in the payload.   So, even though a resized image (of lower resolution) is pushed over the net, the original higher resolution can still be retrieved at a later time (ie:  maybe when the device is on a better network )
 
 
 
