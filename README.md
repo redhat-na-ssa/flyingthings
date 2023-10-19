@@ -3,12 +3,12 @@
 This workshop is designed to showcase OpenShift as a platform for developing and operationalizing AI/ML applications. It uses many tools in the Red Hat ecosystem as well as 3rd party applications and services. This particular workshop features a computer vision implementation and covers a workflow for custom training and serving for integration with other applications and services.
 
 I've created a video series explaining the workshop and a runthrough of the setup and use cases here.
-[![WorkshopSeries](docs/images/youtube-channel.png)](https://www.youtube.com/playlist?list=PLWGcJxV1EWOCQWd1aRss4zUT4zgZCSQ19)
+[![WorkshopSeries](docs/images/youtube-channel.png)](https://youtu.be/agL8PrEPFR8?si=AL0G352nzrH2mfjP)
 
 ## Prerequisites
 
 - Nvidia GPU hardware
-- OpenShift 4.11+ w/ cluster admin
+- OpenShift 4.12+ w/ cluster admin
 - AWS (auto scaling, optional)
 - OpenShift Dev Spaces 3.8.0+ (optional)
 - Internet access
@@ -101,7 +101,7 @@ We then annotate, as before, and repeat the process until we have acceptable con
 - Get Dataset pulls our zip file into the workspace and unzips it.
 - Create Classfile picks up the classes.txt file and converts it to a YAML file that can be - consumed by YOLO. This is a template which also identifies the folder structure for the - training.
 - If the image resize flag is set, the images will be resized to a maximum width. This module - can be used in the future for other image pre-processing that help improve accuracy.
-- Distribute Dataset groups the files into 3 groups. 70% go to training, 30% go to test, and - 30% go to validation. The groups are then moved to their respective directories for training. - This grouping is done randomly each run.
+- Distribute Dataset groups the files into 3 groups. 70% go to training, and the remaining 30% are split beterrn test and validation. The groups are then moved to their respective directories for training. - This grouping is done randomly each run.
 - If the GPU flag is set the training requests a node with GPU and runs the actual training on - that node. If GPU is not set, the training is done with CPUs.
 - Once training is complete the resulting model is exported to onnx format for consumption by - other model serving solutions.
 - Now, all the artifacts from the training including the reports, model, class file, and - exports are written to object storage where they are tagged and propagated to appropriate - folders.
