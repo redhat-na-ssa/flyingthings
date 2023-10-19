@@ -1,0 +1,48 @@
+---
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: udi-rhel8
+spec:
+  tags:
+  - name: original
+    from:
+      kind: DockerImage
+      name: registry.redhat.io/devspaces/udi-rhel8
+    referencePolicy:
+      type: Local
+  - name: latest
+    from:
+      kind: ImageStreamTag
+      name: udi-rhel8:original
+---
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: udi-rhel8-custom
+  annotations:
+    app.openshift.io/vcs-ref: main
+    app.openshift.io/vcs-uri: https://github.com/redhat-na-ssa/flyingthings.git
+spec:
+  output:
+    to:
+      kind: ImageStreamTag
+      name: udi-rhel8:latest
+  runPolicy: SerialLatestOnly
+  source:
+    contextDir: components/demos/yolo-api/container
+    git:
+      ref: develop
+      uri: https://github.com/redhat-na-ssa/flyingthings.git
+    type: Git
+  strategy:
+    dockerStrategy:
+      dockerfilePath: Dockerfile.devspaces
+      from:
+        kind: ImageStreamTag
+        name: udi-rhel8:latest
+    type: Docker
+  triggers:
+  - imageChange: {}
+    type: ImageChange
+  - type: ConfigChange

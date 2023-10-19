@@ -1,0 +1,55 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: get-pretrained
+spec:
+  params:
+    - name: MODEL_WEIGHTS
+      type: string
+    - name: MODEL_BASE
+      type: string
+    - name: MINIO_ENDPOINT
+      type: string
+    - name: MINIO_ACCESSKEY
+      type: string
+    - name: MINIO_SECRETKEY
+      type: string
+    - name: MINIO_BUCKET
+      type: string
+    - name: NAMESPACE
+      type: string
+    - name: IMAGE
+      type: string
+      default: ubi9:latest
+  steps:
+    - name: get-pretrained-model
+      image: $(params.IMAGE)
+      script: |
+        cd $(workspaces.workspace.path)
+
+        SOURCE_DIR=$(workspaces.source.path)
+        BASEDIR=${SOURCE_DIR}/pipelines/scripts
+
+        source $(workspaces.source.path)/pipelines/scripts/functions.sh && \
+        download_yolo_model && \
+        minio_copy_yolo_model
+
+        pwd && ls -al
+      env:
+        - name: MINIO_ENDPOINT
+          value: $(params.MINIO_ENDPOINT)
+        - name: BASEDIR
+          value: $(workspaces.source.path)/pipelines/scripts
+        - name: MODEL_BASE
+          value: $(params.MODEL_BASE)
+        - name: MINIO_ACCESSKEY
+          value: $(params.MINIO_ACCESSKEY)
+        - name: MINIO_SECRETKEY
+          value: $(params.MINIO_SECRETKEY)
+        - name: MINIO_BUCKET
+          value: $(params.MINIO_BUCKET)
+  workspaces:
+    - name: workspace
+      mountPath: /opt/app-root/src/simplevis-data/workspace
+    - name: source
+      mountPath: /source

@@ -1,0 +1,45 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: get-dataset
+spec:
+  params:
+    - name: DATASET_ZIP
+      type: string
+    - name: MINIO_ENDPOINT
+      type: string
+    - name: MINIO_BUCKET
+      type: string
+    - name: MINIO_ACCESSKEY
+      type: string
+    - name: MINIO_SECRETKEY
+      type: string
+  steps:
+    - name: pull-dataset
+      image: registry.access.redhat.com/ubi9/python-39
+      script: |
+        cd $(workspaces.workspace.path)
+
+        SOURCE_DIR=$(workspaces.source.path)
+        BASEDIR=${SOURCE_DIR}/pipelines/scripts
+
+        source $(workspaces.source.path)/pipelines/scripts/functions.sh && \
+        minio_get_dataset
+
+        pwd && ls -al
+      env:
+        - name: DATASET_ZIP
+          value: $(params.DATASET_ZIP)
+        - name: MINIO_ENDPOINT
+          value: $(params.MINIO_ENDPOINT)
+        - name: MINIO_BUCKET
+          value: $(params.MINIO_BUCKET)
+        - name: MINIO_ACCESSKEY
+          value: $(params.MINIO_ACCESSKEY)
+        - name: MINIO_SECRETKEY
+          value: $(params.MINIO_SECRETKEY)
+  workspaces:
+    - name: workspace
+      mountPath: /opt/app-root/src/simplevis-data/workspace
+    - name: source
+      mountPath: /source

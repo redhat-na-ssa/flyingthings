@@ -1,0 +1,27 @@
+#!/bin/sh
+set -e
+
+restore_artifacts(){
+  # Restore artifacts from the previous build (if they exist).
+  # We set them here just for show, but you will need to set this up with your logic
+  # according to the application directory that you chose.
+
+  if [ "$(ls /tmp/artifacts/ 2>/dev/null)" ]; then
+    echo "---> Restoring build artifacts..."
+    mv /tmp/artifacts/* /opt/app-root/etc
+  fi
+}
+
+assemble_s2i_override(){
+  # Install os based code dependencies here
+  echo ""
+}
+
+assemble_s2i_default(){
+  echo "Running default assemble"
+  /usr/libexec/s2i/assemble
+}
+
+restore_artifacts
+assemble_s2i_override
+assemble_s2i_default

@@ -1,0 +1,251 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: model-base
+spec:
+  params:
+    - name: GIT_URL
+      default: https://github.com/redhat-na-ssa/flyingthings.git
+      description: url of the git repo for the code of deployment
+    - name: GIT_REVISION
+      default: main
+      description: revision to be used from repo of the code for deployment
+    - name: NAMESPACE
+      default: ml-demo
+      description: namespace for the deployment
+    - name: IMAGE_REGISTRY
+      default: image-registry.openshift-image-registry.svc:5000
+      description: default image registry
+    - name: YOLO_IMAGE
+      default: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/model-base:latest
+      description: base image for yolo
+    - name: YOLO_CONTEXT
+      default: source/yolov5
+      description: dockerfile path
+    - name: YOLO_BUILD_ARGS
+      default: --build-arg env=YOLOv5_VERSION=v7.0
+      description: build arguments for yolo
+    - name: MODEL_IMAGE
+      default: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/model-server:latest
+      description: model server image
+    - name: MODEL_CONTEXT
+      default: source/model
+      description: dockerfile path
+    - name: MODEL_BUILD_ARGS
+      default: --build-arg BASE_IMAGE=$(params.YOLO_IMAGE)
+      description: build arguments for model server
+    - name: UBI_IMAGE
+      default: $(params.IMAGE_REGISTRY)/$(params.NAMESPACE)/task-runner:latest
+      description: base image for notebook
+    - name: UBI_CONTEXT
+      default: source/task-runner
+      description: dockerfile path
+    - name: BATCH_SIZE
+      default: "2"
+      description: ""
+    - name: NUM_EPOCHS
+      default: "3"
+      description: ""
+    - name: MODEL_BASE
+      default: "yolov5s.pt"
+      description: ""
+    - name: MINIO_ENDPOINT
+      default: "http://minio:9000"
+      description: ""
+    - name: DATASET_ZIP
+      default: "flyingthings-yolo.zip"
+      description: ""
+    - name: MINIO_BUCKET
+      default: "flyingthings"
+      description: ""
+    - name: MINIO_ACCESSKEY
+      default: "minioadmin"
+      description: ""
+    - name: MINIO_SECRETKEY
+      default: "minioadmin"
+      description: ""
+    - name: MODEL_NAME
+      default: model-pretrain
+      description: name used to deploy the model and model server
+  tasks:
+    - name: fetch-repository
+      params:
+        - name: url
+          value: $(params.GIT_URL)
+        - name: subdirectory
+          value: ''
+        - name: deleteExisting
+          value: 'true'
+        - name: revision
+          value: $(params.GIT_REVISION)
+      taskRef:
+        kind: ClusterTask
+        name: git-clone
+      workspaces:
+        - name: output
+          workspace: source
+    - name: build-model-base
+      params:
+        - name: IMAGE
+          value: $(params.YOLO_IMAGE)
+        - name: CONTEXT
+          value: $(params.YOLO_CONTEXT)
+        - name: BUILD_EXTRA_ARGS
+          value: "$(params.YOLO_BUILD_ARGS)"
+      runAfter:
+        - fetch-repository
+      taskRef:
+        kind: ClusterTask
+        name: buildah
+      workspaces:
+        - name: source
+          workspace: source
+    - name: build-task-runner
+      params:
+        - name: IMAGE
+          value: $(params.UBI_IMAGE)
+        - name: CONTEXT
+          value: $(params.UBI_CONTEXT)
+      runAfter:
+        - fetch-repository
+      taskRef:
+        kind: ClusterTask
+        name: buildah
+      workspaces:
+        - name: source
+          workspace: source
+    - name: create-bucket
+      taskRef:
+        name: shell-script
+      params:
+        - name: SCRIPT
+          value: |
+            MINIO_ENDPOINT=$(params.MINIO_ENDPOINT)
+            MINIO_BUCKET=$(params.MINIO_BUCKET)
+            MINIO_ACCESSKEY=$(params.MINIO_ACCESSKEY)
+            MINIO_SECRETKEY=$(params.MINIO_SECRETKEY)
+
+            source $(workspaces.source.path)/pipelines/scripts/functions.sh && \
+            minio_create_bucket ${MINIO_BUCKET}
+      runAfter:
+        - fetch-repository
+      workspaces:
+        - name: source
+          workspace: source
+    - name: upload-artifacts
+      taskRef:
+        name: shell-script
+      params:
+        - name: SCRIPT
+          value: |
+            MINIO_ENDPOINT=$(params.MINIO_ENDPOINT)
+            MINIO_BUCKET=$(params.MINIO_BUCKET)
+            MINIO_ACCESSKEY=$(params.MINIO_ACCESSKEY)
+            MINIO_SECRETKEY=$(params.MINIO_SECRETKEY)
+
+            cd $(workspaces.source.path)
+
+            source $(workspaces.source.path)/pipelines/scripts/functions.sh && \
+            minio_copy_artifacts
+      runAfter:
+        - create-bucket
+      workspaces:
+        - name: source
+          workspace: source
+    - name: upload-pretrained
+      taskRef:
+        name: shell-script
+      params:
+        - name: SCRIPT
+          value: |
+            MINIO_ENDPOINT=$(params.MINIO_ENDPOINT)
+            MINIO_BUCKET=$(params.MINIO_BUCKET)
+            MINIO_ACCESSKEY=$(params.MINIO_ACCESSKEY)
+            MINIO_SECRETKEY=$(params.MINIO_SECRETKEY)
+            MODEL_BASE=$(params.MODEL_BASE)
+
+            source $(workspaces.source.path)/pipelines/scripts/functions.sh && \
+            download_yolo_model && \
+            minio_copy_yolo_model
+      runAfter:
+        - create-bucket
+      workspaces:
+        - name: source
+          workspace: source
+    - name: build-model-server
+      params:
+        - name: IMAGE
+          value: $(params.MODEL_IMAGE)
+        - name: CONTEXT
+          value: $(params.MODEL_CONTEXT)
+        - name: BUILD_EXTRA_ARGS
+          value: "$(params.MODEL_BUILD_ARGS)"
+      runAfter:
+        - build-model-base
+      taskRef:
+        kind: ClusterTask
+        name: buildah
+      workspaces:
+        - name: source
+          workspace: source
+    - name: deploy-model-server
+      taskRef:
+        name: shell-script
+      workspaces:
+        - name: source
+          workspace: source
+      runAfter:
+        - build-model-server
+      params:
+      - name: IMAGE
+        value: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
+      - name: SCRIPT
+        value: |
+          set -x
+
+          oc new-app $(params.MODEL_IMAGE) \
+            --name=$(params.MODEL_NAME) \
+            --env=MINIO_ENDPOINT=$(params.MINIO_ENDPOINT) \
+            --env=MINIO_BUCKET=$(params.MINIO_BUCKET) \
+            --env=MINIO_ACCESSKEY=$(params.MINIO_ACCESSKEY) \
+            --env=MINIO_SECRETKEY=$(params.MINIO_SECRETKEY) \
+            --env=MODEL_BASE=$(params.MODEL_BASE)
+
+          oc apply -f - <<EOF
+          apiVersion: route.openshift.io/v1
+          kind: Route
+          metadata:
+            name: $(params.MODEL_NAME)
+            labels:
+              app: $(params.MODEL_NAME)
+              app.kubernetes.io/component: $(params.MODEL_NAME)
+              app.kubernetes.io/instance: $(params.MODEL_NAME)
+          annotations:
+            openshift.io/host.generated: "true"
+          spec:
+            to:
+              kind: Service
+              name: $(params.MODEL_NAME)
+              weight: 100
+            port:
+              targetPort: 8080-tcp
+            tls:
+              termination: edge
+              insecureEdgeTerminationPolicy: Allow
+          EOF
+          exit 0
+    # - name: debug-workspace
+    #   taskSpec:
+    #     steps:
+    #       - name: run-batch-file
+    #         image: ubi9:latest
+    #         script: |
+    #           #!/usr/bin/env bash
+    #           df -h && pwd && ls -al
+    #   runAfter:
+    #     - upload-artifacts
+    #   workspaces:
+    #     - name: scratch
+    #       workspace: scratch
+  workspaces:
+    - name: source

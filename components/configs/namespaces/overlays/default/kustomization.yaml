@@ -1,0 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base
+  - ../../instance/sandbox
+  - ../../instance/registry
+
+patches:
+  - target:
+      kind: Project
+      group: config.openshift.io
+      name: cluster
+    patch: |
+      - op: replace
+        path: /spec/projectRequestTemplate
+        value:

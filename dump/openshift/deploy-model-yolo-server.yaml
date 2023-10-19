@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: 'model-yolo'
+spec:
+  selector:
+    matchLabels:
+      app: model-yolo
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: model-yolo
+    spec:
+      containers:
+        - name: container
+          image: >-
+            image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/custom-model:latest
+          ports:
+            - containerPort: 8000
+              protocol: TCP
+          env:
+            - name: MODEL_WEIGHTS
+              value: model_pretrained.pt
+            - name: BUILD_VER
+              value: "0.0"
+            - name: MINIO_ENDPOINT
+              value: http://minio:9000
+            - name: MINIO_BUCKET
+              value: flyingthings
+            - name: SIMPLEVIS_DATA
+              value: /opt/app-root/src/simplevis-data
+          volumeMounts:
+            - mountPath: /opt/app-root/src/simplevis-data
+              name: simplevis-data
+          resources: {}
+      volumes:
+        - name: simplevis-data
+          emptyDir: {}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: model-yolo-svc
+spec:
+  selector:
+    app: model-yolo
+  ports:
+    - protocol: TCP
+      port: 8000
+---
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: model-yolo-rt
+  labels: {}
+spec:
+  to:
+    kind: Service
+    name: model-yolo-svc
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Allow
+  path: /
+  port:
+    targetPort: 8000
