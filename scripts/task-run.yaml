@@ -14,7 +14,7 @@ spec:
     - name: DATASET_ZIP
       value: flyingthings-yolo.zip
     - name: GIT_REVISION
-      value: develop
+      value: main
     - name: GIT_URL
       value: 'https://github.com/redhat-na-ssa/flyingthings.git'
     - name: GPU_TIMEOUT
