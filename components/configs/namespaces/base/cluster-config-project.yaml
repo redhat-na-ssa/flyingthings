@@ -1,0 +1,12 @@
+apiVersion: config.openshift.io/v1
+kind: Project
+metadata:
+  name: cluster
+spec:
+  projectRequestMessage: >-
+    Don't Panic - Everything is fine.
+    You might not have access to create projects in this cluster.
+    If you want to change this situation look at:
+    https://github.com/codekow/demo-ai-gitops-catalog
+  projectRequestTemplate: {}
+  #   name: project-request

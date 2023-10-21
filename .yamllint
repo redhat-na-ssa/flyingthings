@@ -1,0 +1,23 @@
+extends: default
+
+rules:
+  document-start: disable
+  line-length: disable
+  comments-indentation: disable
+  new-line-at-end-of-file: disable
+  indentation:
+    indent-sequences: whatever
+  braces:
+    ignore: components/operators/grafana-operator/base/instance/grafana.yaml
+  truthy:
+    ignore: .github/workflows/
+  trailing-spaces:
+    ignore: |
+      components/operators/openshift-gitops-operator/instance/overlays/default/patch-resource-customizations.yaml
+  empty-lines:
+    ignore: |
+      components/operators/ack-controllers/base/adoptedresources-crd.yaml
+
+ignore:
+  - 'venv/'
+  - '.venv/'

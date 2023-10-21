@@ -1,100 +1,27 @@
-schemaVersion: 2.1.0
+schemaVersion: 2.2.0
 metadata:
-  attributes:
-    metadata-name-field: generateName
-    metadata-name-original-value: flyingthings
-  name: flyingthings
+  name: devspaces-gpu
 attributes:
-  controller.devfile.io/scc: container-build
-  controller.devfile.io/storage-type: per-user
-  dw.metadata.annotations:
-    che.eclipse.org/devfile-source: |
-      scm:
-        repo: github.com/redhat-na-ssa/flyingthings.git
-        fileName: devfile.yaml
-      factory:
-        params: url=https://github.com/redhat-na-ssa/flyingthings.git
+#   controller.devfile.io/scc: container-build
+  controller.devfile.io/storage-type: ephemeral
 projects:
-  - git:
+  - name: computer-vision
+    git:
       remotes:
-        origin: https://github.com/redhat-na-ssa/flyingthings.git
-    name: flyingthings
+        origin: "https://github.com/redhat-na-ssa/flyingthings.git"
+      checkoutFrom:
+        revision: main
 components:
   - attributes:
+      container-overrides:
+        resources:
+          limits:
+            nvidia.com/gpu: '1'
       controller.devfile.io/merge-contribution: true
-      memoryLimit: 2Gi
     container:
-      env:
-        - name: CHE_DASHBOARD_URL
-          value: https://devspaces.apps.ocpsno2.davenet.local
-        - name: CHE_PLUGIN_REGISTRY_URL
-          value: https://devspaces.apps.ocpsno2.davenet.local/plugin-registry/v3
-        - name: CHE_PLUGIN_REGISTRY_INTERNAL_URL
-          value: http://plugin-registry.devspaces.svc:8080/v3
-        - name: CLUSTER_CONSOLE_URL
-          value: https://console-openshift-console.apps.ocpsno2.davenet.local
-        - name: CLUSTER_CONSOLE_TITLE
-          value: OpenShift console
-        - name: OPENVSX_REGISTRY_URL
-          value: ''
-      image: registry.redhat.io/devspaces/udi-rhel8@sha256:a5a67003870daf10f941b0279a065358dd1ace6d40826462b91bae9868216eff
+      image: ghcr.io/redhat-na-ssa/udi-cuda:latest
+      memoryLimit: 6G
+      cpuLimit: 1000m
+      mountSources: true
       sourceMapping: /projects
-    name: universal-developer-image
-  - attributes:
-      controller.devfile.io/merge-contribution: false
-      deployment/nvidia.com/gpu: '1'
-    container:
-      memoryLimit: 6Gi
-      args:
-        - '-f'
-        - /dev/null
-      command:
-        - tail
-      env:
-        - name: BATCH_SIZE
-          value: '-1'
-        - name: NUM_EPOCHS
-          value: '10'
-        - name: IMG_RESIZE
-          value: 'N'
-        - name: IMG_WIDTH
-          value: '200'
-        - name: BASE_MODEL
-          value: yolov8n.pt
-        - name: DATASET_ZIP
-          value: flyingthings-yolo.zip
-        - name: MINIO_CLIENT_URL
-          value: util02.davenet.local
-        - name: WEIGHTS
-          value: flyingthings.pt
-        - name: BUILD_VER
-          value: '0.0'
-        - name: MODEL_CLASSES
-          value: flyingthings.yaml
-        - name: SIMPLEVIS_DATA
-          value: /opt/app-root/src/simplevis-data
-        - name: BASEDIR
-          value: /opt/app-root/src
-        - name: MINIO_ENDPOINT
-          value: http://minio:9000
-        - name: MINIO_BUCKET
-          value: flyingthings
-        - name: MINIO_ACCESSKEY
-          value: minioadmin
-        - name: MINIO_SECRETKEY
-          value: minioadmin
-        - name: CHE_DASHBOARD_URL
-          value: https://devspaces.apps.ocpsno2.davenet.local
-        - name: CHE_PLUGIN_REGISTRY_URL
-          value: https://devspaces.apps.ocpsno2.davenet.local/plugin-registry/v3
-        - name: CHE_PLUGIN_REGISTRY_INTERNAL_URL
-          value: http://plugin-registry.devspaces.svc:8080/v3
-        - name: CLUSTER_CONSOLE_URL
-          value: https://console-openshift-console.apps.ocpsno2.davenet.local
-        - name: CLUSTER_CONSOLE_TITLE
-          value: OpenShift console
-        - name: OPENVSX_REGISTRY_URL
-          value: ''
-      image: quay.io/dawhite20910/devspace-tkn:0.0
-      sourceMapping: /projects
-    name: my-custom
+    name: python
