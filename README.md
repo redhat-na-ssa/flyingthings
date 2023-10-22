@@ -157,13 +157,19 @@ scripts/01-setup-pipelines.sh
 scripts/02-run-train-model.sh
 ```
 
+The last script `03-deploy-model-yolo.sh` will deploy the pretrained yolo model which comes in handy to compare against any custom models. Deploy it by running...
+
+```
+scripts/03-deploy-model-yolo.sh
+```
+
 Let’s take a look at what actually got created and deployed.
 
 In Deployments, we see three apps. LabelStudio, Minio, and model-yolo.  Let’s start with Minio. We can use the route to connect to the Minio console. The username and password is minioadmin.  We can see that there is a bucket already created called “flyingthings”.  In this bucket the main thing to notice is the zip file called “flyingthings-yolo”.  This is the main artifact used in training our custom model. More on that in a bit.
 
 ![alt text](docs/images/minio-flyingthings.png "Minio Bucket")
 
-We’ll come back to LabelStudio later, but let’s take a look at model-yolo. As part of the workshop startup, we deploy a default yolo model. This is useful as a baseline for what yolo can do out of the box and it’s a good introduction for the SWAGGER interface. After clicking on its route you should see the swagger interface.
+We’ll come back to LabelStudio later, but let’s take a look at model-yolo which we deployed earlier. This is useful as a baseline for what yolo can do out of the box and it’s a good introduction for the SWAGGER interface. After clicking on its route you should see the swagger interface.
 
 ![alt text](docs/images/fastapi.png "FastAPI")
 
