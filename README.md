@@ -112,14 +112,14 @@ We then annotate, as before, and repeat the process until we have acceptable con
 
 ### Prerequisites
 
-- An OpenShift cluster at version 4.13 or greater.
+- An OpenShift cluster at version 4.12 or greater.
   - Single Node Openshift with at least 32GB RAM will be adequate
   - GPU Enabled Node (Optional)
   - OCP internal registry
   - OpenShift Pipelines Operator
   - Dynamic Storage Provisioning (ODF, LVM Storage, etc)
   - Cluster Admin
-- Workstation with terminal (RHEL or CentOS Streams with bash or zsh)
+- Workstation with terminal (RHEL or CentOS Streams with bash)
   - Git client
   - Tekton client
 - Optional
@@ -135,19 +135,27 @@ We then annotate, as before, and repeat the process until we have acceptable con
 git clone < repo >
 ```
 
-3. Go to the directory flyingthings/bootstrap and run script 01-create-pipelines.sh with the name of the project where you will be deploying the workshop.
+3. Go to the directory flyingthings and create the project where you will be deploying the workshop. Make sure your shell is `bash`
 
 ```
-scripts/01-create-pipelines.sh
+oc new-project ml-demo
 ```
 
-4. Run script 02-build-images-tkn.sh with the same project used for the previous step.
+4. Run script to install and configure cluster components. You may receive errors if this is the first time running the bootstrap. This can be caused due to components not being ready. Simply wait a minute or so and run again.
 
 ```
-scripts/02-build-images-tkn.sh
+scripts/bootstrap.sh
 ```
 
-This process will take some time as the images for the workshop are created. Allow 10 to 30 minutes to complete.
+Once this completes you have the option of setting up the AWS autoscaler for the GPU node. This does two things: 1. Reduces the installation to a compact cluster to 3 nodes (3 control plane/worker nodes). This can help save on hosting costs. 2. It creates a Machineset for the GPU node which it uses to provision a GPU when needed and deletes it after a period of idle time. These actions are entirely controlled by pipeline. If not hosting on AWS you can ignore the message.
+
+5. Now you can run the main components and pipeline installer. These scripts are idempotent and can be run sequentially so you can launch them from the same command line. We've also included an initial training for "flyingthings" which produces the first model. While optional, we recommend running it as well as it performs a training and deployment to test that all components and autoscaling have been installed and configured properly.
+
+```
+scripts/00-setup-components.sh
+scripts/01-setup-pipelines.sh
+scripts/02-run-train-model.sh
+```
 
 Let’s take a look at what actually got created and deployed.
 
@@ -155,7 +163,7 @@ In Deployments, we see three apps. LabelStudio, Minio, and model-yolo.  Let’s 
 
 ![alt text](docs/images/minio-flyingthings.png "Minio Bucket")
 
-We’ll come back to LabelStudio later, but let’s take a look at model-yolo. As part of the workshop startup, we deploy a default yolo model. This is useful as a baseline for what yolo can do out of the box and it’s a good introduction for the SWAGGER interface. After clicking on its route, simply append /docs to the url to access swagger.
+We’ll come back to LabelStudio later, but let’s take a look at model-yolo. As part of the workshop startup, we deploy a default yolo model. This is useful as a baseline for what yolo can do out of the box and it’s a good introduction for the SWAGGER interface. After clicking on its route you should see the swagger interface.
 
 ![alt text](docs/images/fastapi.png "FastAPI")
 
@@ -191,39 +199,83 @@ Alright, now it’s time to run the pipeline and get our first custom model.
 
 ## Launch the pipeline
 
-Go to the same directory as before, flyingthings/bootstrap and edit the file 10-run-model-flyingthings-training.sh to change any parameters for this run.
+Go to the same directory as before, flyingthings/scripts and copy the file `xx-example-model-train.sh.txt` to a new training script like `10-run-train-hoscale.sh`.
 
 ```
-vi scripts/03-run-train-model.sh
+cp scripts/xx-example-model-train.sh.txt 10-run-train-hoscale.sh
+chmod +x scripts/10-run-train-hoscale.sh
 ```
 
 All the supplied params should be fine, but we will want to change a few if we’re not running a GPU.  If your system has no available GPUs then set *GPU* to *N*. Also, since there is no GPU we’ll need to change the *BATCH_SIZE* as it is set to maximize if there are GPUs. You should set it to 2 to avoid any memory issues.  
 
 ```
-tkn pipeline start train-model \
-  -w name=source,volumeClaimTemplateFile=pvc.yaml \
-  -w name=shared-workspace,volumeClaimTemplateFile=pvc.yaml \
-  -p GIT_URL=https://github.com/redhat-na-ssa/flyingthings.git \
-  -p GIT_REVISION=main \
-  -p MODEL_BASE="yolov5s.pt" \
-  -p BATCH_SIZE="-1" \
-  -p NUM_EPOCHS="100" \
-  -p IMG_RESIZE="Y" \
-  -p MAX_WIDTH="200" \
-  -pMODEL_WEIGHTS=flyingthings.pt \
-  -p DATASET_ZIP=flyingthings-yolo.zip \
-  -p MINIO_ENDPOINT=http://minio:9000 \
-  -p MINIO_ACCESSKEY=minioadmin \
-  -p MINIO_SECRETKEY=minioadmin \
-  -p MINIO_BUCKET=flyingthings \
-  -p MODEL_NAME=model-flyingthings \
-  --use-param-defaults --showlog
+#!/bin/bash
+
+get_namespace(){
+  NAMESPACE=$(oc project -q 2>/dev/null)
+  echo "NAMESPACE: ${NAMESPACE}"
+  echo ""
+}
+
+check_pipeline(){
+  PIPELINE_NAME="${1}"
+
+  # check for pipeline in current namespace
+  if oc get pipeline "${PIPELINE_NAME}" -o name; then
+    echo "PIPELINE: ${PIPELINE_NAME} exists"
+  else
+    echo "PIPELINE: ${PIPELINE_NAME} missing"
+    exit 0
+  fi
+  echo "Starting pipeline: ${PIPELINE_NAME}"
+}
+
+start_pipelines(){
+
+  get_namespace
+
+  # IMAGE_REGISTRY=image-registry.openshift-image-registry.svc:5000
+  GIT_URL=https://github.com/redhat-na-ssa/flyingthings.git
+  GIT_REVISION=main
+
+  # kludge
+  [ "${PWD##*/}" != "scripts" ] && pushd scripts || exit
+
+  # debug_pipeline; exit 0
+
+  check_pipeline train-model
+  
+  if which tkn; then
+    tkn pipeline start "${PIPELINE_NAME}" \
+      -p GIT_URL="${GIT_URL}" \
+      -p GIT_REVISION="${GIT_REVISION}" \
+      -p NAMESPACE="${NAMESPACE}" \
+      -p MODEL_BASE="yolov5s.pt" \
+      -p BATCH_SIZE="-1" \
+      -p NUM_EPOCHS="100" \
+      -p GPU_TIMEOUT="12m" \
+      -p IMG_RESIZE="Y" \
+      -p MAX_WIDTH="200" \
+      -p DATASET_ZIP=autos.zip \
+      -p MODEL_NAME=model-autos \
+      -p MODEL_WEIGHTS=autos.pt \
+      -p MINIO_BUCKET=autos \
+      -w name=source,volumeClaimTemplateFile=pvc.yaml \
+      --use-param-defaults --showlog
+  else
+    echo "View logs in the OpenShift Console => Pipelines"
+    oc create -f task-run.yaml
+  fi
+}
+
+start_pipelines
+
 ```
 
 Now execute the script on the project we’ve been using.
 
 ```
-scripts/03-run-train-model.sh
+scripts/10-run-train-hoscale.sh
 ```
 
 As the job kicks off we can monitor it from the console. Here we see all the training tasks displayed for the pipeline. With GPUs it should take around 5 or 6 minutes to run. CPUs will take significantly longer.
