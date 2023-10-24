@@ -150,6 +150,21 @@ Within about a minute, you should see a statement similar to the following:
 pod/amq-broker-operator-76b7f5985b-w9pwj condition met
 -----
 
+. Wait until Grafana operator is running in `user1-flying-djl` namespace:
++
+-----
+$ oc wait \
+    --for=condition=ready pod \
+    -l control-plane=controller-manager \
+    -n user1-flying-djl
+-----
++
+Within about a minute, you should see a statement similar to the following:
++
+-----
+pod/grafana-operator-controller-manager-8c97ff75f-5hjqt condition met
+-----
+
 . Deploy all apps into `user1-flying-djl` namespace:
 +
 -----
