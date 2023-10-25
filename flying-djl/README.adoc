@@ -135,7 +135,7 @@ $ cd flying-djl
 $ oc apply -k config_mgmt/gitops/base/infra/
 -----
 
-. Wait until AMQ Broker operator is running in `openshift-operators` namespace:
+. Wait about 30 seconds and execute the following to ensure that the AMQ Broker operator is running in `openshift-operators` namespace:
 +
 -----
 $ oc wait \
