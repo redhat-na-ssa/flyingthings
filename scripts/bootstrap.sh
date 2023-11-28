@@ -233,7 +233,7 @@ setup_operator_nvidia(){
   # setup nvidia gpu operator
   oc apply -k components/operators/gpu-operator-certified/operator/overlays/stable
   k8s_wait_for_crd clusterpolicies.nvidia.com
-  oc apply -k components/operators/gpu-operator-certified/instance/overlays/time-slicing-4
+  oc apply -k components/operators/gpu-operator-certified/instance/overlays/time-slicing-2
 }
 
 setup_operator_pipelines(){
