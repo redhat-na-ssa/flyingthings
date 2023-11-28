@@ -10,7 +10,8 @@
 - [ ] Review training pipeline GPU task parameters
 - [ ] Review tasks
 - [ ] Make task `upload-artifacts` more generic
-- [ ] Check for `helm`; install helm
+- [ ] Update to use demo catalog for bootstrap.sh
+  - [ ] Check for `helm`; install helm
 
 ### label-studio login
 
