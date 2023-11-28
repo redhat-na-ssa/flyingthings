@@ -19,7 +19,7 @@ components:
             nvidia.com/gpu: '1'
       controller.devfile.io/merge-contribution: true
     container:
-      image: ghcr.io/redhat-na-ssa/udi-cuda:latest
+      image: ghcr.io/redhat-na-ssa/udi-cuda:11.8.0-cudnn8-devel-ubi8-python39
       memoryLimit: 6G
       cpuLimit: 1000m
       mountSources: true
