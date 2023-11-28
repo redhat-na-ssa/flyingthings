@@ -5,7 +5,7 @@ attributes:
 #   controller.devfile.io/scc: container-build
   controller.devfile.io/storage-type: ephemeral
 projects:
-  - name: computer-vision
+  - name: datasci-computer-vision
     git:
       remotes:
         origin: "https://github.com/redhat-na-ssa/flyingthings.git"
