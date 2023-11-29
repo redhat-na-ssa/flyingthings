@@ -134,19 +134,4 @@ delete_demo(){
   oc delete --wait -k gitops
 }
 
-setup_demo_old(){
-  # check_cluster_version
-  
-  # setup_operator_devspaces
-  setup_operator_pipelines
-
-  # setup_operator_nfd
-  # setup_operator_nvidia
-  # nvidia_setup_dashboard_monitor
-  # nvidia_setup_dashboard_admin
-
-  setup_namespaces
-  usage
-}
-
 is_sourced && usage || setup_demo

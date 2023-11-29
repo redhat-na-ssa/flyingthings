@@ -27,10 +27,10 @@ Red Hat Demo Platform Catalog (RHDP) options:
 scripts/bootstrap.sh
 
 # namespace tasks
-scripts/00-setup-components.sh
 scripts/01-setup-pipelines.sh
 scripts/02-run-train-model.sh
 ```
+
 ## Workshop Components
 
 ![alt text](docs/images/workshopcomponents.png "Workshop Components")
