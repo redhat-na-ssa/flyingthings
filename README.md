@@ -12,16 +12,31 @@ Here is a video series explaining the [workshop](docs/WORKSHOP.md) and a runthro
 
 ## Prerequisites
 
+CLI tools
+
+- `bash`, `git`
+- `oc` - Download [mac](https://formulae.brew.sh/formula/openshift-cli), [linux](https://mirror.openshift.com/pub/openshift-v4/clients/ocp), [windows](https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable/openshift-client-windows.zip)
+
+Infrastructure
+
+- OpenShift 4.12+
+  - role: `cluster-admin`
 - Nvidia GPU hardware
-- OpenShift 4.12+ w/ cluster admin
-- AWS (auto scaling, optional)
-- OpenShift Dev Spaces 3.8.0+ (optional)
 - Internet access
 
-Red Hat Demo Platform Catalog (RHDP) options:
+Optional
 
-- `MLOps Demo: Data Science & Edge Practice`
-- `Red Hat OpenShift Container Platform 4 Demo`
+- OpenShift Dev Spaces 3.8.0+
+- AWS (auto scaling)
+
+[Red Hat Demo Platform](https://demo.redhat.com) Options (Tested)
+
+- <a href="https://demo.redhat.com/catalog?item=babylon-catalog-prod/sandboxes-gpte.sandbox-ocp.prod&utm_source=webapp&utm_medium=share-link" target="_blank">AWS with OpenShift Open Environment</a>
+  - 1 x Control Plane - `m5.4xlarge`
+  - 1 x Workers - `m5.2xlarge`
+- <a href="https://demo.redhat.com/catalog?item=babylon-catalog-prod/sandboxes-gpte.ocp4-single-node.prod&utm_source=webapp&utm_medium=share-link" target="_blank">One Node OpenShift</a>
+  - 1 x Control Plane - `m5.4xlarge`
+- <a href="https://demo.redhat.com/catalog?item=babylon-catalog-prod/community-content.com-mlops-wksp.prod&utm_source=webapp&utm_medium=share-link" target="_blank">MLOps Demo: Data Science & Edge Practice</a>
 
 ## Quickstart
 
