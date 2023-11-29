@@ -2,7 +2,7 @@
 
 [![File Linting](https://github.com/redhat-na-ssa/flyingthings/actions/workflows/linting.yaml/badge.svg)](https://github.com/redhat-na-ssa/flyingthings/actions/workflows/linting.yaml)
 
-This Demo / [workshop](docs/WORKSHOP.md) is designed to showcase OpenShift as a platform for developing and operationalizing AI/ML applications.
+This demo / [workshop](docs/WORKSHOP.md) is designed to showcase OpenShift as a platform for developing and operationalizing AI/ML applications.
 
 Specifically it focuses on a computer vision implementation and covers a workflow for custom training and serving for integration with other applications and services. It uses many tools in the Red Hat ecosystem as well as 3rd party applications and services.
 
