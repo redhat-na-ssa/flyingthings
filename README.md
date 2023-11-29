@@ -1,10 +1,13 @@
-# Computer vision demo
+# Computer Vision Demo / Workshop
 
 [![File Linting](https://github.com/redhat-na-ssa/flyingthings/actions/workflows/linting.yaml/badge.svg)](https://github.com/redhat-na-ssa/flyingthings/actions/workflows/linting.yaml)
 
-This workshop is designed to showcase OpenShift as a platform for developing and operationalizing AI/ML applications. It uses many tools in the Red Hat ecosystem as well as 3rd party applications and services. This particular workshop features a computer vision implementation and covers a workflow for custom training and serving for integration with other applications and services.
+The [workshop](docs/WORKSHOP.md) is designed to showcase OpenShift as a platform for developing and operationalizing AI/ML applications.
 
-I've created a video series explaining the workshop and a runthrough of the setup and use cases here.
+Specifically it focuses on a computer vision implementation and covers a workflow for custom training and serving for integration with other applications and services. It uses many tools in the Red Hat ecosystem as well as 3rd party applications and services.
+
+Here is a video series explaining the [workshop](docs/WORKSHOP.md) and a runthrough of the setup and use cases.
+
 [![WorkshopSeries](docs/images/youtube-channel.png)](https://youtu.be/agL8PrEPFR8?si=AL0G352nzrH2mfjP)
 
 ## Prerequisites
