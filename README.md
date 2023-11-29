@@ -154,7 +154,6 @@ Once this completes you have the option of setting up the AWS autoscaler for the
 5. Now you can run the main components and pipeline installer. These scripts are idempotent and can be run sequentially so you can launch them from the same command line. We've also included an initial training for "flyingthings" which produces the first model. While optional, we recommend running it as well as it performs a training and deployment to test that all components and autoscaling have been installed and configured properly.
 
 ```
-scripts/00-setup-components.sh
 scripts/01-setup-pipelines.sh
 scripts/02-run-train-model.sh
 ```
