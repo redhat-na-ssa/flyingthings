@@ -11,7 +11,7 @@ spec:
       default: main
       description: revision to be used from repo of the code for deployment
     - name: GIT_CONTEXT
-      default: components/demos/yolo-api/container
+      default: components/yolo-api/container
       description: dockerfile path
     - name: IMAGE_REGISTRY
       description: default image registry

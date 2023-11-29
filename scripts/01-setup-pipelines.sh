@@ -21,7 +21,7 @@ setup_pipelines(){
 }
 
 setup_yolo_base(){
-  oc apply -k components/demos/yolo-api/base
+  oc apply -k components/yolo-api/base
 }
 
 check_namespace "$@"

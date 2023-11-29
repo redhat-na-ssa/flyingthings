@@ -2,45 +2,46 @@
 apiVersion: image.openshift.io/v1
 kind: ImageStream
 metadata:
-  name: udi-rhel8
+  name: python-custom
+  annotations:
+    app.openshift.io/vcs-ref: main
+    app.openshift.io/vcs-uri: https://github.com/redhat-na-ssa/demo-ocp-yolo-api.git
 spec:
   tags:
-  - name: original
-    from:
-      kind: DockerImage
-      name: registry.redhat.io/devspaces/udi-rhel8
-    referencePolicy:
-      type: Local
   - name: latest
     from:
       kind: ImageStreamTag
-      name: udi-rhel8:original
+      name: python-custom:3.9-ubi9
 ---
 apiVersion: build.openshift.io/v1
 kind: BuildConfig
 metadata:
-  name: udi-rhel8-custom
+  name: python-custom-39
   annotations:
     app.openshift.io/vcs-ref: main
     app.openshift.io/vcs-uri: https://github.com/redhat-na-ssa/flyingthings.git
+  labels:
+    app.openshift.io/runtime: python
+    app.openshift.io/runtime-version: '3.9'
 spec:
   output:
     to:
       kind: ImageStreamTag
-      name: udi-rhel8:latest
+      name: python-custom:3.9-ubi9
   runPolicy: SerialLatestOnly
   source:
-    contextDir: components/demos/yolo-api/container
+    contextDir: components/yolo-api/container
     git:
       ref: main
       uri: https://github.com/redhat-na-ssa/flyingthings.git
     type: Git
   strategy:
     dockerStrategy:
-      dockerfilePath: Dockerfile.devspaces
+      dockerfilePath: Dockerfile.python-custom
       from:
         kind: ImageStreamTag
-        name: udi-rhel8:latest
+        name: python:3.9-ubi9
+        namespace: openshift
     type: Docker
   triggers:
   - imageChange: {}
