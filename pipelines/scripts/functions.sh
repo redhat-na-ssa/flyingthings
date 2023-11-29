@@ -210,8 +210,8 @@ resize_images(){
 }
 
 distribute_dataset(){
-  echo "Distributing dataset..."
   pushd datasets || return
+  echo "Distributing dataset..."
     python3 "/source/pipelines/scripts/images-distribute.py"
   popd || return
 }
