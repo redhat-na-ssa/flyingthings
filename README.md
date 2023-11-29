@@ -25,6 +25,8 @@ Red Hat Demo Platform Catalog (RHDP) options:
 
 ## Quickstart
 
+You can use [AI on OpenShift Dev Spaces](https://github.com/redhat-na-ssa/demo-ai-devspaces) or your local machine to explore this demo.
+
 ```
 # cluster tasks
 scripts/bootstrap.sh
@@ -37,3 +39,7 @@ scripts/02-run-train-model.sh
 ## Workshop Instructions
 
 See [WORKSHOP.md](docs/WORKSHOP.md)
+
+## Additional Resources
+
+- [AI on OpenShift Dev Spaces](https://github.com/redhat-na-ssa/demo-ai-devspaces)
