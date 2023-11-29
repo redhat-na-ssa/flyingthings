@@ -124,6 +124,6 @@ num_valid = count_files(directory_path)
 
 num_total = num_test + num_train + num_valid
 
-print("File count - Test: " + str(num_test) + " - " + format(num_test/num_total, ".0%"))
-print("File count - Train: " + str(num_train) + " - " + format(num_train/num_total, ".0%"))
-print("File count - Validation: " + str(num_valid) + " - " + format(num_valid/num_total, ".0%"))
+print("File count - Test:       [" + format(num_test/num_total, ".0%") + "] " + str(num_test))
+print("File count - Train:      [" + format(num_train/num_total, ".0%") + "] " + str(num_train))
+print("File count - Validation: [" + format(num_valid/num_total, ".0%") + "] " + str(num_valid))
