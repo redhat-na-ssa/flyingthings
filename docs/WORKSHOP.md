@@ -142,7 +142,7 @@ scripts/03-deploy-model-yolo.sh
 
 Let’s take a look at what actually got created and deployed.
 
-In Deployments, we see three apps. LabelStudio, Minio, and model-yolo.  Let’s start with Minio. We can use the route to connect to the Minio console. The username and password is minioadmin.  We can see that there is a bucket already created called “flyingthings”.  In this bucket the main thing to notice is the zip file called “flyingthings-yolo”.  This is the main artifact used in training our custom model. More on that in a bit.
+In Deployments, we see three apps. LabelStudio, Minio, and model-yolo.  Let’s start with Minio. We can use the route to connect to the Minio console. The username and password is `minioadmin`.  We can see that there is a bucket already created called `flyingthings`.  In this bucket the main thing to notice is the zip file called `flyingthings-yolo.zip`.  This is the main artifact used in training our custom model. More on that in a bit.
 
 ![alt text](images/minio-flyingthings.png "Minio Bucket")
 
@@ -150,7 +150,7 @@ We’ll come back to LabelStudio later, but let’s take a look at model-yolo wh
 
 ![alt text](images/fastapi.png "FastAPI")
 
-All of the endpoints are listed here with some basic documentation and the ability to actually send and receive data. This comes in handy as you don’t need to bother with a client that supports POST requests when you need to do simple testing. So let’s do a quick test. Expand the Detect function and click “Try It Out” to activate the panel. Now we can pick an image file to upload and have our model make a prediction. Let’s pick something good.  Perfect! Our model has predicted 20 donuts in our image. There’s also an endpoint to show the image marked up with bounding boxes and confidence scores, so let’s try that one. And, yes. We see 20 predictably delicious donuts.
+All of the endpoints are listed here with some basic documentation and the ability to actually send and receive data. This comes in handy as you don’t need to bother with a client that supports POST requests when you need to do simple testing. So let’s do a quick test. Expand the Detect function and click `Try It Out` to activate the panel. Now we can pick an image file to upload and have our model make a prediction. Let’s pick something good.  Perfect! Our model has predicted 20 donuts in our image. There’s also an endpoint to show the image marked up with bounding boxes and confidence scores, so let’s try that one. And, yes. We see 20 predictably delicious donuts.
 
 ![alt text](images/mmmm-donuts.png "mmmm donuts")
 
@@ -160,7 +160,7 @@ Our pipeline has the option to deploy this same model server for any custom mode
 
 ### Overview
 
-We’re going to make a custom model that can detect helicopters and airplanes. For this model, I’ve downloaded hundreds of images of planes and helicopters from Kaggle and already created annotations for the set. You will see it in the flyingthings-yolo.zip file in the bucket.
+We’re going to make a custom model that can detect helicopters and airplanes. For this model, I’ve downloaded hundreds of images of planes and helicopters from Kaggle and already created annotations for the set. You will see it in the `flyingthings-yolo.zip` file in the bucket.
 
 If we unzip the file you will find the class file and folders containing the images and the labels.
 
