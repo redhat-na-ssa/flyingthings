@@ -6,6 +6,7 @@ resources:
   # - 01-operator-configs
   - 02-components
   - demo-devspaces-nvidia-gpu-autoscale
+  - tekton-operator
 
 patches:
   - target:
