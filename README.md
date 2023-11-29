@@ -40,7 +40,7 @@ Optional
 
 ## Quickstart
 
-You can use [AI on OpenShift Dev Spaces](https://github.com/redhat-na-ssa/demo-ai-devspaces) or your local machine to explore this demo.
+You can use [OpenShift Dev Spaces for AI / ML](https://github.com/redhat-na-ssa/demo-ai-devspaces) or your local machine to explore this demo.
 
 ```
 # cluster tasks
@@ -57,4 +57,4 @@ See [WORKSHOP.md](docs/WORKSHOP.md)
 
 ## Additional Resources
 
-- [AI on OpenShift Dev Spaces](https://github.com/redhat-na-ssa/demo-ai-devspaces)
+- [OpenShift Dev Spaces for AI / ML](https://github.com/redhat-na-ssa/demo-ai-devspaces)
