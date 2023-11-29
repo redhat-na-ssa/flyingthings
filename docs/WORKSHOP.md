@@ -99,28 +99,35 @@ We then annotate, as before, and repeat the process until we have acceptable con
 
 ## Building the workshop
 
-1. Login to your cluster from your workstation.
-2. Clone the repository to your workstation.
+Login to your cluster from your workstation.
+
+Clone the repository to your workstation.
 
 ```
 git clone < repo >
 ```
 
-3. Go to the directory flyingthings and create the project where you will be deploying the workshop. Make sure your shell is `bash`
+Go to the directory flyingthings and create the project where you will be deploying the workshop. Make sure your shell is `bash`
 
 ```
 oc new-project ml-demo
 ```
 
-4. Run script to install and configure cluster components. You may receive errors if this is the first time running the bootstrap. This can be caused due to components not being ready. Simply wait a minute or so and run again.
+Run the `bootstrap.sh` script to install and configure cluster components. You may receive errors if this is the first time running the bootstrap. This can be caused due to components not being ready. Simply wait a minute or so and run it again.
 
 ```
 scripts/bootstrap.sh
 ```
 
-Once this completes you have the option of setting up the AWS autoscaler for the GPU node. This does two things: 1. Reduces the installation to a compact cluster to 3 nodes (3 control plane/worker nodes). This can help save on hosting costs. 2. It creates a Machineset for the GPU node which it uses to provision a GPU when needed and deletes it after a period of idle time. These actions are entirely controlled by pipeline. If not hosting on AWS you can ignore the message.
+This will attempt to setup the AWS autoscaler for the GPU nodes. This does two things:
 
-5. Now you can run the main components and pipeline installer. These scripts are idempotent and can be run sequentially so you can launch them from the same command line. We've also included an initial training for "flyingthings" which produces the first model. While optional, we recommend running it as well as it performs a training and deployment to test that all components and autoscaling have been installed and configured properly.
+- Reduces the installation to a compact cluster to 1-3 nodes - this helps save on hosting costs.
+
+- Creates a Machineset for the GPU node which is used to provision a GPU when needed and deletes it after a period of idle time. These actions are entirely controlled by the OpenShift autoscaler. If not hosting on AWS you can ignore the message.
+
+Now you can run the main components and pipeline installer. These scripts are idempotent and can be run sequentially so you can launch them from the same command line.
+
+We've also included an initial training for "flyingthings" which produces the first model. While optional, we recommend running it as well as it performs a training and deployment to test that all components and autoscaling have been installed and configured properly.
 
 ```
 scripts/01-setup-pipelines.sh
