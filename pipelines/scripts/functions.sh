@@ -253,7 +253,7 @@ create_names_array(){
   done < classes.txt
 }
 
-create_classesfile(){
+create_classes_file(){
   pushd datasets || exit 1
   
   NC=$( wc -l < classes.txt )
