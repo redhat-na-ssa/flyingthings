@@ -22,7 +22,7 @@ patches:
         value: https://github.com/redhat-na-ssa/flyingthings.git
       - op: replace
         path: /spec/source/contextDir
-        value: components/demos/label-studio/container/s2i
+        value: components/label-studio/container/s2i
       - op: replace
         path: /spec/source/git/ref
         value: main

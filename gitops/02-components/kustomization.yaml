@@ -5,6 +5,6 @@ namespace: ml-demo
 
 resources:
   - ../../components/minio
-  - ../../components/demos/label-studio/overlays/flyingthings
+  - ../../components/label-studio/overlays/flyingthings
   - link-github.yaml
   - namespace.yaml
