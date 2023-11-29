@@ -209,16 +209,11 @@ resize_images(){
     "${IMG_WIDTH}"
 }
 
-images_distribute(){
-  echo "Distributing images..."
+distribute_dataset(){
+  echo "Distributing dataset..."
   pushd datasets || return
     python3 "/source/pipelines/scripts/images-distribute.py"
   popd || return
-}
-
-distribute_dataset(){
-  echo "Distributing dataset..."
-  images_distribute
 }
 
 check_base_image(){

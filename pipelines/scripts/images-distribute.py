@@ -3,17 +3,8 @@ import os
 import random
 import shutil
 
-path = os.getcwd()
-print("My Current Path is: " + str(path))
-
-
-def count_files(directory):
-    file_count = 0
-    # Iterate over all files in the directory
-    for _, _, files in os.walk(directory):
-        file_count += len(files)
-    return file_count
-
+# path = os.getcwd()
+# print("Current Path is: " + str(path))
 
 # Set the paths for the original image and label directories
 image_dir = "images"
@@ -27,33 +18,44 @@ train_split = 0.7
 test_split = 0.15
 valid_split = 0.15
 
-# Create the training directory
-os.makedirs(training_dir, exist_ok=True)
+def count_files(directory):
+    file_count = 0
+    # Iterate over all files in the directory
+    for _, _, files in os.walk(directory):
+        file_count += len(files)
+    return file_count
 
-# Create the train, test, and valid directories within the training directory
-train_dir = os.path.join(training_dir, "train")
-test_dir = os.path.join(training_dir, "test")
-valid_dir = os.path.join(training_dir, "valid")
+def create_folders():
+    # Create the training directory
+    os.makedirs(training_dir, exist_ok=True)
 
-os.makedirs(train_dir, exist_ok=True)
-os.makedirs(test_dir, exist_ok=True)
-os.makedirs(valid_dir, exist_ok=True)
+    # Create the train, test, and valid directories within the training directory
+    train_dir = os.path.join(training_dir, "train")
+    test_dir = os.path.join(training_dir, "test")
+    valid_dir = os.path.join(training_dir, "valid")
 
-# Create image and label directories within train, test, and valid directories
-train_image_dir = os.path.join(train_dir, "images")
-train_label_dir = os.path.join(train_dir, "labels")
-os.makedirs(train_image_dir, exist_ok=True)
-os.makedirs(train_label_dir, exist_ok=True)
+    os.makedirs(train_dir, exist_ok=True)
+    os.makedirs(test_dir, exist_ok=True)
+    os.makedirs(valid_dir, exist_ok=True)
 
-test_image_dir = os.path.join(test_dir, "images")
-test_label_dir = os.path.join(test_dir, "labels")
-os.makedirs(test_image_dir, exist_ok=True)
-os.makedirs(test_label_dir, exist_ok=True)
+    # Create image and label directories within train, test, and valid directories
+    train_image_dir = os.path.join(train_dir, "images")
+    train_label_dir = os.path.join(train_dir, "labels")
+    os.makedirs(train_image_dir, exist_ok=True)
+    os.makedirs(train_label_dir, exist_ok=True)
 
-valid_image_dir = os.path.join(valid_dir, "images")
-valid_label_dir = os.path.join(valid_dir, "labels")
-os.makedirs(valid_image_dir, exist_ok=True)
-os.makedirs(valid_label_dir, exist_ok=True)
+    test_image_dir = os.path.join(test_dir, "images")
+    test_label_dir = os.path.join(test_dir, "labels")
+    os.makedirs(test_image_dir, exist_ok=True)
+    os.makedirs(test_label_dir, exist_ok=True)
+
+    valid_image_dir = os.path.join(valid_dir, "images")
+    valid_label_dir = os.path.join(valid_dir, "labels")
+    os.makedirs(valid_image_dir, exist_ok=True)
+    os.makedirs(valid_label_dir, exist_ok=True)
+
+
+create_folders()
 
 # Retrieve the list of image filenames
 image_filenames = os.listdir(image_dir)
@@ -115,7 +117,8 @@ for filename in image_filenames[train_count + test_count :]:
     dest_label_path = os.path.join(valid_label_dir, label_filename)
     shutil.copy(src_label_path, dest_label_path)
 
-print("dataset files distributed to test, train, and valid")
+print("Dataset files distributed to folders: test, train, and valid")
+
 directory_path = "training/test/images"
 num_test = count_files(directory_path)
 directory_path = "training/train/images"
@@ -123,6 +126,8 @@ num_train = count_files(directory_path)
 directory_path = "training/valid/images"
 num_valid = count_files(directory_path)
 
-print("Test image count: " + str(num_test))
-print("Train image count: " + str(num_train))
-print("Validation image count: " + str(num_valid))
+num_total = num_test + num_train + num_valid
+
+print("File count - Test: " + str(num_test) + " - " + format(num_test/num_total, ".0%"))
+print("File count - Train: " + str(num_train) + " - " + format(num_train/num_total, ".0%"))
+print("File count - Validation: " + str(num_valid) + " - " + format(num_valid/num_total, ".0%"))
