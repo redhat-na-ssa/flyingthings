@@ -237,6 +237,45 @@ check_base_image(){
   unset READY
 }
 
+create_json_array(){
+  NAMES=$( printf "'%s'," "${LIST[@]}" )
+  NAMES="[${NAMES: : -1}]"
+  # echo "${NAMES}"
+}
+
+create_names_array(){
+  LIST=()
+
+  local IFS=''
+  while read -r ITEM
+  do
+    LIST+=("${ITEM}")
+  done < classes.txt
+}
+
+create_classesfile(){
+  pushd datasets || exit 1
+  
+  NC=$( wc -l < classes.txt )
+
+  create_names_array
+  create_json_array
+
+cat > ../classes.yaml <<YAML
+path: training
+train: train/images
+val: valid/images
+test: test/images
+
+nc: ${NC}
+names: ${NAMES}
+YAML
+
+  cat ../classes.yaml
+
+  popd || return
+}
+
 # debug
 id; umask
 # df -h; pwd; ls -lsa
