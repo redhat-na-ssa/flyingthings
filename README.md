@@ -53,7 +53,7 @@ scripts/02-run-train-model.sh
 
 ## Workshop Instructions
 
-See [WORKSHOP.md](docs/WORKSHOP.md)
+See [docs/WORKSHOP.md](docs/WORKSHOP.md)
 
 ## Additional Resources
 
