@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ml-demo
+  annotations:
+    openshift.io/display-name: "ML Tekton (Demo)"
+    argocd.argoproj.io/sync-wave: "0"

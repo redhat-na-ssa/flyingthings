@@ -14,14 +14,9 @@ check_namespace(){
   oc project "${NAMESPACE}" >/dev/null 2>&1 || oc new-project "${NAMESPACE}"
 }
 
-setup_minio(){
-  oc apply -k components/demos/minio
-}
-
-setup_label_studio(){
-  oc apply -k components/demos/label-studio/overlays/flyingthings
+setup_components(){
+  oc apply -k gitops/02-components
 }
 
 check_namespace "$@"
-setup_minio
-setup_label_studio
+setup_components
