@@ -25,37 +25,33 @@ def count_files(directory):
         file_count += len(files)
     return file_count
 
-def create_folders():
-    # Create the training directory
-    os.makedirs(training_dir, exist_ok=True)
+# Create the training directory
+os.makedirs(training_dir, exist_ok=True)
 
-    # Create the train, test, and valid directories within the training directory
-    train_dir = os.path.join(training_dir, "train")
-    test_dir = os.path.join(training_dir, "test")
-    valid_dir = os.path.join(training_dir, "valid")
+# Create the train, test, and valid directories within the training directory
+train_dir = os.path.join(training_dir, "train")
+test_dir = os.path.join(training_dir, "test")
+valid_dir = os.path.join(training_dir, "valid")
 
-    os.makedirs(train_dir, exist_ok=True)
-    os.makedirs(test_dir, exist_ok=True)
-    os.makedirs(valid_dir, exist_ok=True)
+os.makedirs(train_dir, exist_ok=True)
+os.makedirs(test_dir, exist_ok=True)
+os.makedirs(valid_dir, exist_ok=True)
 
-    # Create image and label directories within train, test, and valid directories
-    train_image_dir = os.path.join(train_dir, "images")
-    train_label_dir = os.path.join(train_dir, "labels")
-    os.makedirs(train_image_dir, exist_ok=True)
-    os.makedirs(train_label_dir, exist_ok=True)
+# Create image and label directories within train, test, and valid directories
+train_image_dir = os.path.join(train_dir, "images")
+train_label_dir = os.path.join(train_dir, "labels")
+os.makedirs(train_image_dir, exist_ok=True)
+os.makedirs(train_label_dir, exist_ok=True)
 
-    test_image_dir = os.path.join(test_dir, "images")
-    test_label_dir = os.path.join(test_dir, "labels")
-    os.makedirs(test_image_dir, exist_ok=True)
-    os.makedirs(test_label_dir, exist_ok=True)
+test_image_dir = os.path.join(test_dir, "images")
+test_label_dir = os.path.join(test_dir, "labels")
+os.makedirs(test_image_dir, exist_ok=True)
+os.makedirs(test_label_dir, exist_ok=True)
 
-    valid_image_dir = os.path.join(valid_dir, "images")
-    valid_label_dir = os.path.join(valid_dir, "labels")
-    os.makedirs(valid_image_dir, exist_ok=True)
-    os.makedirs(valid_label_dir, exist_ok=True)
-
-
-create_folders()
+valid_image_dir = os.path.join(valid_dir, "images")
+valid_label_dir = os.path.join(valid_dir, "labels")
+os.makedirs(valid_image_dir, exist_ok=True)
+os.makedirs(valid_label_dir, exist_ok=True)
 
 # Retrieve the list of image filenames
 image_filenames = os.listdir(image_dir)
