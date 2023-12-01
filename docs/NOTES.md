@@ -23,4 +23,14 @@ pass: password1
     -n ml-demo \
     label-studio-s2i \
     --patch '[{"op": "add", "path": "/spec/source/git/ref", "value": "gitops-catalog" }]' --type=json
+
+  oc patch bc \
+    -n ml-demo \
+    python-custom-39 \
+    --patch '[{"op": "add", "path": "/spec/source/git/ref", "value": "gitops-catalog" }]' --type=json
+
+  oc patch bc \
+    -n ml-demo \
+    yolo-api-source-ubi \
+    --patch '[{"op": "add", "path": "/spec/source/git/ref", "value": "gitops-catalog" }]' --type=json
 ```
