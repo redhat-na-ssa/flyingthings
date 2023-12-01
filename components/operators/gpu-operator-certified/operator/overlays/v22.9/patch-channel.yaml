@@ -1,6 +1,0 @@
-- op: replace
-  path: /spec/channel
-  value: v22.9
-# - op: replace
-#   path: /spec/startingCSV
-#   value: gpu-operator-certified.v22.9.1

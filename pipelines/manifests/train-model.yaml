@@ -165,7 +165,7 @@ spec:
 
             source $(workspaces.source.path)/pipelines/scripts/functions.sh && \
             cd_to_scratch && \
-            $(workspaces.source.path)/pipelines/scripts/create-classfile.sh
+            create_classes_file
       runAfter:
         - get-dataset
       workspaces:

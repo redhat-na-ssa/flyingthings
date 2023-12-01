@@ -209,16 +209,11 @@ resize_images(){
     "${IMG_WIDTH}"
 }
 
-images_distribute(){
-  echo "Distributing images..."
+distribute_dataset(){
   pushd datasets || return
+  echo "Distributing dataset..."
     python3 "/source/pipelines/scripts/images-distribute.py"
   popd || return
-}
-
-distribute_dataset(){
-  echo "Distributing dataset..."
-  images_distribute
 }
 
 check_base_image(){
@@ -235,6 +230,45 @@ check_base_image(){
 
   echo "[ OK ]"
   unset READY
+}
+
+create_json_array(){
+  NAMES=$( printf "'%s'," "${LIST[@]}" )
+  NAMES="[${NAMES: : -1}]"
+  # echo "${NAMES}"
+}
+
+create_names_array(){
+  LIST=()
+
+  local IFS=''
+  while read -r ITEM
+  do
+    LIST+=("${ITEM}")
+  done < classes.txt
+}
+
+create_classes_file(){
+  pushd datasets || exit 1
+  
+  NC=$( wc -l < classes.txt )
+
+  create_names_array
+  create_json_array
+
+cat > ../classes.yaml <<YAML
+path: training
+train: train/images
+val: valid/images
+test: test/images
+
+nc: ${NC}
+names: ${NAMES}
+YAML
+
+  cat ../classes.yaml
+
+  popd || return
 }
 
 # debug

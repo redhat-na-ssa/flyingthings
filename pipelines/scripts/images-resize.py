@@ -4,7 +4,7 @@ import sys
 import cv2
 
 
-def resize_images(source_dir, dest_dir, max_width):
+def images_resize(source_dir, dest_dir, max_width):
     try:
         os.makedirs(dest_dir, exist_ok=True)
 
@@ -37,11 +37,11 @@ def resize_images(source_dir, dest_dir, max_width):
 
 if __name__ == "__main__":
     if len(sys.argv) != 4:
-        print("Usage: python resize_images.py <source_dir> <dest_dir> <max_width>")
+        print("Usage: python images-resize.py <source_dir> <dest_dir> <max_width>")
         sys.exit(1)
 
     source_directory = sys.argv[1]
     destination_directory = sys.argv[2]
     max_width = int(sys.argv[3])
 
-    resize_images(source_directory, destination_directory, max_width)
+    images_resize(source_directory, destination_directory, max_width)

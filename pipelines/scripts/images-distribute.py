@@ -3,17 +3,8 @@ import os
 import random
 import shutil
 
-path = os.getcwd()
-print("My Current Path is: " + str(path))
-
-
-def count_files(directory):
-    file_count = 0
-    # Iterate over all files in the directory
-    for _, _, files in os.walk(directory):
-        file_count += len(files)
-    return file_count
-
+# path = os.getcwd()
+# print("Current Path is: " + str(path))
 
 # Set the paths for the original image and label directories
 image_dir = "images"
@@ -26,6 +17,13 @@ training_dir = "training"
 train_split = 0.7
 test_split = 0.15
 valid_split = 0.15
+
+def count_files(directory):
+    file_count = 0
+    # Iterate over all files in the directory
+    for _, _, files in os.walk(directory):
+        file_count += len(files)
+    return file_count
 
 # Create the training directory
 os.makedirs(training_dir, exist_ok=True)
@@ -115,7 +113,8 @@ for filename in image_filenames[train_count + test_count :]:
     dest_label_path = os.path.join(valid_label_dir, label_filename)
     shutil.copy(src_label_path, dest_label_path)
 
-print("dataset files distributed to test, train, and valid")
+print("Dataset files distributed to folders: test, train, and valid")
+
 directory_path = "training/test/images"
 num_test = count_files(directory_path)
 directory_path = "training/train/images"
@@ -123,6 +122,8 @@ num_train = count_files(directory_path)
 directory_path = "training/valid/images"
 num_valid = count_files(directory_path)
 
-print("Test image count: " + str(num_test))
-print("Train image count: " + str(num_train))
-print("Validation image count: " + str(num_valid))
+num_total = num_test + num_train + num_valid
+
+print("File count - Test:       [" + format(num_test/num_total, ".0%") + "] " + str(num_test))
+print("File count - Train:      [" + format(num_train/num_total, ".0%") + "] " + str(num_train))
+print("File count - Validation: [" + format(num_valid/num_total, ".0%") + "] " + str(num_valid))
