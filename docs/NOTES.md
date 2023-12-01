@@ -15,3 +15,12 @@
 
 user: user1@example.com
 pass: password1
+
+### patch bc for branch testing
+
+```
+  oc patch bc \
+    -n ml-demo \
+    label-studio-s2i \
+    --patch '[{"op": "add", "path": "/spec/source/git/ref", "value": "gitops-catalog" }]' --type=json
+```
