@@ -10,7 +10,7 @@ COPY --chown=1001:0 requirements.txt .
 RUN pip3 install --no-cache -U pip setuptools wheel && \
     pip3 install --no-cache -r requirements.txt
 
-COPY --chown=1001:0 entrypoint.sh .
+COPY --chown=1001:0 entrypoint.sh /opt/app-root/bin
 
 ENV DJANGO_SETTINGS_MODULE=core.settings.label_studio \
     LABEL_STUDIO_BASE_DATA_DIR=${LS_DIR}/data \
@@ -25,5 +25,5 @@ LABEL name="Label Studio" \
   summary="LabelStudio" \
   description="Label Studio is an open source data labeling tool."
 
-ENTRYPOINT ["/opt/app-root/src/entrypoint.sh"]
+ENTRYPOINT ["/opt/app-root/bin/entrypoint.sh"]
 CMD ["label-studio"]
