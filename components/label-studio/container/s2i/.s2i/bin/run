@@ -48,6 +48,13 @@ run_s2i_override(){
 usage
 [ "${1}" = "-h" ] && exit 0
 
+kludge_to_newest(){
+  label-studio version
+  pip install --no-cache -U label-studio -q
+}
+
+kludge_to_newest
+
 run_s2i_override
-run_s2i_default
+# run_s2i_default
 run_sleep
