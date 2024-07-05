@@ -50,7 +50,7 @@ spec:
     git:
       uri: https://github.com/redhat-na-ssa/flyingthings.git
     contextDir: components/custom-image
-    ref: custom-image
+    ref: main
   strategy:
     dockerStrategy:
       from:
