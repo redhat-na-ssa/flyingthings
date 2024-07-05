@@ -22,19 +22,12 @@ spec:
   lookupPolicy:
     local: true
   tags:
-    - name: "3.3.5"
+    - name: "1.0.0"
       annotations:
         opendatahub.io/default-image: 'true'
         opendatahub.io/workbench-image-recommended: 'true'
         opendatahub.io/notebook-python-dependencies: >-
-          [{"name":"Boto3","version":"1.26"},
-          {"name":"Kafka-Python","version":"2.0"},
-          {"name":"Matplotlib","version":"3.6"},
-          {"name":"Numpy","version":"1.24"},
-          {"name":"Pandas","version":"1.5"},
-          {"name":"Scikit-learn","version":"1.2"},
-          {"name":"Scipy","version":"1.10"},
-          {"name":"Dlib","version":"19.x"}]
+          [{"name":"Dlib","version":"19.x"}]
         opendatahub.io/notebook-software: >-
           [{"name":"Python","version":"v3.9"}]
 ---
@@ -67,4 +60,4 @@ spec:
   output:
     to:
       kind: ImageStreamTag
-      name: computer-vision:3.3.5
+      name: computer-vision:1.0.0
