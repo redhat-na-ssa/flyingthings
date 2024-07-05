@@ -7,6 +7,7 @@ FROM ${BASE_IMAGE}
 USER 0
 
 # hadolint ignore=DL3003
-RUN dnf upgrade -y --refresh
+RUN dnf upgrade -y --refresh && \
+    pip install dlib==19.* --no-cache-dir
 
 USER 1001

@@ -51,16 +51,17 @@ spec:
       imageChange:
         from:
           kind: ImageStreamTag
-          name: s2i-generic-data-science-notebook:2023.1
+          name: s2i-generic-data-science-notebook:2024.1
   source:
     git:
       uri: https://github.com/redhat-na-ssa/flyingthings.git
     contextDir: components/custom-image
+    ref: custom-image
   strategy:
     dockerStrategy:
       from:
         kind: ImageStreamTag
-        name: s2i-generic-data-science-notebook:2023.1
+        name: s2i-generic-data-science-notebook:2024.1
       dockerfilePath: Containerfile
   output:
     to:
