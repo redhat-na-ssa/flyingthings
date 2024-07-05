@@ -1,0 +1,63 @@
+---
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  annotations:
+    opendatahub.io/notebook-image-creator: ai-catalog
+    opendatahub.io/notebook-image-desc: >
+      Jupyter notebook image built on top of a set of data science libraries
+      that advanced AI/ML notebooks will use as a base image, with the addition
+      of the custom libraries.
+    opendatahub.io/notebook-image-name: Computer Vision
+    opendatahub.io/notebook-image-url: https://github.com/redhat-na-ssa/flyingthings.git
+    argocd.argoproj.io/sync-wave: "3"
+  labels:
+    # note: the following label allows the notebook to show up in the dashboard
+    # note: byon = bring your own notebook?
+    app.kubernetes.io/created-by: byon
+    opendatahub.io/dashboard: "true"
+    opendatahub.io/notebook-image: "true"
+  name: computer-vision
+spec:
+  lookupPolicy:
+    local: true
+  tags:
+    - name: "1.0.0"
+      annotations:
+        opendatahub.io/default-image: 'true'
+        opendatahub.io/workbench-image-recommended: 'true'
+        opendatahub.io/notebook-python-dependencies: >-
+          [{"name":"Dlib","version":"19.x"}]
+        opendatahub.io/notebook-software: >-
+          [{"name":"Python","version":"v3.9"}]
+---
+kind: BuildConfig
+apiVersion: build.openshift.io/v1
+metadata:
+  name: computer-vision
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  runPolicy: Serial
+  triggers:
+    - type: ConfigChange
+    - type: ImageChange
+      imageChange:
+        from:
+          kind: ImageStreamTag
+          name: s2i-generic-data-science-notebook:2024.1
+  source:
+    git:
+      uri: https://github.com/redhat-na-ssa/flyingthings.git
+    contextDir: components/custom-image
+    ref: main
+  strategy:
+    dockerStrategy:
+      from:
+        kind: ImageStreamTag
+        name: s2i-generic-data-science-notebook:2024.1
+      dockerfilePath: Containerfile
+  output:
+    to:
+      kind: ImageStreamTag
+      name: computer-vision:1.0.0

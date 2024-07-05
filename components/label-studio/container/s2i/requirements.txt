@@ -1,0 +1,2 @@
+label-studio==1.9.*
+psycopg2-binary

@@ -1,0 +1,40 @@
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: yolo-api-add-ffmpeg
+  annotations:
+    app.openshift.io/vcs-ref: main
+    app.openshift.io/vcs-uri: https://github.com/redhat-na-ssa/flyingthings.git
+  labels:
+    app.openshift.io/runtime: python
+    app.openshift.io/runtime-version: '3.9'
+spec:
+  output:
+    to:
+      kind: ImageStreamTag
+      name: yolo-api:video
+  runPolicy: SerialLatestOnly
+  source:
+    type: dockerfile
+    dockerfile: |
+      FROM quay.io/centos/centos:stream9
+      USER 0
+
+      ARG BUILD_VER=0.0
+      ENV BUILD_VER=${BUILD_VER}
+
+      RUN dnf install -y epel-release && \
+          /usr/bin/crb enable && \
+          dnf install -y git wget libGL python3-pip ffmpeg-free && \
+          dnf clean all
+  strategy:
+    dockerStrategy:
+      from:
+        kind: ImageStreamTag
+        name: yolo-api:docker-centos
+  triggers:
+  - imageChange: {}
+    type: ImageChange
+  - type: ConfigChange
+status:
+  lastVersion: 1336

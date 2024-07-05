@@ -1,0 +1,42 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: train-model-gpu
+spec:
+  params:
+    - name: SCRIPT
+      type: string
+    - name: IMAGE
+      type: string
+  steps:
+    - name: train-model-using-gpu
+      image: $(params.IMAGE)
+      script: |
+        $(params.SCRIPT)
+
+        cd $(workspaces.source.path)
+
+        source $(workspaces.source.path)/pipelines/scripts/functions.sh && \
+        cd_to_scratch && \
+        model_training
+      resources:
+        limits:
+          nvidia.com/gpu: 1
+      volumeMounts:
+        - mountPath: /dev/shm
+          name: dshm
+        - mountPath: /usr/local/lib/python3.9/site-packages/yolov5/training
+          name: training
+  volumes:
+    - name: dshm
+      emptyDir:
+        medium: Memory
+        sizeLimit: 4Gi
+    - name: training
+      emptyDir: {}
+  workspaces:
+    - name: scratch
+      mountPath: /source/scratch
+      optional: true
+    - name: source
+      mountPath: /source

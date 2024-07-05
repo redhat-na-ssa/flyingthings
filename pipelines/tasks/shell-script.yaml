@@ -1,0 +1,38 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: shell-script
+spec:
+  results:
+    - name: output
+      description: Generic output you can use as a result
+  params:
+    - name: SCRIPT
+      description: The bash script you want to run
+      type: string
+      default: |
+        pwd && ls -l && id
+        date | tee $(results.output.path)
+    - name: IMAGE
+      description: The image used to run the script
+      type: string
+      default: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
+  steps:
+    # - name: debug
+    #   image: $(params.IMAGE)
+    #   script: |
+    #     #!/usr/bin/env bash
+    #     df -h && pwd && ls -al
+    - name: run
+      image: $(params.IMAGE)
+      resources: {}
+      script: |
+        #!/usr/bin/env bash
+        $(params.SCRIPT)
+  workspaces:
+    - name: source
+      mountPath: /source
+      optional: true
+    - name: scratch
+      mountPath: /scratch
+      optional: true

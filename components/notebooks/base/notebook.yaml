@@ -1,0 +1,73 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: notebook
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notebook
+spec:
+  selector:
+    matchLabels:
+      app: notebook
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: notebook
+    spec:
+      containers:
+        - name: container
+          image: >-
+            image-registry.openshift-image-registry.svc:5000/flyingthings-standalone/yolo-notebook:latest
+          ports:
+            - containerPort: 8888
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /mydata
+              name: notebook-data
+            - mountPath: /dev/shm
+              name: dshm
+          resources: {}
+      volumes:
+        - name: notebook-data
+          persistentVolumeClaim:
+            claimName: notebook
+        - name: dshm
+          emptyDir:
+            medium: Memory
+  strategy:
+    type: Recreate
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: notebook
+spec:
+  selector:
+    app: notebook
+  ports:
+    - protocol: TCP
+      port: 8888
+---
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: notebook
+spec:
+  to:
+    kind: Service
+    name: notebook
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Allow
+  port:
+    targetPort: 8888

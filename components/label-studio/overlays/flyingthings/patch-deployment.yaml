@@ -1,0 +1,59 @@
+- op: replace
+  path: /spec/template/spec/containers/0/env
+  value:
+    - name: JSON_LOG
+      value: "1"
+- op: add
+  path: /spec/template/spec/initContainers
+  value:
+    - name: setup
+      command:
+        - bash
+        - -c
+        - |
+          #/bin/sh
+          set -x
+
+          CONFIG_PATH=/opt/app-root/src/.local/share
+
+          download_config(){
+            [ ! -e "${CONFIG_PATH}" ] && mkdir -p "${CONFIG_PATH}"
+
+            cd "${CONFIG_PATH}"
+
+            [ -e label-studio/label_studio.sqlite3 ] && return
+
+            # fileid="16qq4YFPmU2rQ7ZPRfqL0oBmOCz_Dnbp7"
+            # filename="label-studio.tar.gz"
+            # url="https://drive.google.com/uc?export=download"
+
+            # curl -s -c ./cookie -L "${url}&id=${fileid}" > /dev/null
+            # curl -s -b ./cookie -L "${url}&confirm=$(awk '/download/ {print $NF}' ./cookie)&id=${fileid}" -o ${filename}
+
+            filename="label-studio.tar.gz"
+            url="https://github.com/redhat-na-ssa/flyingthings/raw/main/artifacts/label-studio.tar.gz"
+            curl -sL "${url}" -o "${filename}"
+
+            tar vzxf label-studio.tar.gz
+            rm label-studio.tar.gz
+          }
+
+          kludge_db_migration(){
+            pip install --no-cache label-studio==1.9.* -q
+            label-studio version
+
+            pip install --no-cache -U label-studio -q
+          }
+
+          download_config
+          # kludge_db_migration
+
+      image: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
+      volumeMounts:
+        - mountPath: /opt/app-root/src
+          name: label-studio-data
+          subPath: s2i
+      resources:
+        limits:
+          cpu: 500m
+          memory: 128Mi

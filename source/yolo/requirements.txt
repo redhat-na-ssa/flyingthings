@@ -1,6 +1,0 @@
-fastapi
-uvicorn
-python-multipart
-pyyaml==5.3.1
-pytest-shutil
-dill

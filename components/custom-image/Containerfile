@@ -1,0 +1,13 @@
+ARG BASE_IMAGE=quay.io/modh/odh-generic-data-science-notebook:v2-2023a-20230322
+# hadolint ignore=DL3006
+FROM ${BASE_IMAGE}
+
+# COPY Pipfile.lock /opt/app-root/bin/
+
+USER 0
+
+# hadolint ignore=DL3003
+RUN dnf upgrade -y --refresh && \
+    pip install dlib==19.* --no-cache-dir
+
+USER 1001

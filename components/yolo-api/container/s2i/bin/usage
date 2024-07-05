@@ -1,0 +1,13 @@
+#!/bin/bash
+
+DISTRO=`cat /etc/*-release | grep ^ID= | grep -Po '".*?"' | tr -d '"'`
+
+cat <<EOF
+
+This is a custom S2I image; ${DISTRO} base image:
+
+To learn more about S2I visit: 
+- https://github.com/openshift/source-to-image
+- https://github.com/sclorg/container-common-scripts
+
+EOF
