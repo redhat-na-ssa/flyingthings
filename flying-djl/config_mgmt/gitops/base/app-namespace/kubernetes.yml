@@ -1,0 +1,10 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    kubernetes.io/metadata.name: user1-flying-djl
+  name: user1-flying-djl
+spec:
+  finalizers:
+  - kubernetes

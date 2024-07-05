@@ -1,0 +1,17 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    monitoring-key: app-services
+  name: app-services
+spec:
+  endpoints:
+    - interval: 5s
+      port: http
+      path: /q/metrics
+  namespaceSelector:
+    matchNames:
+      - user1-flying-djl
+  selector:
+    matchLabels:
+      monitoring: prometheus
