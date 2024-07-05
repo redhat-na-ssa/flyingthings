@@ -6,7 +6,6 @@ get_namespace(){
   echo ""
 }
 
-
 MENDPOINT=$(oc get route|grep minio|grep -v console|awk '{ print $2 }')
 MINIO_ENDPOINT=https://$MENDPOINT
 MINIO_BUCKET=yolo
@@ -23,29 +22,29 @@ echo "MINIO_SECRETKEY: ${MINIO_SECRETKEY}"
 echo "MODEL_IMAGE: ${MODEL_IMAGE}"
 echo "MODEL_NAME: ${MODEL_NAME}"
 
-oc new-app $MODEL_IMAGE \
-  --name=$MODEL_NAME \
+oc new-app "${MODEL_IMAGE}" \
+  --name="${MODEL_NAME}" \
   --env=WEIGHTS=model_custom.pt \
-  --env=MINIO_ENDPOINT=$MINIO_ENDPOINT \
-  --env=MINIO_BUCKET=$MINIO_BUCKET \
-  --env=MINIO_ACCESSKEY=$MINIO_ACCESSKEY \
-  --env=MINIO_SECRETKEY=$MINIO_SECRETKEY
+  --env=MINIO_ENDPOINT="${MINIO_ENDPOINT}" \
+  --env=MINIO_BUCKET="${MINIO_BUCKET}" \
+  --env=MINIO_ACCESSKEY="${MINIO_ACCESSKEY}" \
+  --env=MINIO_SECRETKEY="${MINIO_SECRETKEY}"
 
 oc apply -f - <<EOF
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
-  name: $MODEL_NAME
+  name: ${MODEL_NAME}
   labels:
-    app: $MODEL_NAME
-    app.kubernetes.io/component: $MODEL_NAME
-    app.kubernetes.io/instance: $MODEL_NAME
+    app: ${MODEL_NAME}
+    app.kubernetes.io/component: ${MODEL_NAME}
+    app.kubernetes.io/instance: ${MODEL_NAME}
 annotations:
   openshift.io/host.generated: "true"
 spec:
   to:
     kind: Service
-    name: $MODEL_NAME
+    name: ${MODEL_NAME}
     weight: 100
   port:
     targetPort: 8080-tcp
