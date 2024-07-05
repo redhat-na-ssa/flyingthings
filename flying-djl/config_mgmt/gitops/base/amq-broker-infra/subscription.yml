@@ -1,4 +1,3 @@
-
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
 metadata:
@@ -6,7 +5,7 @@ metadata:
     operators.coreos.com/amq-streams.openshift-operators: ""
   name: amq-streams
 
-  # No need for an additional operatorgroup.  
+  # No need for an additional operatorgroup.
   # 'globaloperator' already exists in this namespace
   namespace: openshift-operators
 
@@ -16,9 +15,8 @@ spec:
   # OCP 4.12 / 4.13
   #   oc get packagemanifests amq-broker-rhel8 -n openshift-marketplace -o json | jq .status.channels[].name
   channel: 7.10.x
-  #startingCSV: amq-broker-operator.v7.10.2-opr-2-0.1676475747.p
+  # startingCSV: amq-broker-operator.v7.10.2-opr-2-0.1676475747.p
 
   installPlanApproval: Automatic
   source: redhat-operators
   sourceNamespace: openshift-marketplace
-

@@ -7,7 +7,7 @@ configMapGenerator:
     files:
       - application.properties
 generatorOptions:
-  disableNameSuffixHash: true # use a static name
+  disableNameSuffixHash: true  # use a static name
 resources:
 - kubernetes.yml
 - route.yml

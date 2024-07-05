@@ -8,7 +8,7 @@ metadata:
   name: mqtt-lb
   namespace: user1-flying-djl
 spec:
-  type: LoadBalancer 
+  type: LoadBalancer
   externalTrafficPolicy: Local
   ports:
     - port: 1883
@@ -46,9 +46,9 @@ spec:
       protocols: amqp
 
   addressSettings:
-    applyRule: merge_all # merge_replace| replace_all
+    applyRule: merge_all  # merge_replace| replace_all
     addressSetting:
-    
+
     # https://activemq.apache.org/components/artemis/documentation/latest/mqtt.html#wildcard-subscriptions
     - match: 'liveObjectDetection'
 

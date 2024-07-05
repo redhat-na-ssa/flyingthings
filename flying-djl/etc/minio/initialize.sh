@@ -1,6 +1,7 @@
+#!/bin/bash
 sleep 10
 
-mc alias set rht http://rht:9000/ $MINIO_ROOT_USER $MINIO_ROOT_PASSWORD
+mc alias set rht http://rht:9000/ "$MINIO_ROOT_USER" "$MINIO_ROOT_PASSWORD"
 
 mc mb rht/flyingthings
 mc policy set public rht/flyingthings

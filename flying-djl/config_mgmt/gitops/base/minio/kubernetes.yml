@@ -91,7 +91,7 @@ spec:
             - name: MINIO_ROOT_PASSWORD
               value: minio123
             - name: MINIO_NOTIFY_MQTT_ENABLE_MLNOTIFY
-              value: on
+              value: 'on'
             - name: MINIO_NOTIFY_MQTT_BROKER_MLNOTIFY
               value: tcp://artemis-mqtt-0-svc:1883
             - name: MINIO_NOTIFY_MQTT_TOPIC_MLNOTIFY
@@ -105,10 +105,10 @@ spec:
           image: quay.io/redhat_naps_da/minio:0.0.1
 
           imagePullPolicy: Always
-          command: 
+          command:
           - /bin/bash
           - -c
-          args: 
+          args:
           - minio server /data --console-address :9090
           livenessProbe:
             failureThreshold: 3
@@ -169,7 +169,7 @@ spec:
             name: minio
             optional: false
           name: config
-        - name: appdata 
+        - name: appdata
           persistentVolumeClaim:
             claimName: minio
             readOnly: false

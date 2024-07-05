@@ -1,8 +1,7 @@
-# # config file version
 apiVersion: 1
 
-# # list of datasources to insert/update depending
-# # on what's available in the database
+# list of datasources to insert/update depending
+# on what's available in the database
 datasources:
  - name: 'Prometheus'
    type: 'prometheus'

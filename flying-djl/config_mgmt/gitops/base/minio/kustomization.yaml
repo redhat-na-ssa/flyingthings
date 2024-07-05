@@ -7,7 +7,7 @@ configMapGenerator:
     files:
       - initialize.sh
 generatorOptions:
-  disableNameSuffixHash: true # use a static name
+  disableNameSuffixHash: true  # use a static name
 resources:
 - pvc.yml
 - kubernetes.yml
