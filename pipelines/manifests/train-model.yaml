@@ -8,7 +8,7 @@ spec:
       default: https://github.com/redhat-na-ssa/flyingthings.git
       description: url of the git repo for the code of deployment
     - name: GIT_REVISION
-      default: main
+      default: djw-fix01
       description: revision to be used from repo of the code for deployment
     - name: GPU_TIMEOUT
       default: 12m
