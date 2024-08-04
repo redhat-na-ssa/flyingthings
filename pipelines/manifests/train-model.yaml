@@ -50,7 +50,7 @@ spec:
       description: default image registry
       default: image-registry.openshift-image-registry.svc:5000
     - name: UBI_IMAGE
-      default: python-custom:latest
+      default: yolo-api:latest
       description: base image for notebook
     - name: MODEL_BASE
       description: base model used to begin training
