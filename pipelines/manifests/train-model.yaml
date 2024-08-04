@@ -8,7 +8,7 @@ spec:
       default: https://github.com/redhat-na-ssa/flyingthings.git
       description: url of the git repo for the code of deployment
     - name: GIT_REVISION
-      default: djw-fix01
+      default: main
       description: revision to be used from repo of the code for deployment
     - name: GPU_TIMEOUT
       default: 12m
@@ -50,7 +50,7 @@ spec:
       description: default image registry
       default: image-registry.openshift-image-registry.svc:5000
     - name: UBI_IMAGE
-      default: python-custom:latest
+      default: yolo-api:latest
       description: base image for notebook
     - name: MODEL_BASE
       description: base model used to begin training
