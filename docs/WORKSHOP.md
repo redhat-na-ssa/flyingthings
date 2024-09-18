@@ -152,9 +152,14 @@ scripts/03-deploy-model-yolo.sh
 
 Let’s take a look at what actually got created and deployed.
 
-fiveIn Deployments, we see four apps. LabelStudio, Minio, model-flyingthings and model-yolo.  Let’s start with Minio. We can use the route to connect to the Minio console. The username and password is `minioadmin`.  We can see that there is a bucket already created called `flyingthings`.  In this bucket the main thing to notice is the zip file called `flyingthings-yolo.zip`.  This is the main artifact used in training our custom model. More on that in a bit.
+In Deployments, we see four apps. LabelStudio, Minio, model-flyingthings and model-yolo.  Let’s start with Minio. We can use the route to connect to the Minio console. The username and password is `minioadmin`.  We can see that there is a bucket already created called `flyingthings`.  In this bucket the main thing to notice is the zip file called `flyingthings-yolo.zip`.  This is the main artifact used in training our custom model. More on that in a bit.
+
+## Launching the deployed apps
+Let's take a look at the apps. We do this by navigating to and expanding "Networking" on the left menu and clicking on "Routes". If the project selector at the top of the page is not set to "ml-demo" click and select it from the list.
+- First, let's click on `minio-console`. You can login with username and password of `minioadmin`
 
 ![alt text](images/minio-flyingthings.png "Minio Bucket")
+We'll revisit this when we're ready for re-training.
 
 We’ll come back to LabelStudio later, but let’s take a look at model-yolo which we deployed earlier. This is useful as a baseline for what yolo can do out of the box and it’s a good introduction for the SWAGGER interface. After clicking on its route you should see the swagger interface.
 
