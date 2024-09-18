@@ -98,22 +98,31 @@ We then annotate, as before, and repeat the process until we have acceptable con
   - Webcam
 
 ## Building the workshop
+For this workshop we'll be interacting with environment through a browser. Once you have logged into your lab environment with the proper credentials, we're going to install the web terminal to facilitate command line interactions.
 
-Login to your cluster from your workstation.
+1. Login to your cluster from your workstation.
+2. Install the "Web Terminal" from OperatorHub.
+- From the OpenShift Console, expand the "Operators" menu item and click on "OperatorHub"
+- Type "Terminal" in the search box on the OperatorHub page.
+- Click on "Web Terminal" and click "Install"
+- Leave all the defaults and scroll to the bottom and click "Install"
+3. Once the terminal has been installed refresh your browser. You should see a new icon near the top right of the screen resembling a command prompt `>_`  Click this button to launch the terminal.
+- Note: this will launch a container with ephemeral storage, so try not to close it as it will lose anything downloaded or edited. Fortunately you can easily recover if this happens.
 
-Clone the repository to your workstation.
+4. Clone the repository to your terminal session.
 
 ```
-git clone < repo >
+git clone https://github.com/redhat-na-ssa/flyingthings.git
 ```
 
-Go to the directory flyingthings and create the project where you will be deploying the workshop. Make sure your shell is `bash`
+5. Go to the directory flyingthings and create the project where you will be deploying the workshop.
 
 ```
-oc new-project ml-demo
+cd flyingthings
 ```
 
-Run the `bootstrap.sh` script to install and configure cluster components. You may receive errors if this is the first time running the bootstrap. This can be caused due to components not being ready. Simply wait a minute or so and run it again.
+6. Run the `bootstrap.sh` script to install and configure cluster components. You may receive errors if this is the first time running the bootstrap. This can be caused due to components not being ready. Simply wait a minute or so and run it again. 
+- Note: all scripts must be run from the project root.
 
 ```
 scripts/bootstrap.sh
@@ -127,7 +136,8 @@ This will attempt to setup the AWS autoscaler for the GPU nodes. This does two t
 
 Now you can run the main components and pipeline installer. These scripts are idempotent and can be run sequentially so you can launch them from the same command line.
 
-We've also included an initial training for "flyingthings" which produces the first model. While optional, we recommend running it as well as it performs a training and deployment to test that all components and autoscaling have been installed and configured properly.
+We've also included an initial training for "flyingthings" which produces the first model. While optional, we recommend running it as well as it performs a training and deployment to test that all components and autoscaling have been installed and configured properly. 
+- Note: The training will take approximately 6 minutes, but it can take up to 12 minutes for the autoscaler to provision the GPU node. You could provision the node after running the `bootstrap.sh` script by increasing the node count on the gpu machineset from 0 to 1. Once the new node has completed provisioning and operator installations it should be ready for training.
 
 ```
 scripts/01-setup-pipelines.sh
@@ -142,7 +152,7 @@ scripts/03-deploy-model-yolo.sh
 
 Let’s take a look at what actually got created and deployed.
 
-In Deployments, we see three apps. LabelStudio, Minio, and model-yolo.  Let’s start with Minio. We can use the route to connect to the Minio console. The username and password is `minioadmin`.  We can see that there is a bucket already created called `flyingthings`.  In this bucket the main thing to notice is the zip file called `flyingthings-yolo.zip`.  This is the main artifact used in training our custom model. More on that in a bit.
+fiveIn Deployments, we see four apps. LabelStudio, Minio, model-flyingthings and model-yolo.  Let’s start with Minio. We can use the route to connect to the Minio console. The username and password is `minioadmin`.  We can see that there is a bucket already created called `flyingthings`.  In this bucket the main thing to notice is the zip file called `flyingthings-yolo.zip`.  This is the main artifact used in training our custom model. More on that in a bit.
 
 ![alt text](images/minio-flyingthings.png "Minio Bucket")
 
@@ -150,7 +160,16 @@ We’ll come back to LabelStudio later, but let’s take a look at model-yolo wh
 
 ![alt text](images/fastapi.png "FastAPI")
 
-All of the endpoints are listed here with some basic documentation and the ability to actually send and receive data. This comes in handy as you don’t need to bother with a client that supports POST requests when you need to do simple testing. So let’s do a quick test. Expand the Detect function and click `Try It Out` to activate the panel. Now we can pick an image file to upload and have our model make a prediction. Let’s pick something good.  Perfect! Our model has predicted 20 donuts in our image. There’s also an endpoint to show the image marked up with bounding boxes and confidence scores, so let’s try that one. And, yes. We see 20 predictably delicious donuts.
+All of the endpoints are listed here with some basic documentation and the ability to actually send and receive data. This comes in handy as you don’t need to bother with a client that supports POST requests when you need to do simple testing. So let’s do a quick test. 
+## Testing the model
+1. Expand the Detect function and click `Try It Out` to activate the panel. 
+2. Now we can pick an image file to upload and have our model make a prediction. Let’s pick something good.
+[![Something Good](https://raw.githubusercontent.com/redhat-na-ssa/flyingthings/main/docs/images/FunCakes-recept-delicious-donuts-website-1-960x720-c-default.jpeg)](![image_url](https://raw.githubusercontent.com/redhat-na-ssa/flyingthings/main/docs/images/FunCakes-recept-delicious-donuts-website-1-960x720-c-default.jpeg) "Download image")
+3. Downlad the above image and use the Swagger interface to send it to our model.
+4. Perfect! In the output we see our model has predicted 20 donuts in our image. 
+5. There’s also an endpoint to show the image marked up with bounding boxes and confidence scores, so let’s try that one. 
+- From the output copy the name of the file Navigate to `/uploads/get/image/{fname}` and enter the name from the previous output `FunCakes-recept-delicious-donuts-website-1-1000x750.jpg` 
+6. And, yes. We see 20 predictably delicious donuts.
 
 ![alt text](images/mmmm-donuts.png "mmmm donuts")
 
