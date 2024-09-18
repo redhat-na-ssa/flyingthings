@@ -274,27 +274,15 @@ The output of the job should spool by in the terminal, but you can also monitor 
 1. launch a new console by right clicking on the Red Hat Openshift logo in the upper left corner and select "Open link in new tab".
 2. Navigate to "Pipelines" and select "Pipelines" You should see a pipeline running with a flodder bar progressing. Click on the bar and you'll see all the tasks progresing with their output logs displayed.
 
+As the job kicks off we can monitor it from the console. Here we see all the training tasks displayed for the pipeline. With GPUs it should take around 5 or 6 minutes to run. CPUs will take significantly longer.
+
+![alt text](images/pipeline-train.png "Training Pipeline")
 It will take some time to complete, but when finished you will see the summary and have a new app deployed with your model AND artifacts from the training in your minio bucket.
 
 ### Test the new model
 1. From our "Routes" you should now see the "model-hoscale" app. Click to launch the Swagger interface.
 2. Use images in the "hoscale" folder to test the model.
 
-
-
-As the job kicks off we can monitor it from the console. Here we see all the training tasks displayed for the pipeline. With GPUs it should take around 5 or 6 minutes to run. CPUs will take significantly longer.
-
-![alt text](images/pipeline-train.png "Training Pipeline")
-
-We see that our model was deployed to model-flying things. Let’s click on its route and launch the app.`
-
-![alt text](images/route-flying.png "Flyingthings")
-
-As before, add /docs to the URL to bring up the swagger interface.  Let’s send an image of a plane and see how well it inferences.
-
-Success! We have successfully identified something not in the original yolo model.
-
-![alt text](images/flying-wing.png "Flyingthings")
 
 ## Review
 
@@ -311,3 +299,36 @@ Now, let’s review what we’ve done so far.
   - saved our model, export, and training artifacts to object storage
   - Deployed our custom model to OpenShift in a containerized FastAPI application
 - Validated our custom model by interacting with API endpoints
+
+## Extra Credit
+We've only scratched the surface here with our platform capabilities. Usually we will want an application to interact with our model. So, for extra credit, I've created a simple app to interact with our model. 
+
+We'll start with the pretrained model but you can easily adapt it to our custom models.
+
+1. From our terminal go back to the home directory and clone this repo.
+```
+cd
+git clone https://github.com/davwhite/cvbrowser.git
+```
+2. Build the image.
+```cvbrowser/build-is.sh```
+3. Edit the deployment for your cluster.
+```
+  - name: DETECT_URL
+    value: "https://model-yolo-ml-demo.apps.<your.cluster.name>/detect"
+  - name: GET_IMAGE_URL
+    value: "https://model-yolo-ml-demo.apps.<your.cluster.name>/uploads/get/image"
+  - name: GET_IMAGES_URL
+    value: "https://model-yolo-ml-demo.apps.<your.cluster.name>/uploads/get"
+image: >-
+          image-registry.openshift-image-registry.svc:5000/ml-demo/cvision-browser:latest
+```
+4. Deploy the app.
+```
+oc create -f cvbrowser/deployment_yolo.yaml 
+```
+
+Once app has deployed you can find it in "Routes" as "cvbrowser-rt". Just click on it to launch. It's a simple FastAPI app that lets you quickly upload images for object detection and allows you to review previously uploaded detections.
+
+# Wrap Up
+This simplified workflow is a demonstration of capabilities of the Kubernetes platform as provided by Red Hat and as such has only scratched the surface of possibilities. The platform makes it possible to deploy industry stand and open source tools to fit the needs of your AI/ML development needs in a way that fits your preferences and scales to meet capacity and expansion. 
