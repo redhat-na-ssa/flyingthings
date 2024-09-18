@@ -98,22 +98,31 @@ We then annotate, as before, and repeat the process until we have acceptable con
   - Webcam
 
 ## Building the workshop
+For this workshop we'll be interacting with environment through a browser. Once you have logged into your lab environment with the proper credentials, we're going to install the web terminal to facilitate command line interactions.
 
-Login to your cluster from your workstation.
+1. Login to your cluster from your workstation.
+2. Install the "Web Terminal" from OperatorHub.
+- From the OpenShift Console, expand the "Operators" menu item and click on "OperatorHub"
+- Type "Terminal" in the search box on the OperatorHub page.
+- Click on "Web Terminal" and click "Install"
+- Leave all the defaults and scroll to the bottom and click "Install"
+3. Once the terminal has been installed refresh your browser. You should see a new icon near the top right of the screen resembling a command prompt `>_`  Click this button to launch the terminal.
+- Note: this will launch a container with ephemeral storage, so try not to close it as it will lose anything downloaded or edited. Fortunately you can easily recover if this happens.
 
-Clone the repository to your workstation.
+4. Clone the repository to your terminal session.
 
 ```
-git clone < repo >
+git clone https://github.com/redhat-na-ssa/flyingthings.git
 ```
 
-Go to the directory flyingthings and create the project where you will be deploying the workshop. Make sure your shell is `bash`
+5. Go to the directory flyingthings and create the project where you will be deploying the workshop.
 
 ```
-oc new-project ml-demo
+cd flyingthings
 ```
 
-Run the `bootstrap.sh` script to install and configure cluster components. You may receive errors if this is the first time running the bootstrap. This can be caused due to components not being ready. Simply wait a minute or so and run it again.
+6. Run the `bootstrap.sh` script to install and configure cluster components. You may receive errors if this is the first time running the bootstrap. This can be caused due to components not being ready. Simply wait a minute or so and run it again. 
+- Note: all scripts must be run from the project root.
 
 ```
 scripts/bootstrap.sh
@@ -127,7 +136,8 @@ This will attempt to setup the AWS autoscaler for the GPU nodes. This does two t
 
 Now you can run the main components and pipeline installer. These scripts are idempotent and can be run sequentially so you can launch them from the same command line.
 
-We've also included an initial training for "flyingthings" which produces the first model. While optional, we recommend running it as well as it performs a training and deployment to test that all components and autoscaling have been installed and configured properly.
+We've also included an initial training for "flyingthings" which produces the first model. While optional, we recommend running it as well as it performs a training and deployment to test that all components and autoscaling have been installed and configured properly. 
+- Note: The training will take approximately 6 minutes, but it can take up to 12 minutes for the autoscaler to provision the GPU node. You could provision the node after running the `bootstrap.sh` script by increasing the node count on the gpu machineset from 0 to 1. Once the new node has completed provisioning and operator installations it should be ready for training.
 
 ```
 scripts/01-setup-pipelines.sh
@@ -142,25 +152,47 @@ scripts/03-deploy-model-yolo.sh
 
 Let’s take a look at what actually got created and deployed.
 
-In Deployments, we see three apps. LabelStudio, Minio, and model-yolo.  Let’s start with Minio. We can use the route to connect to the Minio console. The username and password is `minioadmin`.  We can see that there is a bucket already created called `flyingthings`.  In this bucket the main thing to notice is the zip file called `flyingthings-yolo.zip`.  This is the main artifact used in training our custom model. More on that in a bit.
+In Deployments, we see four apps. LabelStudio, Minio, model-flyingthings and model-yolo.  Let’s start with Minio. We can use the route to connect to the Minio console. The username and password is `minioadmin`.  We can see that there is a bucket already created called `flyingthings`.  In this bucket the main thing to notice is the zip file called `flyingthings-yolo.zip`.  This is the main artifact used in training our custom model. More on that in a bit.
+
+## Launching the deployed apps
+Let's take a look at the apps. We do this by navigating to and expanding "Networking" on the left menu and clicking on "Routes". If the project selector at the top of the page is not set to "ml-demo" click and select it from the list.
+- First, let's click on `minio-console`. You can login with username and password of `minioadmin`
 
 ![alt text](images/minio-flyingthings.png "Minio Bucket")
+We'll revisit this when we're ready for re-training, but for now leave this tab open.
 
 We’ll come back to LabelStudio later, but let’s take a look at model-yolo which we deployed earlier. This is useful as a baseline for what yolo can do out of the box and it’s a good introduction for the SWAGGER interface. After clicking on its route you should see the swagger interface.
 
 ![alt text](images/fastapi.png "FastAPI")
 
-All of the endpoints are listed here with some basic documentation and the ability to actually send and receive data. This comes in handy as you don’t need to bother with a client that supports POST requests when you need to do simple testing. So let’s do a quick test. Expand the Detect function and click `Try It Out` to activate the panel. Now we can pick an image file to upload and have our model make a prediction. Let’s pick something good.  Perfect! Our model has predicted 20 donuts in our image. There’s also an endpoint to show the image marked up with bounding boxes and confidence scores, so let’s try that one. And, yes. We see 20 predictably delicious donuts.
+All of the endpoints are listed here with some basic documentation and the ability to actually send and receive data. This comes in handy as you don’t need to bother with a client that supports POST requests when you need to do simple testing. So let’s do a quick test. 
+## Testing the model
+1. Expand the Detect function and click `Try It Out` to activate the panel. 
+2. Now we can pick an image file to upload and have our model make a prediction. Let’s pick something good.
+[![Something Good](https://raw.githubusercontent.com/redhat-na-ssa/flyingthings/main/docs/images/FunCakes-recept-delicious-donuts-website-1-960x720-c-default.jpeg)](![image_url](https://raw.githubusercontent.com/redhat-na-ssa/flyingthings/main/docs/images/FunCakes-recept-delicious-donuts-website-1-960x720-c-default.jpeg) "Download image")
+3. Downlad the above image and use the Swagger interface to send it to our model.
+4. Perfect! In the output we see our model has predicted 20 donuts in our image. 
+5. There’s also an endpoint to show the image marked up with bounding boxes and confidence scores, so let’s try that one. 
+- From the output copy the name of the file Navigate to `/uploads/get/image/{fname}` and enter the name from the previous output `FunCakes-recept-delicious-donuts-website-1-1000x750.jpg` 
+6. And, yes. We see 20 predictably delicious donuts.
 
 ![alt text](images/mmmm-donuts.png "mmmm donuts")
 
 Our pipeline has the option to deploy this same model server for any custom model we create. This will come in handy for the workshop.
 
 ## Workshop Use Case 1
+Using an existing model is a great way to jumpstart a project as you can use fine tuning or re-training to adapt it to your needs. Let's say we need to detect airplanes and helicopters. We'll see how well the pretrained model does.
+1. Go back to our `model-yolo` app. 
+2. Download the following images for input. 
+- [Download Plane Image](https://raw.githubusercontent.com/redhat-na-ssa/flyingthings/main/docs/images/f16.jpeg)
+- [Download Heli Image](https://raw.githubusercontent.com/redhat-na-ssa/flyingthings/main/docs/images/heli01.jpg)
+3. Test each of the images with the Swagger interface and see how well it detects each by the confidence score in the bounding box image.
+
+So we see it can detect the airplane fairly well but totally misses the helicopter classification. 
 
 ### Overview
 
-We’re going to make a custom model that can detect helicopters and airplanes. For this model, I’ve downloaded hundreds of images of planes and helicopters from Kaggle and already created annotations for the set. You will see it in the `flyingthings-yolo.zip` file in the bucket.
+We’re going to make a custom model that can detect helicopters and airplanes. For this model, I’ve downloaded hundreds of images of planes and helicopters from Kaggle and already created annotations for the set. You will see it in the `flyingthings-yolo.zip` file in the bucket. Download this file to your workstation.
 
 If we unzip the file you will find the class file and folders containing the images and the labels.
 
@@ -180,100 +212,77 @@ You can see the class file contains the two classes we care about, fixed wing an
 
 Alright, now it’s time to run the pipeline and get our first custom model.
 
-## Launch the pipeline
+## Launch the pipeline (optional)
 
-Go to the same directory as before, flyingthings/scripts and copy the file `xx-example-model-train.sh.txt` to a new training script like `10-run-train-hoscale.sh`.
-
-```
-cp scripts/xx-example-model-train.sh.txt 10-run-train-hoscale.sh
-chmod +x scripts/10-run-train-hoscale.sh
-```
-
-All the supplied params should be fine, but we will want to change a few if we’re not running a GPU.  If your system has no available GPUs then set *GPU* to *N*. Also, since there is no GPU we’ll need to change the *BATCH_SIZE* as it is set to maximize if there are GPUs. You should set it to 2 to avoid any memory issues.  
+We should have already run the training in previous steps. If not we can run it here
 
 ```
-#!/bin/bash
-
-get_namespace(){
-  NAMESPACE=$(oc project -q 2>/dev/null)
-  echo "NAMESPACE: ${NAMESPACE}"
-  echo ""
-}
-
-check_pipeline(){
-  PIPELINE_NAME="${1}"
-
-  # check for pipeline in current namespace
-  if oc get pipeline "${PIPELINE_NAME}" -o name; then
-    echo "PIPELINE: ${PIPELINE_NAME} exists"
-  else
-    echo "PIPELINE: ${PIPELINE_NAME} missing"
-    exit 0
-  fi
-  echo "Starting pipeline: ${PIPELINE_NAME}"
-}
-
-start_pipelines(){
-
-  get_namespace
-
-  # IMAGE_REGISTRY=image-registry.openshift-image-registry.svc:5000
-  GIT_URL=https://github.com/redhat-na-ssa/flyingthings.git
-  GIT_REVISION=main
-
-  # kludge
-  [ "${PWD##*/}" != "scripts" ] && pushd scripts || exit
-
-  # debug_pipeline; exit 0
-
-  check_pipeline train-model
-  
-  if which tkn; then
-    tkn pipeline start "${PIPELINE_NAME}" \
-      -p GIT_URL="${GIT_URL}" \
-      -p GIT_REVISION="${GIT_REVISION}" \
-      -p NAMESPACE="${NAMESPACE}" \
-      -p MODEL_BASE="yolov5s.pt" \
-      -p BATCH_SIZE="-1" \
-      -p NUM_EPOCHS="100" \
-      -p GPU_TIMEOUT="12m" \
-      -p IMG_RESIZE="Y" \
-      -p MAX_WIDTH="200" \
-      -p DATASET_ZIP=autos.zip \
-      -p MODEL_NAME=model-autos \
-      -p MODEL_WEIGHTS=autos.pt \
-      -p MINIO_BUCKET=autos \
-      -w name=source,volumeClaimTemplateFile=pvc.yaml \
-      --use-param-defaults --showlog
-  else
-    echo "View logs in the OpenShift Console => Pipelines"
-    oc create -f task-run.yaml
-  fi
-}
-
-start_pipelines
-
+scripts/02-run-train-model.sh
 ```
 
-Now execute the script on the project we’ve been using.
+## Re-test our images on the new model
+Return to the "Routes" items and launch or new model `model-flyingthings`. We'll see the Swagger interface. Use our previous heli and plane images and see the results.
 
+If all went well we should see dramatic improvement in confidence of the plane AND proper classification of the heli. You should also note that it no longer detects people in the heli image as it is only trained on the two classes.
+
+## Workshop Use Case 2
+### Overview
+Now that we know that a pretrained model can be adapted for custom classifications, let's introduce a completely new dataset. 
+- Our scenareo: detect individual automobiles from a set of HO Scale miniatures.
+
+### How we'll do it
+We'll follow a simple classification and training workflow outline above in a step by step process to produce a new custom model.
+1. I've already collected images of several vehicles and loaded them into Label Studio. Go back to the "Routes" page and launch it from the apps. Username is "user1@example.com" password is "password1".
+2. You should see a single project called "HOScale". Click on the project.
+3. You'll see a table with images for annotation. Click on any of the images and you'll see where bounding boxes and labels have been added.
+4. On the navigation at the top click back to the HOScale project.
+5. In practice, someone would go through each image and draw the boxes for each class detected in all the images. I've already labeled everything to speed this along. Now, we'll just export our images and labels to kick off a training. At the top right click on "Export".
+6. In the dialog select "YOLO" format and click "Export"
+7. It should download a file named something like "project-xx-at-xxx...". Once downloaded rename the file to `hoscale.zip`
+8. Now we'll store the export in a bucket for our training automation to pick it up. From out "Routes" page launch the "minio-console" if not already open.
+9. From the "Administrator" menu on the side click "Buckets"
+10. Click "Create Bucket" and name it "hoscale". All defaults are fine.
+11. Under "User" click "Object Browser" and navigate to your new bucket.
+12. Click "Upload File" and select our export "hoscale.zip"
+
+Once the upload is complete we're almost ready to train our custom model.
+We just need to make a new training script and we're on our way.
+
+### New training script
+1. If you web terminal is still active return to your command prompt, if not you'll need to launch a new one and re-clone the repo.
+2. Copy the training script
+- ```cp scripts/02-run-train-model.sh scripts/04-run-train-hoscale.sh```
+3. Edit the new script.
+- ```vi scripts/04-run-train-hoscale.sh```
+4. Make the following changes:
 ```
-scripts/10-run-train-hoscale.sh
+-p DATASET_ZIP=flyingthings-yolo.zip \ to -p DATASET_ZIP=hoscale.zip \
+
+-p MODEL_NAME=model-flyingthings \ to -p MODEL_NAME=model-hoscale \
+
+-p DEPLOY_ARTIFACTS="Y" \ to -p DEPLOY_ARTIFACTS="N" \
+
+-p MINIO_BUCKET=flyingthings \ to -p MINIO_BUCKET=hoscale \
 ```
+5. Save and run the file. Make sure you're in the right project.
+```
+oc project ml-demo
+scripts/04-run-train-hoscale.sh
+```
+
+The output of the job should spool by in the terminal, but you can also monitor it from the console itself. To avoid inadvertlently closing the terminal, 
+1. launch a new console by right clicking on the Red Hat Openshift logo in the upper left corner and select "Open link in new tab".
+2. Navigate to "Pipelines" and select "Pipelines" You should see a pipeline running with a flodder bar progressing. Click on the bar and you'll see all the tasks progresing with their output logs displayed.
 
 As the job kicks off we can monitor it from the console. Here we see all the training tasks displayed for the pipeline. With GPUs it should take around 5 or 6 minutes to run. CPUs will take significantly longer.
 
 ![alt text](images/pipeline-train.png "Training Pipeline")
+It will take some time to complete, but when finished you will see the summary and have a new app deployed with your model AND artifacts from the training in your minio bucket.
 
-We see that our model was deployed to model-flying things. Let’s click on its route and launch the app.`
+### Test the new model
+1. From our "Routes" you should now see the "model-hoscale" app. Click to launch the Swagger interface.
+2. Use images in the "hoscale" folder to test the model.
 
-![alt text](images/route-flying.png "Flyingthings")
-
-As before, add /docs to the URL to bring up the swagger interface.  Let’s send an image of a plane and see how well it inferences.
-
-Success! We have successfully identified something not in the original yolo model.
-
-![alt text](images/flying-wing.png "Flyingthings")
 
 ## Review
 
@@ -290,3 +299,36 @@ Now, let’s review what we’ve done so far.
   - saved our model, export, and training artifacts to object storage
   - Deployed our custom model to OpenShift in a containerized FastAPI application
 - Validated our custom model by interacting with API endpoints
+
+## Extra Credit
+We've only scratched the surface here with our platform capabilities. Usually we will want an application to interact with our model. So, for extra credit, I've created a simple app to interact with our model. 
+
+We'll start with the pretrained model but you can easily adapt it to our custom models.
+
+1. From our terminal go back to the home directory and clone this repo.
+```
+cd
+git clone https://github.com/davwhite/cvbrowser.git
+```
+2. Build the image.
+```cvbrowser/build-is.sh```
+3. Edit the deployment for your cluster.
+```
+  - name: DETECT_URL
+    value: "https://model-yolo-ml-demo.apps.<your.cluster.name>/detect"
+  - name: GET_IMAGE_URL
+    value: "https://model-yolo-ml-demo.apps.<your.cluster.name>/uploads/get/image"
+  - name: GET_IMAGES_URL
+    value: "https://model-yolo-ml-demo.apps.<your.cluster.name>/uploads/get"
+image: >-
+          image-registry.openshift-image-registry.svc:5000/ml-demo/cvision-browser:latest
+```
+4. Deploy the app.
+```
+oc create -f cvbrowser/deployment_yolo.yaml 
+```
+
+Once app has deployed you can find it in "Routes" as "cvbrowser-rt". Just click on it to launch. It's a simple FastAPI app that lets you quickly upload images for object detection and allows you to review previously uploaded detections.
+
+# Wrap Up
+This simplified workflow is a demonstration of capabilities of the Kubernetes platform as provided by Red Hat and as such has only scratched the surface of possibilities. The platform makes it possible to deploy industry stand and open source tools to fit the needs of your AI/ML development needs in a way that fits your preferences and scales to meet capacity and expansion. 
