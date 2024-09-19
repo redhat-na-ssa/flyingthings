@@ -4,6 +4,8 @@ scratch/
 files.txt
 dcgm-exporter-dashboard.json
 
+.DS_Store
+
 dictionary.dic
 
 # swap files

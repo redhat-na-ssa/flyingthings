@@ -44,9 +44,3 @@ echo "$UPDATED_OAUTH_CONFIG" | oc apply -f -
 
 # Verify the OAuth configuration was updated
 oc get oauth cluster -o json | jq '.spec.identityProviders'
-
-# Create projects for each workshop user
-for i in $(seq -w 1 10); do oc new-project user$i --display-name="User $i" --description="This is the project for user$i"; done
-
-# Add the users to the projects
-for i in $(seq -w 1 10); do oc adm policy add-role-to-user admin user$i -n user$i; done
