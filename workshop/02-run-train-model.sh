@@ -40,7 +40,7 @@ start_pipelines(){
       -p GIT_REVISION="${GIT_REVISION}" \
       -p NAMESPACE="${NAMESPACE}" \
       -p MODEL_BASE="yolov5s.pt" \
-      -p BATCH_SIZE="-1" \
+      -p BATCH_SIZE="8" \
       -p NUM_EPOCHS="100" \
       -p GPU_TIMEOUT="12m" \
       -p IMG_RESIZE="Y" \
