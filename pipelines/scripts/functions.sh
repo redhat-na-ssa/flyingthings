@@ -224,7 +224,7 @@ check_base_image(){
 
   while [ -z "${READY}" ]
   do
-    oc get istag "${IS_TAG}" -o name 2>/dev/null && \
+    oc get istag "${IS_TAG}" -n "${MAIN_NAMESPACE}" -o name 2>/dev/null && \
     READY=true && continue
     sleep 10
   done
