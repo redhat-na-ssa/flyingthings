@@ -47,7 +47,7 @@ start_pipelines(){
       -p MAX_WIDTH="200" \
       -p DATASET_ZIP=hoscale.zip \
       -p MODEL_NAME=model-hoscale \
-      -p DEPLOY_ARTIFACTS="Y" \
+      -p DEPLOY_ARTIFACTS="N" \
       -p MINIO_BUCKET=hoscale \
       -w name=source,volumeClaimTemplateFile=pvc.yaml \
       --use-param-defaults --showlog
