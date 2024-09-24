@@ -16,9 +16,6 @@ spec:
     - name: NAMESPACE
       default: ml-demo
       description: namespace for the deployment
-    - name: MAIN_NAMESPACE
-      default: ml-demo
-      description: namespace for workshop assets
     - name: BATCH_SIZE
       description: batch size for training NOTE* for CPU use a value of 2
       default: "-1"
@@ -51,7 +48,7 @@ spec:
       default: minioadmin
     - name: IMAGE_REGISTRY
       description: default image registry
-      default: image-registry.openshift-image-registry.svc:5000/ml-demo
+      default: image-registry.openshift-image-registry.svc:5000
     - name: UBI_IMAGE
       default: yolo-api:latest
       description: base image for notebook
