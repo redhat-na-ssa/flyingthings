@@ -2,7 +2,7 @@
 
 # Define the range of users and the GPU quota values
 START=1      # Starting user number (user01, user02, etc.)
-END=2       # Ending user number (user10, user11, etc.)
+END=10       # Ending user number (user10, user11, etc.)
 GPU_REQUEST="2"   # Requested GPU quota
 GPU_LIMIT="2"     # Limit for GPU usage
 

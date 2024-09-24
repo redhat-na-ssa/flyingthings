@@ -6,7 +6,7 @@ htpasswd -c -B -b scratch/users.htpasswd admin redhatadmin
 
 # Define the range of users and the GPU quota values
 START=1      # Starting user number (user01, user02, etc.)
-END=2       # Ending user number (user10, user11, etc.)
+END=10       # Ending user number (user10, user11, etc.)
 
 # Add the workshop users starting from user01 to user10 with the password redhat + the user number
 for i in $(seq -f "%02g" $START $END); do htpasswd -b scratch/users.htpasswd user$i redhat$i; done
