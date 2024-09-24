@@ -220,10 +220,10 @@ check_base_image(){
   echo "Checking base image..."
   IS_TAG="${1}"
   echo "Waiting for ${IS_TAG}..."
-  READY=true
+
   while [ -z "${READY}" ]
   do
-    oc get istag "${IS_TAG}" -n ml-demo -o name 2>/dev/null && \
+    oc get istag "${IS_TAG}" -o name 2>/dev/null && \
     READY=true && continue
     sleep 10
   done
