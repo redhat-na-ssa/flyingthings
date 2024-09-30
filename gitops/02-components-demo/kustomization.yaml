@@ -5,7 +5,7 @@ namespace: ml-demo
 
 resources:
   - ../../components/custom-image
-  - ../../components/label-studio/overlays/flyingthings
+  - ../../components/label-studio
   - ../../components/minio
   - ../../components/yolo-api/base
   - link-github.yaml

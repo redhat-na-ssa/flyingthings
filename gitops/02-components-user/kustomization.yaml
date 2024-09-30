@@ -4,7 +4,7 @@ kind: Kustomization
 namespace: user0
 
 resources:
-  - ../../components/label-studio/overlays/flyingthings
+  - ../../components/label-studio
   - ../../components/minio
   - gpu-quota.yaml
   - namespace.yaml
