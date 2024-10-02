@@ -72,7 +72,7 @@ We then annotate, as before, and repeat the process until we have acceptable con
 - Get Dataset pulls our zip file into the workspace and unzips it.
 - Create Classfile picks up the classes.txt file and converts it to a YAML file that can be - consumed by YOLO. This is a template which also identifies the folder structure for the - training.
 - If the image resize flag is set, the images will be resized to a maximum width. This module - can be used in the future for other image pre-processing that help improve accuracy.
-- Distribute Dataset groups the files into 3 groups. 70% go to training, and the remaining 30% are split beterrn test and validation. The groups are then moved to their respective directories for training. - This grouping is done randomly each run.
+- Distribute Dataset groups the files into 3 groups. 70% go to training, and the remaining 30% are split between test and validation. The groups are then moved to their respective directories for training. - This grouping is done randomly each run.
 - If the GPU flag is set the training requests a node with GPU and runs the actual training on - that node. If GPU is not set, the training is done with CPUs.
 - Once training is complete the resulting model is exported to onnx format for consumption by - other model serving solutions.
 - Now, all the artifacts from the training including the reports, model, class file, and - exports are written to object storage where they are tagged and propagated to appropriate - folders.
@@ -103,6 +103,7 @@ For this workshop we'll be interacting with environment through a browser. Once 
 
 1. Login to your cluster from your workstation.
 2. You will be in the "Developer" view of the console. You should see an icon near the top right of the screen resembling a command prompt `>_`  Click this button to launch the terminal.
+
 - Note: this will launch a container with ephemeral storage, so try not to close it as it will lose anything downloaded or edited. Fortunately you can easily recover if this happens.
 
 3. Clone the repository to your terminal session.
@@ -119,6 +120,7 @@ git checkout workshop
 ```
 
 5. We're going to deploy the YOLOv8 pre-trained model to our cluster.
+
 - Note: all scripts must be run from the project root.
 
 ```
@@ -129,52 +131,64 @@ This script simply deploys the yolo model in a FASTApi wrapper to allow us to in
 
 ![alt text](images/fastapi.png "FastAPI")
 
-All of the endpoints are listed here with some basic documentation and the ability to actually send and receive data. This comes in handy as you don’t need to bother with a client that supports POST requests when you need to do simple testing. So let’s do a quick test. 
+All of the endpoints are listed here with some basic documentation and the ability to actually send and receive data. This comes in handy as you don’t need to bother with a client that supports POST requests when you need to do simple testing. So let’s do a quick test.
+
 ## Testing the model
-1. Expand the Detect function and click `Try It Out` to activate the panel. 
+
+1. Expand the Detect function and click `Try It Out` to activate the panel.
 2. Now we can pick an image file to upload and have our model make a prediction. Let’s pick something good.
 [![Something Good](https://raw.githubusercontent.com/redhat-na-ssa/flyingthings/main/docs/images/FunCakes-recept-delicious-donuts-website-1-960x720-c-default.jpeg)](![image_url](https://raw.githubusercontent.com/redhat-na-ssa/flyingthings/main/docs/images/FunCakes-recept-delicious-donuts-website-1-960x720-c-default.jpeg) "Download image")
-3. Downlad the above image and use the Swagger interface to send it to our model.
-4. Perfect! In the output we see our model has predicted 20 donuts in our image. 
-5. There’s also an endpoint to show the image marked up with bounding boxes and confidence scores, so let’s try that one. 
-- From the output copy the name of the file Navigate to `/uploads/get/image/{fname}` and enter the name from the previous output `FunCakes-recept-delicious-donuts-website-1-1000x750.jpg` 
+3. Download the above image and use the Swagger interface to send it to our model.
+4. Perfect! In the output we see our model has predicted 20 donuts in our image.
+5. There’s also an endpoint to show the image marked up with bounding boxes and confidence scores, so let’s try that one.
+
+- From the output copy the name of the file Navigate to `/uploads/get/image/{fname}` and enter the name from the previous output `FunCakes-recept-delicious-donuts-website-1-1000x750.jpg`
+
 6. And, yes. We see 20 predictably delicious donuts.
 
 ![alt text](images/mmmm-donuts.png "mmmm donuts")
 
-
 ## Workshop Use Case 1
-Using an existing model is a great way to jumpstart a project as you can use fine tuning or re-training to adapt it to your needs. Let's say we need to detect airplanes and helicopters. We'll see how well the pretrained model does.
-1. Go back to our `model-yolo` app. 
-2. Download the following images for input. 
+
+Using an existing model is a great way to jump start a project as you can use fine tuning or re-training to adapt it to your needs. Let's say we need to detect airplanes and helicopters. We'll see how well the pre-trained model does.
+
+1. Go back to our `model-yolo` app.
+2. Download the following images for input.
+
 - [Download Plane Image](https://raw.githubusercontent.com/redhat-na-ssa/flyingthings/main/docs/images/f16.jpeg)
 - [Download Heli Image](https://raw.githubusercontent.com/redhat-na-ssa/flyingthings/main/docs/images/heli01.jpg)
+
 3. Test each of the images with the Swagger interface and see how well it detects each by the confidence score in the bounding box image.
 
-So we see it can detect the airplane fairly well but totally misses the helicopter classification. 
+So we see it can detect the airplane fairly well but totally misses the helicopter classification.
 
 ### Overview
 
-We’re going to make a custom model that can detect helicopters and airplanes. For this model, I’ve downloaded hundreds of images of planes and helicopters from Kaggle and already created annotations for the set. You will see it in the `flyingthings-yolo.zip` file in the bucket. Download this file to your workstation. 
+We’re going to make a custom model that can detect helicopters and airplanes. For this model, I’ve downloaded hundreds of images of planes and helicopters from Kaggle and already created annotations for the set. You will see it in the `flyingthings-yolo.zip` file in the bucket. Download this file to your workstation.
 
-### NOTE: this portion will be demonstrated by the workshop lead.
+### NOTE: this portion will be demonstrated by the workshop lead
 
 We'll see how we can train the default Yolov8 model to detect custom classes.
 
-
 ## Workshop Use Case 2
+
 ### Overview
-Now that we know that a pretrained model can be adapted for custom classifications, let's introduce a completely new dataset. 
-- Our scenareo: detect individual automobiles from a set of HO Scale miniatures.
+
+Now that we know that a pre-trained model can be adapted for custom classifications, let's introduce a completely new dataset.
+
+- Our scenario: detect individual automobiles from a set of HO Scale miniatures.
 
 ## Labeling our data
+
 Let's take a look at the apps. We do this by navigating to "Topology" on the left menu. If the project selector at the top of the page is not set to your username click and select it from the list.
-- Find the icon for `label-studio` and click on the callout arrow on the upper right of the icon. This should launch label-studio.
+
+- Find the icon for `label-studio` and click on the call-out arrow on the upper right of the icon. This should launch label-studio.
 ![alt text](images/label-stud-log.png "Label Studio")
-- Log in with user1@example.com password1
+- Log in with <user1@example.com> password1
 You should see only one project.
 
 ![alt text](images/label-stud-proj.png "Label Studio Project")
+
 - Click on that project to show all assets.
 ![alt text](images/label-stud-tasks.png "Label Studio Tasks")
 - click on an image to see the classes and bounding boxes
@@ -192,9 +206,10 @@ If you want, you can find unlabeled images and annotate them by selecting the cl
 - Save or rename the downloaded file as `hoscale.zip`
 
 ## Upload our training data
-Now that we have images and labels for training we will upload them to our S3 compatible bucket on our cluster. 
 
-- Back on our OpenShift console, find the icon for `minio` and click the callout arrow to launch. The username and password are `minioadmin`
+Now that we have images and labels for training we will upload them to our S3 compatible bucket on our cluster.
+
+- Back on our OpenShift console, find the icon for `minio` and click the call-out arrow to launch. The username and password are `minioadmin`
 
 ![alt text](images/minio-login.png "Minio Login")
 
@@ -207,15 +222,18 @@ Once the upload is complete we're almost ready to train our custom model.
 We just need to make a new training script and we're on our way.
 
 ### HOScale training script
+
 1. If you web terminal is still active return to your command prompt, if not you'll need to launch a new one and re-clone the repo.
 2. You will see the training script we will use to retrain the Yolo model. `scripts/04-run-train-hoscale.sh`
-```
+
+```sh
 scripts/04-run-train-hoscale.sh
 ```
 
-The output of the job should spool by in the terminal, but you can also monitor it from the console itself. To avoid inadvertlently closing the terminal, 
+The output of the job should spool by in the terminal, but you can also monitor it from the console itself. To avoid inadvertently closing the terminal,
+
 1. launch a new console by right clicking on the Red Hat Openshift logo in the upper left corner and select "Open link in new tab".
-2. Navigate to "Pipelines". You should see a pipeline running with a flodder bar progressing. Click on the bar and you'll see all the tasks progresing with their output logs displayed.
+2. Navigate to "Pipelines". You should see a pipeline running with a flooder bar progressing. Click on the bar and you'll see all the tasks progressing with their output logs displayed.
 
 As the job kicks off we can monitor it from the console. Here we see all the training tasks displayed for the pipeline. With GPUs it should take around 5 or 6 minutes to run. CPUs will take significantly longer.
 
@@ -223,9 +241,9 @@ As the job kicks off we can monitor it from the console. Here we see all the tra
 It will take some time to complete, but when finished you will see the summary and have a new app deployed with your model AND artifacts from the training in your minio bucket.
 
 ### Test the new model
+
 1. From our "Routes" you should now see the "model-hoscale" app. Click to launch the Swagger interface.
 2. Use images in the "hoscale" folder to test the model.
-
 
 ## Review
 
@@ -244,19 +262,25 @@ Now, let’s review what we’ve done so far.
 - Validated our custom model by interacting with API endpoints
 
 ## Extra Credit
-We've only scratched the surface here with our platform capabilities. Usually we will want an application to interact with our model. So, for extra credit, I've created a simple app to interact with our model. 
 
-We'll start with the pretrained model but you can easily adapt it to our custom models.
+We've only scratched the surface here with our platform capabilities. Usually we will want an application to interact with our model. So, for extra credit, I've created a simple app to interact with our model.
+
+We'll start with the pre-trained model but you can easily adapt it to our custom models.
 
 1. From our terminal go back to the home directory and clone this repo.
-```
+
+```sh
 cd
 git clone https://github.com/davwhite/cvbrowser.git
 ```
-2. Build the image.
+
+1. Build the image.
+
 ```cvbrowser/build-is.sh```
-3. Edit the deployment for your cluster.
-```
+
+1. Edit the deployment for your cluster.
+
+```sh
   - name: DETECT_URL
     value: "https://model-yolo-ml-demo.apps.<your.cluster.name>/detect"
   - name: GET_IMAGE_URL
@@ -266,12 +290,15 @@ git clone https://github.com/davwhite/cvbrowser.git
 image: >-
           image-registry.openshift-image-registry.svc:5000/ml-demo/cvision-browser:latest
 ```
-4. Deploy the app.
-```
+
+1. Deploy the app.
+
+```sh
 oc create -f cvbrowser/deployment_yolo.yaml 
 ```
 
 Once app has deployed you can find it in "Routes" as "cvbrowser-rt". Just click on it to launch. It's a simple FastAPI app that lets you quickly upload images for object detection and allows you to review previously uploaded detections.
 
-# Wrap Up
-This simplified workflow is a demonstration of capabilities of the Kubernetes platform as provided by Red Hat and as such has only scratched the surface of possibilities. The platform makes it possible to deploy industry stand and open source tools to fit the needs of your AI/ML development needs in a way that fits your preferences and scales to meet capacity and expansion. 
+## Wrap Up
+
+This simplified workflow is a demonstration of capabilities of the Kubernetes platform as provided by Red Hat and as such has only scratched the surface of possibilities. The platform makes it possible to deploy industry stand and open source tools to fit the needs of your AI/ML development needs in a way that fits your preferences and scales to meet capacity and expansion.
