@@ -6,7 +6,7 @@ namespace: user0
 resources:
   - ../../components/label-studio
   - ../../components/minio
-  - ../../pipelines
+  - ../../components/pipelines
   - imagestream.yaml
   - namespace.yaml
   - ns-rb-admin.yaml

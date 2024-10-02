@@ -19,8 +19,8 @@ check_namespace(){
 
 setup_pipelines(){
   # apply pipeline objects
-  oc apply -k pipelines/tasks
-  oc apply -k pipelines/manifests
+  oc apply -k components/pipelines/tasks
+  oc apply -k components/pipelines/manifests
 }
 
 check_namespace "$@"

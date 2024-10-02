@@ -16,7 +16,7 @@ spec:
 
         cd $(workspaces.source.path)
 
-        source $(workspaces.source.path)/pipelines/scripts/functions.sh && \
+        source $(workspaces.source.path)/components/pipelines/scripts/functions.sh && \
         cd_to_scratch && \
         model_training
       resources:
