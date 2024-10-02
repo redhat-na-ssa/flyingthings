@@ -10,6 +10,39 @@ WORKSHOP_NUM=${WORKSHOP_NUM:-25}
 OBJ_DIR=${TMP_DIR}/workshop
 HTPASSWD_FILE=${OBJ_DIR}/htpasswd-workshop
 
+htpasswd_add_user(){
+  TMP_DIR=${TMP_DIR:-scratch}
+  USERNAME=${1:-admin}
+  PASSWORD=${2:-$(genpass 16)}
+  HTPASSWD=${3:-${TMP_DIR}/htpasswd-local}
+
+  echo "
+    USERNAME: ${USERNAME}
+    PASSWORD: ${PASSWORD}
+  "
+
+  touch "${HTPASSWD}"
+  sed '/'"${USERNAME}":'/d' "${HTPASSWD}.txt"
+  echo "# ${USERNAME} - ${PASSWORD}" >> "${HTPASSWD}.txt"
+  htpasswd -bB -C 10 "${HTPASSWD}" "${USERNAME}" "${PASSWORD}"
+}
+
+htpasswd_get_file(){
+  HTPASSWD=${1:-"${TMP_DIR}/htpasswd-local"}
+
+  oc -n openshift-config \
+    extract secret/"${HTPASSWD##*/}" \
+    --keys=htpasswd \
+    --to=- > "${HTPASSWD}"
+}
+
+htpasswd_set_file(){
+  HTPASSWD=${1:-"${TMP_DIR}/htpasswd-local"}
+
+  oc -n openshift-config \
+    set data secret/"${HTPASSWD##*/}" \
+    --from-file=htpasswd="${HTPASSWD}"
+}
 
 workshop_init(){
 
@@ -29,7 +62,7 @@ workshop_create_users(){
   do
 
     # create login things
-    # htpasswd_add_user "${DEFAULT_USER}${num}" "${DEFAULT_PASS}${num}" "${HTPASSWD_FILE}"
+    htpasswd_add_user "${DEFAULT_USER}${num}" "${DEFAULT_PASS}${num}" "${HTPASSWD_FILE}"
     # workshop_add_user_to_group "${DEFAULT_USER}${num}" "${DEFAULT_GROUP}"
 
     # create users objs from template
