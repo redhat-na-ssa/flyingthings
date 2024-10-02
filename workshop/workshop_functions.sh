@@ -39,53 +39,11 @@ workshop_create_users(){
     echo "Creating: ${DEFAULT_USER}${num}"
     oc apply -k "${OBJ_DIR}/${DEFAULT_USER}${num}"
 
-    # # apply pipeline objects
-    # oc apply -k pipelines/tasks -n "${DEFAULT_USER}${num}"
-    # oc apply -k pipelines/manifests -n "${DEFAULT_USER}${num}"
   done
 
   # update htpasswd in cluster
   # htpasswd_set_file "${HTPASSWD_FILE}"
 
-}
-
-workshop_setup_user_assets(){
-  START=${START:-1}
-  END=${END:-10}
-
-  # # Grant access to all the CV training image streams
-  # for num in $(seq -f "%02g" $START $END); do
-  #   oc adm policy add-role-to-user view ${USERNAME}${num} -n ml-demo
-  #   oc adm policy add-role-to-user system:image-puller ${USERNAME}${num} -n ml-demo
-  #   oc tag ml-demo/yolo-api:latest ${USERNAME}${num}/yolo-api:latest
-  #   oc tag ml-demo/yolo-api:latest ${USERNAME}${num}/model-yolo:latest
-  # done
-
-  for i in $(seq -f "%02g" $START $END); do
-    echo "Current user: ${USERNAME}${num}"
-    # oc project ${USERNAME}${num}
-    # workshop/01-setup-pipelines.sh
-    # oc apply -k gitops/02-workshop-user-components
-  done
-}
-
-setup_user_project(){
-  # Loop through the range of users
-  for i in $(seq -f "%02g" $START $END)
-  do
-      USERNAME="user${num}"
-
-      echo "Creating project for ${USERNAME}..."
-      
-      # Create a new project/namespace for the user
-      oc new-project ${USERNAME}
-
-      # Assign admin role to the user for their project
-      oc adm policy add-role-to-user admin ${USERNAME} -n ${USERNAME}
-
-  done
-
-  echo "All users and quotas have been successfully created."
 }
 
 setup_user_auth(){
