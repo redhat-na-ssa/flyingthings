@@ -5,7 +5,7 @@ TMP_DIR=scratch
 DEFAULT_USER=${WORKSHOP_USER:-user}
 DEFAULT_PASS=${WORKSHOP_PASS:-openshift}
 WORKSHOP_NUM=${WORKSHOP_NUM:-25}
-GROUP_ADMINS=workshop-admins
+# GROUP_ADMINS=workshop-admins
 
 OBJ_DIR=${TMP_DIR}/workshop
 HTPASSWD_FILE=${OBJ_DIR}/htpasswd-workshop
@@ -24,6 +24,7 @@ workshop_create_users(){
   TOTAL=${1:-25}
   LIST=$(eval echo "{0..${TOTAL}}")
 
+  # shellcheck disable=SC2068
   for num in ${LIST[@]}
   do
 
@@ -52,7 +53,7 @@ setup_user_auth(){
   htpasswd -c -B -b scratch/users.htpasswd admin redhatadmin
 
   # Add the workshop users starting from user01 to user10 with the password redhat + the user number
-  for i in $(seq -f "%02g" $START $END); do htpasswd -b scratch/users.htpasswd user$i redhat$i; done
+  for i in $(seq -f "%02g" "$START" "$END"); do htpasswd -b scratch/users.htpasswd "${DEFAULT_USER}${i}" "${DEFAULT_PASS}${i}"; done
 
   # Create the secret with the htpasswd file
   oc create secret generic htpasswd-secret --from-file=htpasswd=scratch/users.htpasswd -n openshift-config
