@@ -8,4 +8,4 @@ spec:
   text: GitHub - Flying Things
   applicationMenu:
     section: Git Repos
-    imageURL: https://img.icons8.com/fluency/512/github.png
+    imageURL: /static/assets/github.svg
