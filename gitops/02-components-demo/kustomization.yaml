@@ -10,3 +10,4 @@ resources:
   - ../../components/yolo-api/base
   - link-github.yaml
   - namespace.yaml
+  - ns-rb-view.yaml
