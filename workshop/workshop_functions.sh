@@ -4,17 +4,21 @@ TMP_DIR=scratch
 
 DEFAULT_USER=${WORKSHOP_USER:-user}
 DEFAULT_PASS=${WORKSHOP_PASS:-openshift}
-
 WORKSHOP_NUM=${WORKSHOP_NUM:-25}
-WORKSHOP_HTPASSWD=htpasswd-workshop
-
 GROUP_ADMINS=workshop-admins
 
 OBJ_DIR=${TMP_DIR}/workshop
-
 HTPASSWD_FILE=${OBJ_DIR}/htpasswd-workshop
 
-mkdir -p "${OBJ_DIR}"
+
+workshop_init(){
+
+  # do not delete empty
+  [ "${OBJ_DIR}x" = "x" ] && return
+  
+  rm -rf "${OBJ_DIR}"
+  mkdir -p "${OBJ_DIR}"
+}
 
 workshop_create_users(){
   TOTAL=${1:-25}
@@ -30,10 +34,14 @@ workshop_create_users(){
     # create users objs from template
     cp -a workshop/instance "${OBJ_DIR}/${DEFAULT_USER}${num}"
     sed -i 's/user0/'"${DEFAULT_USER}${num}"'/g' "${OBJ_DIR}/${DEFAULT_USER}${num}/"*.yaml
-    sed -i 's@- ../../components@- ../../../components@g' "${OBJ_DIR}/${DEFAULT_USER}${num}/"kustomization.yaml
+    sed -i 's@- ../../@- ../../../@g' "${OBJ_DIR}/${DEFAULT_USER}${num}/"kustomization.yaml
 
-    echo "Creating: ${USERNAME}${num}"
+    echo "Creating: ${DEFAULT_USER}${num}"
     oc apply -k "${OBJ_DIR}/${DEFAULT_USER}${num}"
+
+    # # apply pipeline objects
+    # oc apply -k pipelines/tasks -n "${DEFAULT_USER}${num}"
+    # oc apply -k pipelines/manifests -n "${DEFAULT_USER}${num}"
   done
 
   # update htpasswd in cluster
@@ -45,26 +53,20 @@ workshop_setup_user_assets(){
   START=${START:-1}
   END=${END:-10}
 
-  # Grant access to all the CV training image streams
-  for num in $(seq -f "%02g" $START $END); do
-    oc adm policy add-role-to-user view ${USERNAME}${num} -n ml-demo
-    oc adm policy add-role-to-user system:image-puller ${USERNAME}${num} -n ml-demo
-    oc tag ml-demo/yolo-api:latest ${USERNAME}${num}/yolo-api:latest
-    oc tag ml-demo/yolo-api:latest ${USERNAME}${num}/model-yolo:latest
-  done
+  # # Grant access to all the CV training image streams
+  # for num in $(seq -f "%02g" $START $END); do
+  #   oc adm policy add-role-to-user view ${USERNAME}${num} -n ml-demo
+  #   oc adm policy add-role-to-user system:image-puller ${USERNAME}${num} -n ml-demo
+  #   oc tag ml-demo/yolo-api:latest ${USERNAME}${num}/yolo-api:latest
+  #   oc tag ml-demo/yolo-api:latest ${USERNAME}${num}/model-yolo:latest
+  # done
 
   for i in $(seq -f "%02g" $START $END); do
     echo "Current user: ${USERNAME}${num}"
-    oc project ${USERNAME}${num}
-    workshop/01-setup-pipelines.sh
-    oc apply -k gitops/02-workshop-user-components
+    # oc project ${USERNAME}${num}
+    # workshop/01-setup-pipelines.sh
+    # oc apply -k gitops/02-workshop-user-components
   done
-}
-
-setup_pipelines(){
-  # apply pipeline objects
-  oc apply -f ../pipelines/tasks
-  oc apply -f ../pipelines/manifests
 }
 
 setup_user_project(){
@@ -137,3 +139,5 @@ setup_user_auth(){
 workshop_clean(){
   oc delete project -l owner=workshop
 }
+
+workshop_init

@@ -8,6 +8,8 @@ resources:
   - ../../components/label-studio
   - ../../components/minio
   - ../../components/yolo-api/base
+  - ../../pipelines/manifests
+  - ../../pipelines/tasks
   - link-github.yaml
   - namespace.yaml
   - ns-rb-view.yaml
