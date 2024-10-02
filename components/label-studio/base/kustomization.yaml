@@ -18,6 +18,5 @@ resources:
 # - deploy-patch.yaml
 - deploy.yaml
 - is.yaml
-- pvc.yaml
 - route.yaml
 - svc.yaml
