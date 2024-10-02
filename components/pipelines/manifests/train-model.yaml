@@ -99,7 +99,7 @@ spec:
       params:
         - name: SCRIPT
           value: |
-            source $(workspaces.source.path)/pipelines/scripts/functions.sh && \
+            source $(workspaces.source.path)/components/pipelines/scripts/functions.sh && \
             check_base_image $(params.MODEL_IMAGE)
             check_base_image $(params.UBI_IMAGE)
       runAfter:
@@ -124,7 +124,7 @@ spec:
 
             cd $(workspaces.source.path)
 
-            source $(workspaces.source.path)/pipelines/scripts/functions.sh && \
+            source $(workspaces.source.path)/components/pipelines/scripts/functions.sh && \
             copy_artifacts
       runAfter:
         - check-base-image
@@ -147,7 +147,7 @@ spec:
 
             cd $(workspaces.source.path)
 
-            source $(workspaces.source.path)/pipelines/scripts/functions.sh && \
+            source $(workspaces.source.path)/components/pipelines/scripts/functions.sh && \
             cd_to_scratch && \
             get_dataset
       runAfter:
@@ -163,7 +163,7 @@ spec:
           value: |
             cd $(workspaces.source.path)
 
-            source $(workspaces.source.path)/pipelines/scripts/functions.sh && \
+            source $(workspaces.source.path)/components/pipelines/scripts/functions.sh && \
             cd_to_scratch && \
             create_classes_file
       runAfter:
@@ -185,7 +185,7 @@ spec:
           value: |
             cd $(workspaces.source.path)
 
-            source $(workspaces.source.path)/pipelines/scripts/functions.sh && \
+            source $(workspaces.source.path)/components/pipelines/scripts/functions.sh && \
             cd_to_scratch && \
             resize_images datasets/images $(params.MAX_WIDTH)
 
@@ -204,7 +204,7 @@ spec:
           value: |
             cd $(workspaces.source.path)
 
-            source $(workspaces.source.path)/pipelines/scripts/functions.sh && \
+            source $(workspaces.source.path)/components/pipelines/scripts/functions.sh && \
             cd_to_scratch && \
             distribute_dataset
       runAfter:
@@ -289,7 +289,7 @@ spec:
 
             cd $(workspaces.source.path)
 
-            source $(workspaces.source.path)/pipelines/scripts/functions.sh && \
+            source $(workspaces.source.path)/components/pipelines/scripts/functions.sh && \
             cd_to_scratch && \
             push_results
       runAfter:

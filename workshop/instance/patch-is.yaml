@@ -1,0 +1,32 @@
+---
+kind: ImageStream
+apiVersion: image.openshift.io/v1
+metadata:
+  name: label-studio
+spec:
+  tags:
+    - annotations:
+        openshift.io/imported-from: docker.io/heartexlabs/label-studio:latest
+      from:
+        kind: DockerImage
+        name: docker.io/heartexlabs/label-studio:latest
+      name: latest
+      referencePolicy:
+        type: Local
+    - annotations:
+        openshift.io/imported-from: docker.io/heartexlabs/label-studio:ubi_latest
+      from:
+        kind: DockerImage
+        name: docker.io/heartexlabs/label-studio:ubi_latest
+      name: ubi_latest
+      referencePolicy:
+        type: Local
+    - name: s2i
+      from:
+        kind: ImageStreamTag
+        namespace: ml-demo
+        name: 'label-studio:s2i'
+      importPolicy:
+        importMode: Legacy
+      referencePolicy:
+        type: Source

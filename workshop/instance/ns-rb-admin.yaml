@@ -1,0 +1,33 @@
+# klude: rhoai / rhoai can not visualize multiple subjects
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: user0-admin
+  labels:
+    opendatahub.io/dashboard: 'true'
+    opendatahub.io/project-sharing: 'true'
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: admin
+subjects:
+- apiGroup: rbac.authorization.k8s.io
+  kind: User
+  name: user0
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: workshop-admins
+  labels:
+    opendatahub.io/dashboard: 'true'
+    opendatahub.io/project-sharing: 'true'
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: admin
+subjects:
+- apiGroup: rbac.authorization.k8s.io
+  kind: Group
+  name: workshop-admins
