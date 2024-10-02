@@ -1,8 +1,0 @@
-apiVersion: v1
-kind: ResourceQuota
-metadata:
-  name: gpu-quota
-spec:
-  hard:
-    requests.nvidia.com/gpu: "2"  # Maximum GPUs that can be requested
-    limits.nvidia.com/gpu: "2"      # Maximum GPUs that can be used

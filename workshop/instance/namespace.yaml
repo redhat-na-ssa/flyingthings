@@ -4,3 +4,5 @@ metadata:
   name: user0
   annotations:
     openshift.io/display-name: "Start Here - user0"
+  labels:
+    owner: workshop
