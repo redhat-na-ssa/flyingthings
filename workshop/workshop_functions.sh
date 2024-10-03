@@ -59,15 +59,17 @@ workshop_init(){
   mkdir -p "${OBJ_DIR}"
 }
 
-workshop_create_users(){
-  TOTAL=${1:-25}
-  LIST=$(eval echo "{0..${TOTAL}}")
-
+workshop_create_admin(){
   # get htpasswd file
   htpasswd_get_file "${HTPASSWD_FILE}"
 
   # setup admin user
   htpasswd_add_user "${HTPASSWD_FILE}" admin
+}
+
+workshop_create_users(){
+  TOTAL=${1:-25}
+  LIST=$(eval echo "{0..${TOTAL}}")
 
   # setup workshop users
   # shellcheck disable=SC2068
