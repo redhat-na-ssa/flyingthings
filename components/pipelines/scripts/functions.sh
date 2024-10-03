@@ -62,7 +62,7 @@ minio_copy(){
   echo "Copying ${SOURCE} to MinIO..."
   [ ! -d "${MINIO_CFG}" ] && minio_setup_client
 
-  echo "mc --insecure --config-dir ${MINIO_CFG} cp ${SOURCE} ${DEST}"
+  # echo "mc --insecure --config-dir ${MINIO_CFG} cp ${SOURCE} ${DEST}"
   mc --insecure --config-dir "${MINIO_CFG}" cp "${SOURCE}" "${DEST}"
 }
 
