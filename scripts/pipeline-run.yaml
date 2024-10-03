@@ -7,15 +7,14 @@ metadata:
   labels:
     tekton.dev/pipeline: train-model
 spec:
-  taskRunTemplate:
-    podTemplate:
-      tolerations:
-        - key: nvidia-gpu-only
-          operator: Exists
-          effect: NoSchedule
-        - key: nvidia.com/gpu
-          operator: Exists
-          effect: NoSchedule
+  podTemplate:
+    tolerations:
+      - key: nvidia-gpu-only
+        operator: Exists
+        effect: NoSchedule
+      - key: nvidia.com/gpu
+        operator: Exists
+        effect: NoSchedule
   params:
     - name: BATCH_SIZE
       value: '-1'
