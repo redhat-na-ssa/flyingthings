@@ -141,10 +141,12 @@ push_results(){
 }
 
 get_dataset(){
+  set -x
   echo "Getting dataset from MinIO..."
   minio_copy "${MINIO_REMOTE}/${MINIO_BUCKET}/${DATASET_ZIP}" "${DATASET_ZIP}"
   unzip -d datasets "${DATASET_ZIP}"
   rm "${DATASET_ZIP}"
+  set +x
 }
 
 minio_copy_yolo_model(){
