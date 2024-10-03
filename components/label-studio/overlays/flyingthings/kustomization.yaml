@@ -8,11 +8,11 @@ patches:
   - target:
       version: v1
       kind: PersistentVolumeClaim
-      name: label-studio-data
+      name: label-studio-db
     patch: |-
       - op: replace
         path: /spec/resources/requests/storage
-        value: 10Gi
+        value: 6Gi
   - target:
       group: build.openshift.io
       kind: BuildConfig
