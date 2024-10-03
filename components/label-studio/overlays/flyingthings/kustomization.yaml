@@ -40,4 +40,3 @@ patches:
   #       path: /spec/replicas
   #       value: 0
   - path: patch-delete-db.yaml
-  
