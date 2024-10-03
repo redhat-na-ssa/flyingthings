@@ -10,11 +10,17 @@ WORKSHOP_NUM=${WORKSHOP_NUM:-25}
 OBJ_DIR=${TMP_DIR}/workshop
 HTPASSWD_FILE=${OBJ_DIR}/htpasswd-workshop
 
+# shellcheck disable=SC2120
+genpass(){
+  < /dev/urandom LC_ALL=C tr -dc _A-Z-a-z-0-9 | head -c "${1:-32}"
+}
+
 htpasswd_add_user(){
   TMP_DIR=${TMP_DIR:-scratch}
-  USERNAME=${1:-admin}
-  PASSWORD=${2:-$(genpass 16)}
-  HTPASSWD=${3:-${TMP_DIR}/htpasswd-local}
+  HTPASSWD=${1:-${TMP_DIR}/htpasswd-local}
+  USERNAME=${2:-admin}
+  PASSWORD=${3:-$(genpass 16)}
+
 
   echo "
     USERNAME: ${USERNAME}
@@ -22,7 +28,7 @@ htpasswd_add_user(){
   "
 
   touch "${HTPASSWD}"
-  sed '/'"${USERNAME}":'/d' "${HTPASSWD}.txt"
+  sed '/# '"${USERNAME}"'/d' "${HTPASSWD}.txt"
   echo "# ${USERNAME} - ${PASSWORD}" >> "${HTPASSWD}.txt"
   htpasswd -bB -C 10 "${HTPASSWD}" "${USERNAME}" "${PASSWORD}"
 }
@@ -57,47 +63,35 @@ workshop_create_users(){
   TOTAL=${1:-25}
   LIST=$(eval echo "{0..${TOTAL}}")
 
+  # get htpasswd file
+  htpasswd_get_file "${HTPASSWD_FILE}"
+
+  # setup admin user
+  htpasswd_add_user "${HTPASSWD_FILE}" admin
+
+  # setup workshop users
   # shellcheck disable=SC2068
   for num in ${LIST[@]}
   do
-
-    # create login things
-    htpasswd_add_user "${DEFAULT_USER}${num}" "${DEFAULT_PASS}${num}" "${HTPASSWD_FILE}"
+    # create login hashes
+    htpasswd_add_user "${HTPASSWD_FILE}" "${DEFAULT_USER}${num}" "${DEFAULT_PASS}${num}"
     # workshop_add_user_to_group "${DEFAULT_USER}${num}" "${DEFAULT_GROUP}"
 
-    # create users objs from template
+    # create user project from template
     cp -a workshop/instance "${OBJ_DIR}/${DEFAULT_USER}${num}"
     sed -i 's/user0/'"${DEFAULT_USER}${num}"'/g' "${OBJ_DIR}/${DEFAULT_USER}${num}/"*.yaml
     sed -i 's@- ../../@- ../../../@g' "${OBJ_DIR}/${DEFAULT_USER}${num}/"kustomization.yaml
 
     echo "Creating: ${DEFAULT_USER}${num}"
     oc apply -k "${OBJ_DIR}/${DEFAULT_USER}${num}"
-
   done
 
   # update htpasswd in cluster
-  # htpasswd_set_file "${HTPASSWD_FILE}"
+  htpasswd_set_file "${HTPASSWD_FILE}"
 
 }
 
 setup_user_auth(){
-
-  # Create the htpasswd file for the users and add the admin user
-  htpasswd -c -B -b scratch/users.htpasswd admin redhatadmin
-
-  # Add the workshop users starting from user01 to user10 with the password redhat + the user number
-  for i in $(seq -f "%02g" "$START" "$END"); do htpasswd -b scratch/users.htpasswd "${DEFAULT_USER}${i}" "${DEFAULT_PASS}${i}"; done
-
-  # Create the secret with the htpasswd file
-  oc create secret generic htpasswd-secret --from-file=htpasswd=scratch/users.htpasswd -n openshift-config
-
-  # Variables
-  HTPASSWD_FILE="scratch/users.htpasswd"
-  SECRET_NAME="htpasswd-secret"
-  NAMESPACE="openshift-config"
-
-  # Create the htpasswd secret (if not created already)
-  oc create secret generic $SECRET_NAME --from-file=htpasswd=$HTPASSWD_FILE -n $NAMESPACE --dry-run=client -o yaml | oc apply -f -
 
   # Get the current OAuth configuration
   OAUTH_CONFIG=$(oc get oauth cluster -o json)

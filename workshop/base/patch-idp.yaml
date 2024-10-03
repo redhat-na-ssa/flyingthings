@@ -3,12 +3,6 @@
   value:
     - htpasswd:
         fileData:
-          name: htpasswd-local
-      mappingMethod: claim
-      name: Admins
-      type: HTPasswd
-    - htpasswd:
-        fileData:
           name: htpasswd-workshop
       mappingMethod: claim
       name: Workshop Users

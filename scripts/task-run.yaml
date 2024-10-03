@@ -8,7 +8,6 @@ metadata:
     tekton.dev/pipeline: train-model
 spec:
   params:
-
     - name: BATCH_SIZE
       value: '-1'
     - name: DATASET_ZIP
@@ -49,15 +48,3 @@ spec:
           resources:
             requests:
               storage: 2Gi
-    # - name: large-data
-    #   volumeClaimTemplate:
-    #     apiVersion: v1
-    #     kind: PersistentVolumeClaim
-    #     metadata:
-    #       name: tekton
-    #     spec:
-    #       accessModes:
-    #         - ReadWriteOnce
-    #       resources:
-    #         requests:
-    #           storage: 2Gi
