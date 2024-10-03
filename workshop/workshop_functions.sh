@@ -82,7 +82,7 @@ workshop_create_users(){
     # create user project from template
     cp -a workshop/instance "${OBJ_DIR}/${DEFAULT_USER}${num}"
     sed -i 's/user0/'"${DEFAULT_USER}${num}"'/g' "${OBJ_DIR}/${DEFAULT_USER}${num}/"*.yaml
-    sed -i 's@- ../../@- ../../../@g' "${OBJ_DIR}/${DEFAULT_USER}${num}/"kustomization.yaml
+    sed -i 's@- ../../components@- ../../../components@g' "${OBJ_DIR}/${DEFAULT_USER}${num}/"kustomization.yaml
 
     echo "Creating: ${DEFAULT_USER}${num}"
     oc apply -k "${OBJ_DIR}/${DEFAULT_USER}${num}"
