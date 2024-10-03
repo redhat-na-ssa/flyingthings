@@ -42,6 +42,9 @@ spec:
             - key: nvidia-gpu-only
               operator: Exists
               effect: NoSchedule
+            - key: nvidia.com/gpu
+              operator: Exists
+              effect: NoSchedule
         YAML
 
         echo "
