@@ -111,7 +111,7 @@ setup_user_auth(){
       "type": "HTPasswd",
       "htpasswd": {
           "fileData": {
-              "name": "'$SECRET_NAME'"
+              "name": "'"$SECRET_NAME"'"
           }
       }
   }]')
