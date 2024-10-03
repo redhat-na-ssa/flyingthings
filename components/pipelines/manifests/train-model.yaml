@@ -62,7 +62,7 @@ spec:
       default: 'Y'
       description: flag for deploying model server along with model
     - name: DEPLOY_ARTIFACTS
-      default: 'N'
+      default: 'Y'
       description: flag for deploying artifacts to minio from git repo
     - name: MODEL_NAME
       default: model-custom
