@@ -315,8 +315,7 @@ spec:
         value: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
       - name: SCRIPT
         value: |
-          set -x
-
+          # todo: move to functions.sh
           oc new-app $(params.MODEL_IMAGE) \
             --name=$(params.MODEL_NAME) \
             --env=WEIGHTS=model_custom.pt \
