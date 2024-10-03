@@ -38,6 +38,10 @@ spec:
               resources:
                 limits:
                   nvidia.com/gpu: 1
+          tolerations:
+            - key: nvidia-gpu-only
+              operator: Exists
+              effect: NoSchedule
         YAML
 
         echo "
