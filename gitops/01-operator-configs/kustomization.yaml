@@ -3,5 +3,5 @@ kind: Kustomization
 
 resources:
   - https://github.com/redhat-na-ssa/demo-ai-gitops-catalog/components/operators/devspaces/instance/overlays/timeout-12m?ref=v0.05
-  - https://github.com/redhat-na-ssa/demo-ai-gitops-catalog/components/operators/gpu-operator-certified/instance/overlays/aws-time-sliced-2?ref=v0.05
+  - https://github.com/redhat-na-ssa/demo-ai-gitops-catalog/components/operators/gpu-operator-certified/instance/overlays/aws-time-sliced?ref=v0.05
   - https://github.com/redhat-na-ssa/demo-ai-gitops-catalog/components/operators/nfd/instance/overlays/only-nvidia?ref=v0.05
