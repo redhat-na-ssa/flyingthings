@@ -29,13 +29,15 @@ patches:
   - target:
       group: apps
       kind: Deployment
-      name: label-studio-db
-    patch: |-
-      - op: replace
-        path: /spec/replicas
-        value: 0
-  - target:
-      group: apps
-      kind: Deployment
       name: label-studio
     path: patch-deployment.yaml
+# - target:
+  #     group: apps
+  #     kind: Deployment
+  #     name: label-studio-db
+  #   patch: |-
+  #     - op: replace
+  #       path: /spec/replicas
+  #       value: 0
+  - path: patch-delete-db.yaml
+  
