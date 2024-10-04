@@ -114,7 +114,7 @@ git clone https://github.com/redhat-na-ssa/flyingthings.git
 
 4. Go to the directory flyingthings and create the project where you will be deploying the workshop. Checkout the `workshop` branch
 
-```
+```sh
 cd flyingthings
 git checkout workshop
 ```
@@ -123,7 +123,7 @@ git checkout workshop
 
 - Note: all scripts must be run from the project root.
 
-```
+```sh
 scripts/03-deploy-model-yolo.sh
 ```
 
