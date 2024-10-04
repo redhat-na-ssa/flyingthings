@@ -46,4 +46,4 @@ pyspelling -c .pyspelling.yml
 yamllint . && echo "YAML check passed :)"
 
 # validate manifests
-[ -e scripts/validate_manifests.sh ] && scripts/validate_manifests.sh
+[ -e scripts/validate_kustomize.sh ] && scripts/validate_kustomize.sh

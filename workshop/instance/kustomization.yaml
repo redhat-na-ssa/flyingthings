@@ -1,0 +1,27 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: user0
+
+resources:
+  - ../../components/label-studio
+  - ../../components/minio
+  - ../../components/pipelines
+  - imagestream.yaml
+  - namespace.yaml
+  - ns-rb-admin.yaml
+  # - ns-rb-view.yaml
+  - quota.yaml
+
+patches:
+  - target:
+      group: image.openshift.io
+      kind: ImageStream
+      name: label-studio
+    path: patch-is.yaml
+  - target:
+      kind: BuildConfig
+      name: label-studio-s2i
+    patch: |-
+      - op: replace
+        path: /spec/triggers

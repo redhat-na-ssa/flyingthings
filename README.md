@@ -42,13 +42,18 @@ Optional
 
 You can use [OpenShift Dev Spaces for AI / ML](https://github.com/redhat-na-ssa/demo-ai-devspaces) or your local machine to explore this demo.
 
-```
+```sh
 # cluster tasks
 scripts/bootstrap.sh
+```
 
-# namespace tasks
-scripts/01-setup-pipelines.sh
-scripts/02-run-train-model.sh
+```sh
+# namespace only tasks
+oc new-project let-me-fly-away
+oc apply -k gitops/user-components
+
+# create a new pipeline run
+oc create -f components/pipelines/manifests/pipeline-run.yaml
 ```
 
 ## Workshop Instructions

@@ -1,0 +1,38 @@
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: quota-gpu
+spec:
+  hard:
+    requests.nvidia.com/gpu: "2"  # Maximum GPUs that can be requested
+    limits.nvidia.com/gpu: "2"      # Maximum GPUs that can be used
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: quota-compute
+spec:
+  hard:
+    # requests.cpu: '1'
+    # requests.memory: 1Gi
+    # limits.cpu: '8'
+    # limits.memory: 24Gi
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: quota-storage
+spec:
+  hard:
+    requests.storage: 40Gi
+    persistentvolumeclaims: '8'
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: quota-objects
+spec:
+  hard:
+    # count/cronjobs.batch: '4'
+    count/daemonsets.apps: '0'

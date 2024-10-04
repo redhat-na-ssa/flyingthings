@@ -1,0 +1,32 @@
+---
+kind: ImageStream
+apiVersion: image.openshift.io/v1
+metadata:
+  name: yolo-api
+spec:
+  tags:
+    - name: latest
+      from:
+        kind: ImageStreamTag
+        namespace: ml-demo
+        name: 'yolo-api:latest'
+      importPolicy:
+        importMode: Legacy
+      referencePolicy:
+        type: Source
+---
+kind: ImageStream
+apiVersion: image.openshift.io/v1
+metadata:
+  name: model-yolo
+spec:
+  tags:
+    - name: latest
+      from:
+        kind: ImageStreamTag
+        namespace: ml-demo
+        name: 'model-yolo:latest'
+      importPolicy:
+        importMode: Legacy
+      referencePolicy:
+        type: Source

@@ -1,10 +1,10 @@
 #!/bin/bash
 
-get_namespace(){
-  NAMESPACE=$(oc project -q 2>/dev/null)
-  echo "NAMESPACE: ${NAMESPACE}"
-  echo ""
-}
+# get_namespace(){
+#   NAMESPACE=$(oc project -q 2>/dev/null)
+#   echo "NAMESPACE: ${NAMESPACE}"
+#   echo ""
+# }
 
 MENDPOINT=$(oc get route|grep minio|grep -v console|awk '{ print $2 }')
 MINIO_ENDPOINT=https://$MENDPOINT
