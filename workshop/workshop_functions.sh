@@ -93,6 +93,24 @@ workshop_create_users(){
 
 }
 
+workshop_load_test(){
+  TOTAL=${1:-25}
+  LIST=$(eval echo "{0..${TOTAL}}")
+
+  # setup workshop users
+  # shellcheck disable=SC2068
+  for num in ${LIST[@]}
+  do
+    echo "Creating: ${DEFAULT_USER}${num}"
+    oc -n "${DEFAULT_USER}${num}" \
+      create -f components/pipelines/manifests/pipeline-run.yaml
+  done
+
+  # update htpasswd in cluster
+  htpasswd_set_file "${HTPASSWD_FILE}"
+
+}
+
 setup_user_auth(){
 
   # Get the current OAuth configuration
