@@ -1,14 +1,9 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-namespace: ml-demo
-
 resources:
   - ../../components/custom-image
   - ../../components/label-studio
   - ../../components/minio
   - ../../components/yolo-api/base
   - ../../components/pipelines
-  - link-github.yaml
-  - namespace.yaml
-  - ns-rb-view.yaml

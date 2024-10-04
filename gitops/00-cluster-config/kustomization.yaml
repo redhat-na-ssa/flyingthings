@@ -3,3 +3,4 @@ kind: Kustomization
 
 resources:
   - https://github.com/redhat-na-ssa/demo-ai-gitops-catalog/clusters/default?ref=v0.05
+  - link-github.yaml

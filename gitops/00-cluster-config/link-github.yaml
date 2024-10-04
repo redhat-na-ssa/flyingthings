@@ -1,7 +1,7 @@
 apiVersion: console.openshift.io/v1
 kind: ConsoleLink
 metadata:
-  name: github-ai-devspaces
+  name: github-flyingthings
 spec:
   href: 'https://github.com/redhat-na-ssa/flyingthings'
   location: ApplicationMenu
