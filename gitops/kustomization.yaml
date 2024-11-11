@@ -2,11 +2,10 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  # - 00-operators
-  # - 01-operator-configs
-  - 02-components
-  - demo-devspaces-nvidia-gpu-autoscale
-  - tekton-operator
+  - 00-cluster-config
+  - 00-operators
+  - 01-operator-configs
+  - 02-ml-demo
 
 patches:
   - target:

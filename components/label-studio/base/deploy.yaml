@@ -63,4 +63,4 @@ spec:
         emptyDir: {}
       - name: label-studio-data
         persistentVolumeClaim:
-          claimName: label-studio-data
+          claimName: label-studio-db

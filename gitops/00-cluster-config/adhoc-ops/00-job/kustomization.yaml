@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+resources:
+  - job.yaml
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+configMapGenerator:
+  - name: job-setup-cluster
+    files:
+      # - functions.sh
+      - job.sh
+      - https://raw.githubusercontent.com/redhat-na-ssa/demo-ai-gitops-catalog/v0.05/scripts/library/ocp.sh

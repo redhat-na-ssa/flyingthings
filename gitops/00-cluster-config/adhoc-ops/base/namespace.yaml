@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: adhoc-ops
+  annotations:
+    openshift.io/display-name: "Adhoc Ops"
+    openshift.io/description: |
+      I Make This Look Easy

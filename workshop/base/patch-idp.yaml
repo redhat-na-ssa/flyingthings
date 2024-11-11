@@ -1,0 +1,9 @@
+- op: add
+  path: /spec/identityProviders
+  value:
+    - htpasswd:
+        fileData:
+          name: htpasswd-workshop
+      mappingMethod: claim
+      name: Workshop Users
+      type: HTPasswd

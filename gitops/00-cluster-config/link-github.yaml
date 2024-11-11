@@ -1,0 +1,11 @@
+apiVersion: console.openshift.io/v1
+kind: ConsoleLink
+metadata:
+  name: github-flyingthings
+spec:
+  href: 'https://github.com/redhat-na-ssa/flyingthings'
+  location: ApplicationMenu
+  text: GitHub - Flying Things
+  applicationMenu:
+    section: Git Repos
+    imageURL: /static/assets/github.svg
