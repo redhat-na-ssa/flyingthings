@@ -1,0 +1,116 @@
+version: '3.7'
+
+# NETWORKING README
+#   This docker compose assumes a networking architecture where:
+#     1)  containers are not in the same pod
+#     2)  containers bind to the host and use the "port mapping" technique for deconfliction.
+#   The above assumptions occurs by default when running this docker-compose in rootless podman4 via the default slirp4netns network setup:
+#     https://github.com/containers/podman/blob/main/docs/tutorials/basic_networking.md#slirp4netns
+#
+#   As such, the containers created as per this compose file are configured to all bind to different ports on the host.
+#   You need to ensure your host is not already running processes that bind to ports specified in this docker-compose file.
+#   Also, this docker-compose file assumes that the host (and subsequently all containers bound to it) is resolvable by the name:  rht.
+#   To accomplish this, it is recommended that you add an entry with the name "rht" to your /etc/hosts.  ie:
+#       192.168.122.1     rht
+
+services:
+
+  artemis:
+    container_name: artemis
+    image: quay.io/artemiscloud/activemq-artemis-broker-init:artemis.2.28.0
+    ports:
+      - "8161:8161"
+      - "61616:61616"
+      - "1883:1883"
+    environment:
+      AMQ_USER: djl
+      AMQ_PASSWORD: djl
+    networks:
+      - rht-ml
+
+  minio:
+    container_name: minio
+
+    # https://github.com/jbride/minio_integrations_quickstart/blob/main/etc/minio/Dockerfile
+    image: quay.io/redhat_naps_da/minio:0.0.1
+
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/docker-entrypoint.sh minio server /data --console-address :9001
+      "
+    restart: always
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+
+    environment:
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: minio123
+      MINIO_NOTIFY_MQTT_ENABLE_MLNOTIFY: 'on'
+      MINIO_NOTIFY_MQTT_BROKER_MLNOTIFY: 'tcp://rht:1883'
+      MINIO_NOTIFY_MQTT_TOPIC_MLNOTIFY: 'model-update-notify'
+      MINIO_NOTIFY_MQTT_USERNAME_MLNOTIFY: djl
+      MINIO_NOTIFY_MQTT_PASSWORD_MLNOTIFY: djl
+
+      # Used by minio console to invoke minio REST APIs
+      MINIO_SERVER_URL: 'http://rht:9000'
+    networks:
+      - rht-ml
+
+  minio-initialize:
+    container_name: minio-initialize
+
+    # https://github.com/jbride/minio_integrations_quickstart/blob/main/etc/minio/Dockerfile
+    image: quay.io/redhat_naps_da/minio:0.0.1
+
+    entrypoint: >
+      /bin/sh -c "
+      /opt/initialize.sh
+      "
+    environment:
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: minio123
+    volumes:
+    - ./minio/initialize.sh:/opt/initialize.sh:bind
+    networks:
+      - rht-ml
+
+  prometheus:
+    container_name: prometheus
+
+    image: docker.io/prom/prometheus:v2.37.9
+    # image: registry.redhat.io/openshift4/ose-prometheus:v4.13.0
+
+    restart: always
+    ports:
+      - "9090:9090"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    volumes:
+    - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:bind
+    extra_hosts:
+      - "quarkus-dev-host:192.168.1.7"
+    networks:
+      - rht-ml
+
+  # https://github.com/cirocosta/sample-grafana
+  grafana:
+    container_name: grafana
+    image: registry.redhat.io/openshift4/ose-grafana:v4.11.0
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+    - ./grafana/datasources/all.yaml:/etc/grafana/provisioning/datasources/all.yaml:bind
+    - ./grafana/dashboards/all.yml:/etc/grafana/provisioning/dashboards/all.yml:bind
+    - ./grafana/dashboards/corrective_candidates.json:/var/lib/grafana/dashboards/corrective_candidates.json:bind
+    networks:
+      - rht-ml
+
+networks:
+  rht-ml:
+    name: rht-ml
+    driver: bridge

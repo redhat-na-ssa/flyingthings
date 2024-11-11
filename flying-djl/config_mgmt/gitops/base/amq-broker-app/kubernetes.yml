@@ -1,0 +1,102 @@
+# Reference:
+#   https://artemiscloud.io/
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mqtt-lb
+  namespace: user1-flying-djl
+spec:
+  type: LoadBalancer
+  externalTrafficPolicy: Local
+  ports:
+    - port: 1883
+      targetPort: 1883
+      protocol: TCP
+      name: mqtt
+  selector:
+    ActiveMQArtemis: artemis
+    application: artemis-app
+    statefulset.kubernetes.io/pod-name: artemis-ss-0
+---
+apiVersion: broker.amq.io/v1beta1
+kind: ActiveMQArtemis
+metadata:
+  name: artemis
+  namespace: user1-flying-djl
+spec:
+  console:
+    expose: true
+  acceptors:
+    - name: mqtt
+      port: 1883
+      protocols: mqtt
+
+    # https://artemiscloud.io/docs/tutorials/external_mqtt_clients/
+    - name: mqtt-tls
+      port: 1884     # de-conflict port with default mqtt address
+      protocols: mqtt
+      expose: true
+      sslEnabled: true
+      sslSecret: artemis-tls-secret
+
+    - name: amqp
+      port: 5672
+      protocols: amqp
+
+  addressSettings:
+    applyRule: merge_all  # merge_replace| replace_all
+    addressSetting:
+
+    # https://activemq.apache.org/components/artemis/documentation/latest/mqtt.html#wildcard-subscriptions
+    - match: 'liveObjectDetection'
+
+      # max memory the address could have before triggering addressFullPolicy
+      maxSizeBytes: '10m'
+
+      # DROP:  silent drop
+      # FAIL:  drop messages and also throw an exception on the client-side when address is full
+      # BLOCK: block producers from sending further messages when the address if full, thus preventing the memory being exhausted on the server
+      #        When memory is freed up on the server, producers will automatically unblock and be able to continue sending
+      # PAGE:  https://activemq.apache.org/components/artemis/documentation/latest/paging#paging-mode
+      addressFullPolicy: FAIL
+
+  env:
+    - name: JAVA_ARGS_APPEND
+      value: -Djavax.net.debug=all
+  adminPassword: admin
+  adminUser: admin
+  deploymentPlan:
+    image: placeholder
+    jolokiaAgentEnabled: false
+    journalType: nio
+    managementRBACEnabled: true
+    messageMigration: false
+    persistenceEnabled: false
+    requireLogin: false
+    size: 1
+---
+apiVersion: broker.amq.io/v1beta1
+kind: ActiveMQArtemisAddress
+metadata:
+  name: live-object-detection
+spec:
+  addressName: liveObjectDetection
+
+  # MQTT is a multicast topic
+  routingType: multicast
+
+  removeFromBrokerOnDelete: true
+---
+apiVersion: broker.amq.io/v1beta1
+kind: ActiveMQArtemisAddress
+metadata:
+  name: model-update-notify
+spec:
+  addressName: model-update-notify
+
+  # MQTT is a multicast topic
+  routingType: multicast
+
+  removeFromBrokerOnDelete: true

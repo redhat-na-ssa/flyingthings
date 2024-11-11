@@ -1,0 +1,32 @@
+---
+apiVersion: grafana.integreatly.org/v1beta1
+kind: Grafana
+metadata:
+  name: grafana-a
+  labels:
+    dashboards: grafana-a
+    folders: grafana-a
+  namespace: user1-flying-djl
+spec:
+  config:
+    auth:
+      disable_login_form: 'false'
+    log:
+      mode: console
+    security:
+      admin_password: admin
+      admin_user: admin
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: grafana
+spec:
+  port:
+    targetPort: grafana
+  tls:
+    termination: edge
+  to:
+    kind: Service
+    name: grafana-a-service
+  wildcardPolicy: None

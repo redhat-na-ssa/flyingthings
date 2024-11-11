@@ -1,0 +1,19 @@
+kind: GrafanaDatasource
+apiVersion: grafana.integreatly.org/v1beta1
+metadata:
+  name: ds-grafana
+  namespace: user1-flying-djl
+spec:
+  datasource:
+    access: proxy
+    editable: true
+    isDefault: true
+    jsonData:
+      timeInterval: 5s
+      tlsSkipVerify: true
+    name: prometheus
+    type: prometheus
+    url: 'http://prometheus-operated:9090'
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana-a

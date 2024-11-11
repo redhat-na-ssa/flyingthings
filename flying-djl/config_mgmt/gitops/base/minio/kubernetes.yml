@@ -1,0 +1,175 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: quarkus
+    app.kubernetes.io/name: minio
+  name: minio
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: minio-view
+roleRef:
+  kind: ClusterRole
+  apiGroup: rbac.authorization.k8s.io
+  name: view
+subjects:
+  - kind: ServiceAccount
+    name: minio
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/name: minio
+    app.kubernetes.io/managed-by: quarkus
+  name: minio
+spec:
+  ports:
+    - name: http
+      port: 9000
+      protocol: TCP
+      targetPort: 9000
+    - name: console
+      port: 9090
+      protocol: TCP
+      targetPort: 9090
+  selector:
+    app.kubernetes.io/name: minio
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/name: minio
+    app.kubernetes.io/managed-by: quarkus
+  name: minio
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: minio
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: minio
+        app.kubernetes.io/managed-by: quarkus
+    spec:
+      containers:
+        - env:
+            - name: MINIO_ROOT_USER
+              value: minio
+            - name: MINIO_ROOT_PASSWORD
+              value: minio123
+          image: quay.io/jbride/mc:RELEASE.2023-07-11T23-30-44Z
+          command: ["/bin/sh"]
+          args:
+            [
+              "-c",
+              "while true; do echo echo $(date -u) 'Written by sidecar container' >> /tmp/sidecar.log; sleep 30;done",
+            ]
+          name: mc
+          resources: {}
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                - /bin/sh
+                - /opt/initialize.sh
+          volumeMounts:
+            - mountPath: /opt/initialize.sh
+              name: config
+              readOnly: true
+              subPath: initialize.sh
+
+        - env:
+            - name: MINIO_ROOT_USER
+              value: minio
+            - name: MINIO_ROOT_PASSWORD
+              value: minio123
+            - name: MINIO_NOTIFY_MQTT_ENABLE_MLNOTIFY
+              value: 'on'
+            - name: MINIO_NOTIFY_MQTT_BROKER_MLNOTIFY
+              value: tcp://artemis-mqtt-0-svc:1883
+            - name: MINIO_NOTIFY_MQTT_TOPIC_MLNOTIFY
+              value: model-update-notify
+            - name: MINIO_NOTIFY_MQTT_USERNAME_MLNOTIFY
+              value: djl
+            - name: MINIO_NOTIFY_MQTT_PASSWORD_MLNOTIFY
+              value: djl
+
+          # https://github.com/jbride/minio_integrations_quickstart/blob/main/etc/minio/Dockerfile
+          image: quay.io/redhat_naps_da/minio:0.0.1
+
+          imagePullPolicy: Always
+          command:
+          - /bin/bash
+          - -c
+          args:
+          - minio server /data --console-address :9090
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /minio/health/live
+              port: 9000
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 10
+          name: minio
+          ports:
+            - containerPort: 9000
+              name: http
+              protocol: TCP
+            - containerPort: 9090
+              name: console
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /minio/health/live
+              port: 9000
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 10
+          resources:
+            limits:
+              cpu: 500m
+              memory: 512Mi
+            requests:
+              cpu: 100m
+              memory: 128Mi
+          volumeMounts:
+            - mountPath: /data
+              name: appdata
+              readOnly: false
+          startupProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /minio/health/live
+              port: 9000
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 10
+      serviceAccountName: minio
+      volumes:
+        - configMap:
+            defaultMode: 0755
+            items:
+              - key: initialize.sh
+                path: initialize.sh
+            name: minio
+            optional: false
+          name: config
+        - name: appdata
+          persistentVolumeClaim:
+            claimName: minio
+            readOnly: false
