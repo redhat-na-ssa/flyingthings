@@ -57,7 +57,7 @@ kludge_to_newest(){
   label-studio version
 }
 
-kludge_to_newest
+# kludge_to_newest
 
 run_s2i_override
 # run_s2i_default
