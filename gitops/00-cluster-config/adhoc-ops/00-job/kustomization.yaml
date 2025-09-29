@@ -12,4 +12,4 @@ configMapGenerator:
     files:
       # - functions.sh
       - job.sh
-      - https://raw.githubusercontent.com/redhat-na-ssa/demo-ai-gitops-catalog/v0.05/scripts/library/ocp.sh
+      - https://raw.githubusercontent.com/redhat-na-ssa/demo-ai-gitops-catalog/v0.15/scripts/library/ocp.sh
