@@ -6,7 +6,7 @@ usage(){
 
 cat <<USAGE
 
-This is a S2I python-3.9 ${DISTRO} base image:
+This is a S2I python ${DISTRO} base image:
 There are multiple ways how to run the image, see documentation at:
 https://github.com/sclorg/s2i-python-container/blob/master/3.9/README.md
 
@@ -31,7 +31,7 @@ USAGE
 # fallback with sleep to debug your code
 # oc rsh / podman exec -it .. /bin/sh
 run_sleep(){
-  echo "Ponder the universe with infinate sleep..."
+  echo "Ponder the universe with infinite sleep..."
   sleep infinity
 }
 
