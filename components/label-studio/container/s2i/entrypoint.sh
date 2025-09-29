@@ -5,7 +5,7 @@ kludge_to_newest(){
   label-studio version
   
   echo "kludging ahead to newest version..."
-  pip install --no-cache -U label-studio -q
+  pip install --no-cache -U label-studio label-studio-converter -q
   
   label-studio version
 }
