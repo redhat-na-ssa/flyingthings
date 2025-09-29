@@ -1,2 +1,3 @@
 label-studio==1.9.*
+nltk==3.*
 psycopg2-binary
