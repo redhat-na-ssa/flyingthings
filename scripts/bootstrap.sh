@@ -79,7 +79,7 @@ until_true(){
 check_cluster_version(){
   OCP_VERSION=$(oc version | sed -n '/Server Version: / s/Server Version: //p')
   AVOID_VERSIONS=()
-  TESTED_VERSIONS=("4.12.12" "4.12.33" "4.14.37")
+  TESTED_VERSIONS=("4.14.37" "4.18.20" "4.18.24")
 
   echo "Current OCP version: ${OCP_VERSION}"
   echo "Tested OCP version(s): ${TESTED_VERSIONS[*]}"
@@ -128,7 +128,7 @@ delete_demo(){
   oc delete --wait -l operators.coreos.com/openshift-pipelines-operator-rh.openshift-operators csv -A
 
   # standard demo uninstall
-  oc delete --wait -k gitops/02-components
+  oc delete --wait -k gitops/02-ml-demo
   oc delete --wait -k gitops/01-operator-configs
   oc delete --wait -k gitops/00-operators
   oc delete --wait -k gitops
