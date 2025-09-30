@@ -32,8 +32,8 @@ cd_to_scratch(){
 
 download_mc(){
   echo "Downloading MinIO Client..."
-  MINIO_CLIENT_URL="${MINIO_CLIENT_URL:-https://dl.min.io/client/mc/release/linux-amd64}"
-  curl -s -L "${MINIO_CLIENT_URL}/mc" -o "${BIN_DIR}/mc" && \
+  MINIO_CLIENT_URL="${MINIO_CLIENT_URL:-https://dl.min.io/client/mc/release/linux-amd64/archive/mc.RELEASE.2025-04-16T18-13-26Z}"
+  curl -s -L "${MINIO_CLIENT_URL}" -o "${BIN_DIR}/mc" && \
     chmod +x "${BIN_DIR}/mc"
 }
 
