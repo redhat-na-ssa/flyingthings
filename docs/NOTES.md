@@ -31,3 +31,23 @@ pass: password1
     yolo-api-source-ubi \
     --patch '[{"op": "add", "path": "/spec/source/git/ref", "value": "gitops-catalog" }]' --type=json
 ```
+
+Run csi plugins on GPU nodes
+
+```sh
+cat << YAML > /tmp/patch.yaml
+spec:
+  placement:
+    csi-plugin:
+      tolerations:
+        - key: nvidia.com/gpu
+          operator: Exists
+          effect: NoSchedule
+YAML
+
+oc -n openshift-storage \
+  patch storagecluster \
+  ocs-storagecluster \
+  --type=merge \
+  --patch "$(cat /tmp/patch.yaml)"
+```

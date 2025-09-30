@@ -14,6 +14,7 @@ CLI
 config
 CPUs
 CReferenceEvaluator
+csi
 CUDA
 curation
 cvbrowser
@@ -35,6 +36,7 @@ github
 gitops
 GitOps
 gmail
+gpu
 GPUs
 heartexlabs
 Heli
@@ -80,9 +82,12 @@ NFD
 NLP
 nodeFeatureDiscovery
 NONINFRINGEMENT
+NoSchedule
+nvidia
 Nvidia
 oc
 OCP
+ocs
 ODF
 onnx
 openshift
@@ -110,13 +115,16 @@ runthrough
 sdk
 sheppard
 Stienstra
+storagecluster
 sublicense
 svc
 Takhteyev
 tekton
 Tekton
 tkn
+tmp
 TODO
+tolerations
 traefik
 txt
 ubi
